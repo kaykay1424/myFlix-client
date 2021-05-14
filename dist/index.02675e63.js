@@ -1055,27 +1055,13 @@ try {
   var _componentsMainViewMainView = require('./components/MainView/MainView');
   var _componentsMainViewMainViewDefault = _parcelHelpers.interopDefault(_componentsMainViewMainView);
   require('./index.scss');
-  var _jsxFileName = "/Users/kala/Desktop/CF/courses/full_stack_ immersion/client_side_ programming_ react/project/myFlix-client/src/index.jsx";
   // Main component (will eventually use all the others)
   class MyFlixApplication extends _reactDefault.default.Component {
     render() {
       return (
         /*#__PURE__*/_reactDefault.default.createElement("div", {
-          className: "my-flix",
-          __self: this,
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 10,
-            columnNumber: 13
-          }
-        }, /*#__PURE__*/_reactDefault.default.createElement(_componentsMainViewMainViewDefault.default, {
-          __self: this,
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 11,
-            columnNumber: 17
-          }
-        }))
+          className: "my-flix"
+        }, /*#__PURE__*/_reactDefault.default.createElement(_componentsMainViewMainViewDefault.default, null))
       );
     }
   }
@@ -26489,245 +26475,110 @@ try {
   _parcelHelpers.defineInteropFlag(exports);
   var _react = require('react');
   var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _axios = require('axios');
+  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
   var _MovieCardMovieCard = require('../MovieCard/MovieCard');
   var _MovieCardMovieCardDefault = _parcelHelpers.interopDefault(_MovieCardMovieCard);
   var _MovieViewMovieView = require('../MovieView/MovieView');
   var _MovieViewMovieViewDefault = _parcelHelpers.interopDefault(_MovieViewMovieView);
-  var _jsxFileName = "/Users/kala/Desktop/CF/courses/full_stack_ immersion/client_side_ programming_ react/project/myFlix-client/src/components/MainView/MainView.jsx";
+  var _LoginViewLoginView = require('../LoginView/LoginView');
+  var _LoginViewLoginViewDefault = _parcelHelpers.interopDefault(_LoginViewLoginView);
+  var _RegistrationViewRegistrationView = require('../RegistrationView/RegistrationView');
+  var _RegistrationViewRegistrationViewDefault = _parcelHelpers.interopDefault(_RegistrationViewRegistrationView);
+  require('./main-view.scss');
   class MainView extends _reactDefault.default.Component {
     state = {
-      movies: [{
-        description: 'A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.',
-        director: {
-          bio: `James Francis Cameron was born on August 16, 1954 in Kapuskasing, Ontario, Canada. He moved to the United States in 1971. The son of an engineer, he majored in physics at California State University before switching to English, and eventually dropping out. He then drove a truck to support his screenwriting ambition. He landed his first professional film job as art director, miniature-set builder, and process-projection supervisor on Roger Corman's Battle Beyond the Stars (1980) and had his first experience as a director with a two week stint on Piranha II: The Spawning (1981) before being fired.
-                  He then wrote and directed The Terminator (1984), a futuristic action-thriller starring Arnold Schwarzenegger, Michael Biehn and Linda Hamilton. It was a low budget independent film, but Cameron's superb, dynamic direction made it a surprise mainstream success and it is now regarded as one of the most iconic pictures of the 1980s. After this came a string of successful, bigger budget science-fiction action films such as Aliens (1986), The Abyss (1989) and Terminator 2: Judgment Day (1991). In 1990, Cameron formed his own production company, Lightstorm Entertainment. In 1997, he wrote and directed Titanic (1997), a romance epic about two young lovers from different social classes who meet on board the famous ship. The movie went on to break all box office records and earned eleven Academy Awards. It became the highest grossing movie of all time until 12 years later, Avatar (2009), which invented and pioneered 3D film technology, and it went on to beat ""Titanic"", and became the first film to cost two billion dollars until 2019 when Marvel took the record.
-                  James Cameron is now one of the most sought-after directors in Hollywood. He was formerly married to producer Gale Anne Hurd, who produced several of his films. In 2000, he married actress Suzy Amis, who appeared in Titanic, and they have three children.`,
-          birth_year: 1954,
-          death_year: null,
-          name: 'James Cameron'
-        },
-        featured: true,
-        genre: {
-          description: 'Science fiction (or sci-fi) is a film genre that uses speculative, fictional science-based depictions of phenomena that are not fully accepted by mainstream science, such as extraterrestrial lifeforms, alien worlds, extrasensory perception and time travel, along with futuristic elements such as spacecraft, robots, cyborgs, interstellar travel or other technologies',
-          name: 'Sci-Fi'
-        },
-        image: 'https://m.media-amazon.com/images/M/MV5BMTYwOTEwNjAzMl5BMl5BanBnXkFtZTcwODc5MTUwMw@@._V1_UX182_CR0,0,182,268_AL_.jpg',
-        imdbLink: 'https://www.imdb.com/title/tt0499549/',
-        name: 'Avatar'
-      }, {
-        description: 'A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.',
-        director: {
-          bio: `James Francis Cameron was born on August 16, 1954 in Kapuskasing, Ontario, Canada. He moved to the United States in 1971. The son of an engineer, he majored in physics at California State University before switching to English, and eventually dropping out. He then drove a truck to support his screenwriting ambition. He landed his first professional film job as art director, miniature-set builder, and process-projection supervisor on Roger Corman's Battle Beyond the Stars (1980) and had his first experience as a director with a two week stint on Piranha II: The Spawning (1981) before being fired.
-                    He then wrote and directed The Terminator (1984), a futuristic action-thriller starring Arnold Schwarzenegger, Michael Biehn and Linda Hamilton. It was a low budget independent film, but Cameron's superb, dynamic direction made it a surprise mainstream success and it is now regarded as one of the most iconic pictures of the 1980s. After this came a string of successful, bigger budget science-fiction action films such as Aliens (1986), The Abyss (1989) and Terminator 2: Judgment Day (1991). In 1990, Cameron formed his own production company, Lightstorm Entertainment. In 1997, he wrote and directed Titanic (1997), a romance epic about two young lovers from different social classes who meet on board the famous ship. The movie went on to break all box office records and earned eleven Academy Awards. It became the highest grossing movie of all time until 12 years later, Avatar (2009), which invented and pioneered 3D film technology, and it went on to beat ""Titanic"", and became the first film to cost two billion dollars until 2019 when Marvel took the record.
-                    James Cameron is now one of the most sought-after directors in Hollywood. He was formerly married to producer Gale Anne Hurd, who produced several of his films. In 2000, he married actress Suzy Amis, who appeared in Titanic, and they have three children.`,
-          birth_year: 1954,
-          death_year: null,
-          name: 'James Cameron'
-        },
-        featured: true,
-        genre: {
-          description: 'In film and television, drama is a category of narrative fiction (or semi-fiction) intended to be more serious than humorous in tone.',
-          name: 'Drama'
-        },
-        image: 'https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_UX182_CR0,0,182,268_AL_.jpg',
-        imdbLink: 'https://www.imdb.com/title/tt0120338/',
-        name: 'Titanic'
-      }, {
-        description: 'In 2035, a technophobic cop investigates a crime that may have been perpetrated by a robot, which leads to a larger threat to humanity.',
-        director: {
-          bio: `Alex Proyas has moved effortlessly between helming TV commercials and music videos to feature films. Born to Greek parents in Egypt, Proyas relocated to Australia with his family when he was three years old. He began making films at age ten and went on to attend the Australian Film Television and Radio School along with Jane Campion and Jocelyn Moorhouse. Proyas collaborated with Campion on two of her shorts, A Girl's Own Story (1984), for which he wrote and performed a song, and Passionless Moments (1985), which he photographed. Proyas' own short, Groping (1980), had earned him some attention at festival screenings in Sydney and London. Also while still a student, the enterprising novice formed Meaningful Eye Contact, a production company. Spirits of the Air, Gremlins of the Clouds (1987) marked Proyas' feature debut as director and screenwriter. Set in a post-apocalyptic world, the film, with its stylized production design and aural texture, was atypical of standard Australian fare, more closely resembling a longform music video. Critics admired the director's vision, but felt the overall result was lacking. Proyas continued to hone his craft helming TV advertisements for products like Nike, Nissan and Swatch (earning kudos from advertising associations in both Australia and England) and directing videos for such artists as Sting, INXS and Crowded House. In 1993 Proyas was tapped to helm the screen adaptation of James O'Barr's comic strip The Crow (1994). During production, star Brandon Lee died of an accidental gunshot wound (ironically, the film's story revolves around his character's resurrection). His death cast a pall over the remainder of the filming and its subsequent theatrical release, although reviews were generally favorably, most singling out the production values which created a colorless rain-soaked wasteland that invoked comparisons with Ridley Scott's seminal Blade Runner (1982) and Tim Burton's Batman (1989). Made for about $14 million, it grossed close to $50 million domestically. Proyas seemed set to move on to other projects and was announced as the director of Casper (1995), but left the project and was replaced by Brad Silberling. After a four-year absence he returned with another thriller, Dark City (1998), about an amnesiac who may or may not have been a serial killer. Garage Days (2002) marked Proyas' return to his homeland, Australia: the movie tells the story of a young Sydney garage band desperately trying to make it big in the competitive world of rock 'n' roll. In 2004 Proyas returned to Hollywood: he directed I, Robot (2004), a science-fiction film suggested by the 'Isaac Asimov' short story compilation of the same name that starred Will Smith. It was a box office success, but met with mixed reactions by readers and fans of the Asimov stories.`,
-          birth_year: 1963,
-          death_year: null,
-          name: 'Alex Proyas'
-        },
-        featured: false,
-        genre: {
-          description: 'Science fiction (or sci-fi) is a film genre that uses speculative, fictional science-based depictions of phenomena that are not fully accepted by mainstream science, such as extraterrestrial lifeforms, alien worlds, extrasensory perception and time travel, along with futuristic elements such as spacecraft, robots, cyborgs, interstellar travel or other technologies',
-          name: 'Sci-Fi'
-        },
-        image: 'https://m.media-amazon.com/images/M/MV5BNmE1OWI2ZGItMDUyOS00MmU5LWE0MzUtYTQ0YzA1YTE5MGYxXkEyXkFqcGdeQXVyMDM5ODIyNw@@._V1_UY268_CR8,0,182,268_AL_.jpg',
-        imdbLink: 'https://www.imdb.com/title/tt0343818/',
-        name: 'I, Robot'
-      }, {
-        description: 'A band director recruits a Harlem street drummer to play at a Southern university.',
-        director: {
-          bio: `Charles Stone III was born in 1966. He is a director and actor, known for Drumline (2002), Paid in Full (2002) and Mr. 3000 (2004).`,
-          birth_year: 1966,
-          death_year: null,
-          name: 'Charles Stone III'
-        },
-        featured: false,
-        genre: {
-          description: 'In film and television, drama is a category of narrative fiction (or semi-fiction) intended to be more serious than humorous in tone.',
-          name: 'Drama'
-        },
-        image: 'https://m.media-amazon.com/images/M/MV5BNzhhY2Y3NDktM2JiYi00YmY0LWEzOGQtMDc4Yzk3ZWIxOTVmXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_UX182_CR0,0,182,268_AL_.jpg',
-        imdbLink: 'https://www.imdb.com/title/tt0303933/',
-        name: 'Drumline'
-      }, {
-        description: 'Four teenagers are sucked into a magical video game, and the only way they can escape is to work together to finish the game.',
-        director: {
-          bio: `Jake Kasdan was born on October 28, 1974 in Detroit, Michigan, USA as Jacob Kasdan. He is a producer and director, known for Walk Hard: The Dewey Cox Story (2007), Jumanji: The Next Level (2019) and Zero Effect (1998).`,
-          birth_year: 1974,
-          death_year: null,
-          name: 'Jake Kasdan'
-        },
-        featured: false,
-        genre: {
-          description: 'Action film is a film genre in which the protagonist or protagonists are thrust into a series of events that typically include violence, extended fighting, physical feats, rescues and frantic chases.',
-          name: 'Action'
-        },
-        image: 'https://m.media-amazon.com/images/M/MV5BODQ0NDhjYWItYTMxZi00NTk2LWIzNDEtOWZiYWYxZjc2MTgxXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_UX182_CR0,0,182,268_AL_.jpg',
-        imdbLink: 'https://www.imdb.com/title/tt2283362/',
-        name: 'Jumanji: Welcome to the Jungle'
-      }, {
-        description: 'After the devastating events of Avengers: Infinity War (2018), the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos\' actions and restore balance to the universe.',
-        director: {
-          bio: `Anthony Russo was born on February 3, 1970 in Cleveland, Ohio, USA as Anthony J. Russo. He is a producer and director, known for Captain America: The Winter Soldier (2014), Avengers: Endgame (2019) and Avengers: Infinity War (2018).`,
-          birth_year: 1970,
-          death_year: null,
-          name: 'Anthony Russo'
-        },
-        featured: true,
-        genre: {
-          description: 'Science fiction (or sci-fi) is a film genre that uses speculative, fictional science-based depictions of phenomena that are not fully accepted by mainstream science, such as extraterrestrial lifeforms, alien worlds, extrasensory perception and time travel, along with futuristic elements such as spacecraft, robots, cyborgs, interstellar travel or other technologies',
-          name: 'Sci-Fi'
-        },
-        image: 'https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_UX182_CR0,0,182,268_AL_.jpg',
-        imdbLink: 'https://www.imdb.com/title/tt4154796/',
-        name: 'Avengers: End Game'
-      }, {
-        description: 'The African monarch Akeem learns he has a long-lost son in the United States and must return to America to meet this unexpected heir and build a relationship with his son.',
-        director: {
-          bio: `Father, Walter D. Brewer worked in a number of high-level corporate positions for Matson Navigation Company, culminating in the position of director of corporate development from 1990-1998, when he died. His work caused the family to move from Vallejo, California (where Craig attended elementary school and junior high) to Orange County, returning to Vallejo in the early 1990s. Walter frequently rented out local theaters to present young Craig's plays and often financed Craig's productions.
-                    Craig's mother, Gail, was a school board member for Vallejo's district both times the family lived there and taught English and Drama in nearby Mt. Diablo School District. She allowed her son, fresh out of high school, to teach her drama courses at College Park High School in Pleasant Hill, California and produce/direct the school's plays, with the school occasionally serving as a showcase for his original works. Craig's father also helped finance school productions, and helped to rent out local theaters for additional shows. Craig's high school friends, including future wife, Jodi Brewer and Chris Barela, took an active role in CPHS's drama department productions. Craig's younger sister, Amanda Brewer, attended CPHS from 1992-1995.`,
-          birth_year: 1971,
-          death_year: null,
-          name: 'Craig Brewer'
-        },
-        featured: true,
-        genre: {
-          description: 'A comedy film is a category of film in which the main emphasis is on humor. These films are designed to make the audience laugh through amusement and most often work by exaggerating characteristics for humorous effect.',
-          name: 'Comedy'
-        },
-        image: 'https://m.media-amazon.com/images/M/MV5BZTMyY2Q2MDctMDFlMS00MWEzLTk1NmEtNDcxNzg1ZGJlNGU5XkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_UX182_CR0,0,182,268_AL_.jpg',
-        imdbLink: 'https://www.imdb.com/title/tt6802400/',
-        name: 'Coming 2 America'
-      }, {
-        description: 'Beca, a freshman at Barden University, is cajoled into joining The Bellas, her school\'s all-girls singing group. Injecting some much needed energy into their repertoire, The Bellas take on their male rivals in a campus competition.',
-        director: {
-          bio: `Jason Moore was born on October 22, 1970 in Fayetteville, Arkansas, USA. He is a director and actor, known for Pitch Perfect 2 (2015), Pitch Perfect (2012) and Sisters (2015).`,
-          birth_year: 1970,
-          death_year: null,
-          name: 'Jason Moore'
-        },
-        featured: false,
-        genre: {
-          description: 'A comedy film is a category of film in which the main emphasis is on humor. These films are designed to make the audience laugh through amusement and most often work by exaggerating characteristics for humorous effect.',
-          name: 'Comedy'
-        },
-        image: 'https://m.media-amazon.com/images/M/MV5BMTcyMTMzNzE5N15BMl5BanBnXkFtZTcwNzg5NjM5Nw@@._V1_UX182_CR0,0,182,268_AL_.jpg',
-        imdbLink: 'https://www.imdb.com/title/tt1981677/',
-        name: 'Pitch Perfect'
-      }, {
-        description: 'A cowboy doll is profoundly threatened and jealous when a new spaceman figure supplants him as top toy in a boy\'s room.',
-        director: {
-          bio: `Although born in Hollywood John and his twin sister, Johanna were raised in Wittier near Los Angeles. His parents were Jewell Mae (Risley), an art teacher, and Paul Eual Lasseter, a parts manager at a Chevrolet dealership. His mother's profession contributed to his interest in animation and particularly the Bugs Bunny and Daffy Duck cartoons which he would watch on television. It was when he was in High School that he realized that he could have a career in animation and he wrote to the Walt Disney Studios but nothing happened then In 1975 the Disney company started an animation course at Calarts - The California Institute of the Arts- and John, with encouragement from his mother, was one of the first to sign up. He and his class mates, who included the future animators and directors Brad Bird, and Tim Burton were taught by some of Disney's veteran animators such as Ollie Johnston and Frank Thomas. During his time there John produced two animated shorts - Lady and the Lamp (1979) and Nitemare (1980) - which both won the Student Academy Award for Animation. On graduating in 1979 John was taken on as an animator at the Disney Studios. In 1983, while working on Mickey's Christmas Carol some friends invited him to see some footage of Tron that they were working on using CGI and he immediately saw the potential of it to enhance animated films. John and a colleague made a short test film and satisfied with the result and full of enthusiasm started work on a feature without consulting their superiors who when they found out about it canceled it and sacked John. Having made contacts in the computer industry he was quickly taken on by Lucasfilm which was bought by Steve Jobs for $5 million with a further $5 million invested as working capital and the company renamed Pixar. John soon convinced Steve that the future lay in computer animation by bringing his desk lamp to life in the short 'Luxor Jr' which was shown at a computer graphics conference and got a standing ovation. The first computer animated feature soon followed in the form of 'Toy Story' winning John an Oscar for Special Achievement to go with one he got for Animated Short Film - Tin Toy. He's also had Oscar nominations for Animated Feature - Monster Inc and Cars, Original Screenplay -Toy Story, Animated Short Story - Luxor Jr while the short Knick Knack was selected by Terry Gilliam as one of the best 10 animated films of all time. In 2008, he was honored with the Winsor McCay Award, - the lifetime achievement award for animators. He oversees 3 animation studios - Pixar, Disney Animation and DisneyToon He spent 9 year (2005 - 2014) on the board of governors of the Academy of Motion Picture Arts and Sciences, only relinquishing his seat due to term limits. He was presented with a star on the Hollywood Walk of Fame in Hollywood in November 2011.`,
-          birth_year: 1957,
-          death_year: null,
-          name: 'John Lasseter'
-        },
-        featured: false,
-        genre: {
-          description: 'Animation is a method in which figures are manipulated to appear as moving images. In traditional animation, images are drawn or painted by hand on transparent celluloid sheets to be photographed and exhibited on film.',
-          name: 'Animation'
-        },
-        image: 'https://m.media-amazon.com/images/M/MV5BMDU2ZWJlMjktMTRhMy00ZTA5LWEzNDgtYmNmZTEwZTViZWJkXkEyXkFqcGdeQXVyNDQ2OTk4MzI@._V1_UX182_CR0,0,182,268_AL_.jpg',
-        imdbLink: 'https://www.imdb.com/title/tt0114709/',
-        name: 'Toy Story'
-      }, {
-        description: 'Lion prince Simba and his father are targeted by his bitter uncle, who wants to ascend the throne himself.',
-        director: {
-          bio: `Roger Allers was born on June 29, 1949 in Rye, New York, USA as Roger Charles Allers. He is known for his work on The Lion King (1994), Aladdin (1992) and Beauty and the Beast (1991). He has been married to Leslee Allers since 1965. They have two children.`,
-          birth_year: 1949,
-          death_year: null,
-          name: 'Roger Allers'
-        },
-        featured: true,
-        genre: {
-          description: 'Animation is a method in which figures are manipulated to appear as moving images. In traditional animation, images are drawn or painted by hand on transparent celluloid sheets to be photographed and exhibited on film.',
-          name: 'Animation'
-        },
-        image: 'https://m.media-amazon.com/images/M/MV5BYTYxNGMyZTYtMjE3MS00MzNjLWFjNmYtMDk3N2FmM2JiM2M1XkEyXkFqcGdeQXVyNjY5NDU4NzI@._V1_UX182_CR0,0,182,268_AL_.jpg',
-        imdbLink: 'https://www.imdb.com/title/tt0110357/',
-        name: 'The Lion King'
-      }],
-      selectedMovie: null
+      registration: false,
+      error: null,
+      movies: [],
+      selectedMovie: null,
+      user: null
     };
-    showAllMovies = () => {
+    componentDidMount() {
+      _axiosDefault.default.get('https://my-flix-2021.herokuapp.com/movies').then(response => {
+        this.setState({
+          movies: response.data
+        });
+      }, () => {
+        this.setState({
+          error: 'An error has occurred. Please try again.'
+        });
+      });
+    }
+    handleBackClick = () => {
       this.setState({
         selectedMovie: null
       });
     };
-    showMovieDetails = selectedMovie => {
+    handleMovieClick = selectedMovie => {
       this.setState({
         selectedMovie
       });
     };
+    handleRegistrationClick = () => {
+      this.setState({
+        registration: true
+      });
+    };
+    setRegistration = () => {
+      this.setState({
+        registration: false
+      });
+    };
+    setUser = user => {
+      this.setState({
+        user
+      });
+    };
     render() {
-      const {movies, selectedMovie} = this.state;
+      const {error, movies, registration, selectedMovie, user} = this.state;
+      // If user needs to create an account, show registration view
+      if (registration) return (
+        /*#__PURE__*/_reactDefault.default.createElement(_RegistrationViewRegistrationViewDefault.default, {
+          setRegistration: this.setRegistration,
+          setUser: this.setUser
+        })
+      );
+      // If user is not logged in, show login view
+      if (!user) return (
+        /*#__PURE__*/_reactDefault.default.createElement(_LoginViewLoginViewDefault.default, {
+          setUser: this.setUser,
+          onRegistrationClick: this.handleRegistrationClick
+        })
+      );
       // If a user clicks on the read more link to select a movie
-      if (selectedMovie) {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement(_MovieViewMovieViewDefault.default, {
-            selectedMovie: this.state.selectedMovie,
-            showAllMovies: this.showAllMovies,
-            __self: this,
-            __source: {
-              fileName: _jsxFileName,
-              lineNumber: 204,
-              columnNumber: 20
-            }
-          })
-        );
-      } else if (movies.length > 0) {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement("div", {
-            className: "movies-container",
-            __self: this,
-            __source: {
-              fileName: _jsxFileName,
-              lineNumber: 208,
-              columnNumber: 17
-            }
-          }, this.state.movies.map((movie, i) => {
-            return (
-              /*#__PURE__*/_reactDefault.default.createElement(_MovieCardMovieCardDefault.default, {
-                key: movie._id,
-                movie: movie,
-                showMovieDetails: this.showMovieDetails,
-                __self: this,
-                __source: {
-                  fileName: _jsxFileName,
-                  lineNumber: 210,
-                  columnNumber: 33
-                }
-              })
-            );
-          }), ";")
-        );
-      } else if (movies.length === 0) {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement("div", {
-            __self: this,
-            __source: {
-              fileName: _jsxFileName,
-              lineNumber: 216,
-              columnNumber: 20
-            }
-          }, "The movie list is empty")
-        );
-      }
+      // show movie view
+      if (selectedMovie) return (
+        /*#__PURE__*/_reactDefault.default.createElement(_MovieViewMovieViewDefault.default, {
+          selectedMovie: this.state.selectedMovie,
+          onBackClick: this.handleBackClick
+        })
+      );
+      // if there is an error loading the movies
+      if (error) return (
+        /*#__PURE__*/_reactDefault.default.createElement("div", null, "An error has occurred. Please try again.")
+      );
+      // If there are movies to display
+      // show all movies
+      if (movies.length > 0) return (
+        /*#__PURE__*/_reactDefault.default.createElement("div", {
+          className: "movies-container"
+        }, this.state.movies.map(movie => {
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_MovieCardMovieCardDefault.default, {
+              key: movie._id,
+              movie: movie,
+              onMovieClick: this.handleMovieClick
+            })
+          );
+        }), ";")
+      );
+      // If there are no movies to display
+      if (movies.length === 0) return (
+        /*#__PURE__*/_reactDefault.default.createElement("div", {
+          className: "movies-container"
+        })
+      );
     }
   }
   exports.default = MainView;
@@ -26737,7 +26588,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../MovieCard/MovieCard":"7csoe","../MovieView/MovieView":"6fxIo"}],"7csoe":[function(require,module,exports) {
+},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../MovieCard/MovieCard":"7csoe","../MovieView/MovieView":"6fxIo","axios":"7rA65","../RegistrationView/RegistrationView":"4DfHF","../LoginView/LoginView":"1zhWx","./main-view.scss":"3JwwG"}],"7csoe":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -26747,52 +26598,24 @@ try {
   _parcelHelpers.defineInteropFlag(exports);
   var _react = require('react');
   var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _jsxFileName = "/Users/kala/Desktop/CF/courses/full_stack_ immersion/client_side_ programming_ react/project/myFlix-client/src/components/MovieCard/MovieCard.jsx";
-  const MovieCard = ({movie, showMovieDetails}) => {
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  require('./movie-card.scss');
+  const MovieCard = ({movie, onMovieClick}) => {
     const createExcerpt = description => {
       return description.slice(0, 45);
     };
     return (
       /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "movie-card",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 9,
-          columnNumber: 9
-        }
+        className: "movie-card"
       }, /*#__PURE__*/_reactDefault.default.createElement("h3", {
-        className: "header",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 10,
-          columnNumber: 13
-        }
+        className: "header"
       }, movie.name), /*#__PURE__*/_reactDefault.default.createElement("img", {
-        src: movie.image,
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 11,
-          columnNumber: 13
-        }
+        src: movie.image
       }), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "description",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 12,
-          columnNumber: 13
-        }
+        className: "description"
       }, createExcerpt(movie.description), " …"), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "read-more-link-container",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 15,
-          columnNumber: 13
-        }
+        className: "read-more-link-container"
       }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
@@ -26803,45 +26626,29 @@ try {
         strokeWidth: "2",
         strokeLinecap: "round",
         strokeLinejoin: "round",
-        className: "feather feather-arrow-right",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 16,
-          columnNumber: 17
-        }
+        className: "feather feather-arrow-right"
       }, /*#__PURE__*/_reactDefault.default.createElement("line", {
         x1: "5",
         y1: "12",
         x2: "19",
-        y2: "12",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 28,
-          columnNumber: 21
-        }
+        y2: "12"
       }), /*#__PURE__*/_reactDefault.default.createElement("polyline", {
-        points: "12 5 19 12 12 19",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 29,
-          columnNumber: 21
-        }
+        points: "12 5 19 12 12 19"
       })), /*#__PURE__*/_reactDefault.default.createElement("span", {
         className: "read-more-link",
-        onClick: () => showMovieDetails(movie),
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 31,
-          columnNumber: 17
-        }
+        onClick: () => onMovieClick(movie)
       }, "Read More")))
     );
   };
   _c = MovieCard;
+  MovieCard.propTypes = {
+    movie: _propTypesDefault.default.shape({
+      description: _propTypesDefault.default.string.isRequired,
+      image: _propTypesDefault.default.string.isRequired,
+      name: _propTypesDefault.default.string.isRequired
+    }).isRequired,
+    onMovieClick: _propTypesDefault.default.func.isRequired
+  };
   exports.default = MovieCard;
   var _c;
   $RefreshReg$(_c, "MovieCard");
@@ -26851,7 +26658,817 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"6fxIo":[function(require,module,exports) {
+},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","prop-types":"4dfy5","./movie-card.scss":"1jHjl"}],"4dfy5":[function(require,module,exports) {
+/**
+* Copyright (c) 2013-present, Facebook, Inc.
+*
+* This source code is licensed under the MIT license found in the
+* LICENSE file in the root directory of this source tree.
+*/
+if ("development" !== 'production') {
+  var ReactIs = require('react-is');
+  // By explicitly using `prop-types` you are opting into new development behavior.
+  // http://fb.me/prop-types-in-prod
+  var throwOnDirectAccess = true;
+  module.exports = require('./factoryWithTypeCheckers')(ReactIs.isElement, throwOnDirectAccess);
+} else {
+  // By explicitly using `prop-types` you are opting into new production behavior.
+  // http://fb.me/prop-types-in-prod
+  module.exports = require('./factoryWithThrowingShims')();
+}
+
+},{"react-is":"68QIU","./factoryWithTypeCheckers":"1PVBO"}],"68QIU":[function(require,module,exports) {
+"use strict";
+if ("development" === 'production') {
+  module.exports = require('./cjs/react-is.production.min.js');
+} else {
+  module.exports = require('./cjs/react-is.development.js');
+}
+
+},{"./cjs/react-is.development.js":"2onCQ"}],"2onCQ":[function(require,module,exports) {
+/** @license React v16.13.1
+* react-is.development.js
+*
+* Copyright (c) Facebook, Inc. and its affiliates.
+*
+* This source code is licensed under the MIT license found in the
+* LICENSE file in the root directory of this source tree.
+*/
+"use strict";
+if ("development" !== "production") {
+  (function () {
+    "use strict";
+    // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
+    // nor polyfill, then a plain number is used for performance.
+    var hasSymbol = typeof Symbol === 'function' && Symbol.for;
+    var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
+    var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
+    var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
+    var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
+    var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
+    var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
+    var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace;
+    // TODO: We don't use AsyncMode or ConcurrentMode anymore. They were temporary
+    // (unstable) APIs that have been removed. Can we remove the symbols?
+    var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol.for('react.async_mode') : 0xeacf;
+    var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;
+    var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
+    var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;
+    var REACT_SUSPENSE_LIST_TYPE = hasSymbol ? Symbol.for('react.suspense_list') : 0xead8;
+    var REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;
+    var REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;
+    var REACT_BLOCK_TYPE = hasSymbol ? Symbol.for('react.block') : 0xead9;
+    var REACT_FUNDAMENTAL_TYPE = hasSymbol ? Symbol.for('react.fundamental') : 0xead5;
+    var REACT_RESPONDER_TYPE = hasSymbol ? Symbol.for('react.responder') : 0xead6;
+    var REACT_SCOPE_TYPE = hasSymbol ? Symbol.for('react.scope') : 0xead7;
+    function isValidElementType(type) {
+      return typeof type === 'string' || typeof type === 'function' || // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
+      type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || type === REACT_SUSPENSE_LIST_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE || type.$$typeof === REACT_FUNDAMENTAL_TYPE || type.$$typeof === REACT_RESPONDER_TYPE || type.$$typeof === REACT_SCOPE_TYPE || type.$$typeof === REACT_BLOCK_TYPE);
+    }
+    function typeOf(object) {
+      if (typeof object === 'object' && object !== null) {
+        var $$typeof = object.$$typeof;
+        switch ($$typeof) {
+          case REACT_ELEMENT_TYPE:
+            var type = object.type;
+            switch (type) {
+              case REACT_ASYNC_MODE_TYPE:
+              case REACT_CONCURRENT_MODE_TYPE:
+              case REACT_FRAGMENT_TYPE:
+              case REACT_PROFILER_TYPE:
+              case REACT_STRICT_MODE_TYPE:
+              case REACT_SUSPENSE_TYPE:
+                return type;
+              default:
+                var $$typeofType = type && type.$$typeof;
+                switch ($$typeofType) {
+                  case REACT_CONTEXT_TYPE:
+                  case REACT_FORWARD_REF_TYPE:
+                  case REACT_LAZY_TYPE:
+                  case REACT_MEMO_TYPE:
+                  case REACT_PROVIDER_TYPE:
+                    return $$typeofType;
+                  default:
+                    return $$typeof;
+                }
+            }
+          case REACT_PORTAL_TYPE:
+            return $$typeof;
+        }
+      }
+      return undefined;
+    }
+    // AsyncMode is deprecated along with isAsyncMode
+    var AsyncMode = REACT_ASYNC_MODE_TYPE;
+    var ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;
+    var ContextConsumer = REACT_CONTEXT_TYPE;
+    var ContextProvider = REACT_PROVIDER_TYPE;
+    var Element = REACT_ELEMENT_TYPE;
+    var ForwardRef = REACT_FORWARD_REF_TYPE;
+    var Fragment = REACT_FRAGMENT_TYPE;
+    var Lazy = REACT_LAZY_TYPE;
+    var Memo = REACT_MEMO_TYPE;
+    var Portal = REACT_PORTAL_TYPE;
+    var Profiler = REACT_PROFILER_TYPE;
+    var StrictMode = REACT_STRICT_MODE_TYPE;
+    var Suspense = REACT_SUSPENSE_TYPE;
+    var hasWarnedAboutDeprecatedIsAsyncMode = false;
+    // AsyncMode should be deprecated
+    function isAsyncMode(object) {
+      {
+        if (!hasWarnedAboutDeprecatedIsAsyncMode) {
+          hasWarnedAboutDeprecatedIsAsyncMode = true;
+          // Using console['warn'] to evade Babel and ESLint
+          console['warn']('The ReactIs.isAsyncMode() alias has been deprecated, ' + 'and will be removed in React 17+. Update your code to use ' + 'ReactIs.isConcurrentMode() instead. It has the exact same API.');
+        }
+      }
+      return isConcurrentMode(object) || typeOf(object) === REACT_ASYNC_MODE_TYPE;
+    }
+    function isConcurrentMode(object) {
+      return typeOf(object) === REACT_CONCURRENT_MODE_TYPE;
+    }
+    function isContextConsumer(object) {
+      return typeOf(object) === REACT_CONTEXT_TYPE;
+    }
+    function isContextProvider(object) {
+      return typeOf(object) === REACT_PROVIDER_TYPE;
+    }
+    function isElement(object) {
+      return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
+    }
+    function isForwardRef(object) {
+      return typeOf(object) === REACT_FORWARD_REF_TYPE;
+    }
+    function isFragment(object) {
+      return typeOf(object) === REACT_FRAGMENT_TYPE;
+    }
+    function isLazy(object) {
+      return typeOf(object) === REACT_LAZY_TYPE;
+    }
+    function isMemo(object) {
+      return typeOf(object) === REACT_MEMO_TYPE;
+    }
+    function isPortal(object) {
+      return typeOf(object) === REACT_PORTAL_TYPE;
+    }
+    function isProfiler(object) {
+      return typeOf(object) === REACT_PROFILER_TYPE;
+    }
+    function isStrictMode(object) {
+      return typeOf(object) === REACT_STRICT_MODE_TYPE;
+    }
+    function isSuspense(object) {
+      return typeOf(object) === REACT_SUSPENSE_TYPE;
+    }
+    exports.AsyncMode = AsyncMode;
+    exports.ConcurrentMode = ConcurrentMode;
+    exports.ContextConsumer = ContextConsumer;
+    exports.ContextProvider = ContextProvider;
+    exports.Element = Element;
+    exports.ForwardRef = ForwardRef;
+    exports.Fragment = Fragment;
+    exports.Lazy = Lazy;
+    exports.Memo = Memo;
+    exports.Portal = Portal;
+    exports.Profiler = Profiler;
+    exports.StrictMode = StrictMode;
+    exports.Suspense = Suspense;
+    exports.isAsyncMode = isAsyncMode;
+    exports.isConcurrentMode = isConcurrentMode;
+    exports.isContextConsumer = isContextConsumer;
+    exports.isContextProvider = isContextProvider;
+    exports.isElement = isElement;
+    exports.isForwardRef = isForwardRef;
+    exports.isFragment = isFragment;
+    exports.isLazy = isLazy;
+    exports.isMemo = isMemo;
+    exports.isPortal = isPortal;
+    exports.isProfiler = isProfiler;
+    exports.isStrictMode = isStrictMode;
+    exports.isSuspense = isSuspense;
+    exports.isValidElementType = isValidElementType;
+    exports.typeOf = typeOf;
+  })();
+}
+
+},{}],"1PVBO":[function(require,module,exports) {
+/**
+* Copyright (c) 2013-present, Facebook, Inc.
+*
+* This source code is licensed under the MIT license found in the
+* LICENSE file in the root directory of this source tree.
+*/
+"use strict";
+var ReactIs = require('react-is');
+var assign = require('object-assign');
+var ReactPropTypesSecret = require('./lib/ReactPropTypesSecret');
+var checkPropTypes = require('./checkPropTypes');
+var has = Function.call.bind(Object.prototype.hasOwnProperty);
+var printWarning = function () {};
+if ("development" !== 'production') {
+  printWarning = function (text) {
+    var message = 'Warning: ' + text;
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+}
+function emptyFunctionThatReturnsNull() {
+  return null;
+}
+module.exports = function (isValidElement, throwOnDirectAccess) {
+  /*global Symbol*/
+  var ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
+  var FAUX_ITERATOR_SYMBOL = '@@iterator';
+  // Before Symbol spec.
+  /**
+  * Returns the iterator method function contained on the iterable object.
+  *
+  * Be sure to invoke the function with the iterable as context:
+  *
+  *     var iteratorFn = getIteratorFn(myIterable);
+  *     if (iteratorFn) {
+  *       var iterator = iteratorFn.call(myIterable);
+  *       ...
+  *     }
+  *
+  * @param {?object} maybeIterable
+  * @return {?function}
+  */
+  function getIteratorFn(maybeIterable) {
+    var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);
+    if (typeof iteratorFn === 'function') {
+      return iteratorFn;
+    }
+  }
+  /**
+  * Collection of methods that allow declaration and validation of props that are
+  * supplied to React components. Example usage:
+  *
+  *   var Props = require('ReactPropTypes');
+  *   var MyArticle = React.createClass({
+  *     propTypes: {
+  *       // An optional string prop named "description".
+  *       description: Props.string,
+  *
+  *       // A required enum prop named "category".
+  *       category: Props.oneOf(['News','Photos']).isRequired,
+  *
+  *       // A prop named "dialog" that requires an instance of Dialog.
+  *       dialog: Props.instanceOf(Dialog).isRequired
+  *     },
+  *     render: function() { ... }
+  *   });
+  *
+  * A more formal specification of how these methods are used:
+  *
+  *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
+  *   decl := ReactPropTypes.{type}(.isRequired)?
+  *
+  * Each and every declaration produces a function with the same signature. This
+  * allows the creation of custom validation functions. For example:
+  *
+  *  var MyLink = React.createClass({
+  *    propTypes: {
+  *      // An optional string or URI prop named "href".
+  *      href: function(props, propName, componentName) {
+  *        var propValue = props[propName];
+  *        if (propValue != null && typeof propValue !== 'string' &&
+  *            !(propValue instanceof URI)) {
+  *          return new Error(
+  *            'Expected a string or an URI for ' + propName + ' in ' +
+  *            componentName
+  *          );
+  *        }
+  *      }
+  *    },
+  *    render: function() {...}
+  *  });
+  *
+  * @internal
+  */
+  var ANONYMOUS = '<<anonymous>>';
+  // Important!
+  // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
+  var ReactPropTypes = {
+    array: createPrimitiveTypeChecker('array'),
+    bool: createPrimitiveTypeChecker('boolean'),
+    func: createPrimitiveTypeChecker('function'),
+    number: createPrimitiveTypeChecker('number'),
+    object: createPrimitiveTypeChecker('object'),
+    string: createPrimitiveTypeChecker('string'),
+    symbol: createPrimitiveTypeChecker('symbol'),
+    any: createAnyTypeChecker(),
+    arrayOf: createArrayOfTypeChecker,
+    element: createElementTypeChecker(),
+    elementType: createElementTypeTypeChecker(),
+    instanceOf: createInstanceTypeChecker,
+    node: createNodeChecker(),
+    objectOf: createObjectOfTypeChecker,
+    oneOf: createEnumTypeChecker,
+    oneOfType: createUnionTypeChecker,
+    shape: createShapeTypeChecker,
+    exact: createStrictShapeTypeChecker
+  };
+  /**
+  * inlined Object.is polyfill to avoid requiring consumers ship their own
+  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
+  */
+  /*eslint-disable no-self-compare*/
+  function is(x, y) {
+    // SameValue algorithm
+    if (x === y) {
+      // Steps 1-5, 7-10
+      // Steps 6.b-6.e: +0 != -0
+      return x !== 0 || 1 / x === 1 / y;
+    } else {
+      // Step 6.a: NaN == NaN
+      return x !== x && y !== y;
+    }
+  }
+  /*eslint-enable no-self-compare*/
+  /**
+  * We use an Error-like object for backward compatibility as people may call
+  * PropTypes directly and inspect their output. However, we don't use real
+  * Errors anymore. We don't inspect their stack anyway, and creating them
+  * is prohibitively expensive if they are created too often, such as what
+  * happens in oneOfType() for any type before the one that matched.
+  */
+  function PropTypeError(message) {
+    this.message = message;
+    this.stack = '';
+  }
+  // Make `instanceof Error` still work for returned errors.
+  PropTypeError.prototype = Error.prototype;
+  function createChainableTypeChecker(validate) {
+    if ("development" !== 'production') {
+      var manualPropTypeCallCache = {};
+      var manualPropTypeWarningCount = 0;
+    }
+    function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
+      componentName = componentName || ANONYMOUS;
+      propFullName = propFullName || propName;
+      if (secret !== ReactPropTypesSecret) {
+        if (throwOnDirectAccess) {
+          // New behavior only for users of `prop-types` package
+          var err = new Error('Calling PropTypes validators directly is not supported by the `prop-types` package. ' + 'Use `PropTypes.checkPropTypes()` to call them. ' + 'Read more at http://fb.me/use-check-prop-types');
+          err.name = 'Invariant Violation';
+          throw err;
+        } else if ("development" !== 'production' && typeof console !== 'undefined') {
+          // Old behavior for people using React.PropTypes
+          var cacheKey = componentName + ':' + propName;
+          if (!manualPropTypeCallCache[cacheKey] && // Avoid spamming the console because they are often not actionable except for lib authors
+          manualPropTypeWarningCount < 3) {
+            printWarning('You are manually calling a React.PropTypes validation ' + 'function for the `' + propFullName + '` prop on `' + componentName + '`. This is deprecated ' + 'and will throw in the standalone `prop-types` package. ' + 'You may be seeing this warning due to a third-party PropTypes ' + 'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.');
+            manualPropTypeCallCache[cacheKey] = true;
+            manualPropTypeWarningCount++;
+          }
+        }
+      }
+      if (props[propName] == null) {
+        if (isRequired) {
+          if (props[propName] === null) {
+            return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
+          }
+          return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
+        }
+        return null;
+      } else {
+        return validate(props, propName, componentName, location, propFullName);
+      }
+    }
+    var chainedCheckType = checkType.bind(null, false);
+    chainedCheckType.isRequired = checkType.bind(null, true);
+    return chainedCheckType;
+  }
+  function createPrimitiveTypeChecker(expectedType) {
+    function validate(props, propName, componentName, location, propFullName, secret) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== expectedType) {
+        // `propValue` being instance of, say, date/regexp, pass the 'object'
+        // check, but we can offer a more precise error message here rather than
+        // 'of type `object`'.
+        var preciseType = getPreciseType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+  function createAnyTypeChecker() {
+    return createChainableTypeChecker(emptyFunctionThatReturnsNull);
+  }
+  function createArrayOfTypeChecker(typeChecker) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (typeof typeChecker !== 'function') {
+        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
+      }
+      var propValue = props[propName];
+      if (!Array.isArray(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
+      }
+      for (var i = 0; i < propValue.length; i++) {
+        var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
+        if (error instanceof Error) {
+          return error;
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+  function createElementTypeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      if (!isValidElement(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+  function createElementTypeTypeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      if (!ReactIs.isValidElementType(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement type.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+  function createInstanceTypeChecker(expectedClass) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (!(props[propName] instanceof expectedClass)) {
+        var expectedClassName = expectedClass.name || ANONYMOUS;
+        var actualClassName = getClassName(props[propName]);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+  function createEnumTypeChecker(expectedValues) {
+    if (!Array.isArray(expectedValues)) {
+      if ("development" !== 'production') {
+        if (arguments.length > 1) {
+          printWarning('Invalid arguments supplied to oneOf, expected an array, got ' + arguments.length + ' arguments. ' + 'A common mistake is to write oneOf(x, y, z) instead of oneOf([x, y, z]).');
+        } else {
+          printWarning('Invalid argument supplied to oneOf, expected an array.');
+        }
+      }
+      return emptyFunctionThatReturnsNull;
+    }
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      for (var i = 0; i < expectedValues.length; i++) {
+        if (is(propValue, expectedValues[i])) {
+          return null;
+        }
+      }
+      var valuesString = JSON.stringify(expectedValues, function replacer(key, value) {
+        var type = getPreciseType(value);
+        if (type === 'symbol') {
+          return String(value);
+        }
+        return value;
+      });
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of value `' + String(propValue) + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
+    }
+    return createChainableTypeChecker(validate);
+  }
+  function createObjectOfTypeChecker(typeChecker) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (typeof typeChecker !== 'function') {
+        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
+      }
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
+      }
+      for (var key in propValue) {
+        if (has(propValue, key)) {
+          var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+          if (error instanceof Error) {
+            return error;
+          }
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+  function createUnionTypeChecker(arrayOfTypeCheckers) {
+    if (!Array.isArray(arrayOfTypeCheckers)) {
+      "development" !== 'production' ? printWarning('Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
+      return emptyFunctionThatReturnsNull;
+    }
+    for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
+      var checker = arrayOfTypeCheckers[i];
+      if (typeof checker !== 'function') {
+        printWarning('Invalid argument supplied to oneOfType. Expected an array of check functions, but ' + 'received ' + getPostfixForTypeWarning(checker) + ' at index ' + i + '.');
+        return emptyFunctionThatReturnsNull;
+      }
+    }
+    function validate(props, propName, componentName, location, propFullName) {
+      for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
+        var checker = arrayOfTypeCheckers[i];
+        if (checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret) == null) {
+          return null;
+        }
+      }
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`.'));
+    }
+    return createChainableTypeChecker(validate);
+  }
+  function createNodeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (!isNode(props[propName])) {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+  function createShapeTypeChecker(shapeTypes) {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
+      }
+      for (var key in shapeTypes) {
+        var checker = shapeTypes[key];
+        if (!checker) {
+          continue;
+        }
+        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+        if (error) {
+          return error;
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+  function createStrictShapeTypeChecker(shapeTypes) {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
+      }
+      // We need to check all keys in case some are required but missing from
+      // props.
+      var allKeys = assign({}, props[propName], shapeTypes);
+      for (var key in allKeys) {
+        var checker = shapeTypes[key];
+        if (!checker) {
+          return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' + '\nBad object: ' + JSON.stringify(props[propName], null, '  ') + '\nValid keys: ' + JSON.stringify(Object.keys(shapeTypes), null, '  '));
+        }
+        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+        if (error) {
+          return error;
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+  function isNode(propValue) {
+    switch (typeof propValue) {
+      case 'number':
+      case 'string':
+      case 'undefined':
+        return true;
+      case 'boolean':
+        return !propValue;
+      case 'object':
+        if (Array.isArray(propValue)) {
+          return propValue.every(isNode);
+        }
+        if (propValue === null || isValidElement(propValue)) {
+          return true;
+        }
+        var iteratorFn = getIteratorFn(propValue);
+        if (iteratorFn) {
+          var iterator = iteratorFn.call(propValue);
+          var step;
+          if (iteratorFn !== propValue.entries) {
+            while (!(step = iterator.next()).done) {
+              if (!isNode(step.value)) {
+                return false;
+              }
+            }
+          } else {
+            // Iterator will provide entry [k,v] tuples rather than values.
+            while (!(step = iterator.next()).done) {
+              var entry = step.value;
+              if (entry) {
+                if (!isNode(entry[1])) {
+                  return false;
+                }
+              }
+            }
+          }
+        } else {
+          return false;
+        }
+        return true;
+      default:
+        return false;
+    }
+  }
+  function isSymbol(propType, propValue) {
+    // Native Symbol.
+    if (propType === 'symbol') {
+      return true;
+    }
+    // falsy value can't be a Symbol
+    if (!propValue) {
+      return false;
+    }
+    // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
+    if (propValue['@@toStringTag'] === 'Symbol') {
+      return true;
+    }
+    // Fallback for non-spec compliant Symbols which are polyfilled.
+    if (typeof Symbol === 'function' && propValue instanceof Symbol) {
+      return true;
+    }
+    return false;
+  }
+  // Equivalent of `typeof` but with special handling for array and regexp.
+  function getPropType(propValue) {
+    var propType = typeof propValue;
+    if (Array.isArray(propValue)) {
+      return 'array';
+    }
+    if (propValue instanceof RegExp) {
+      // Old webkits (at least until Android 4.0) return 'function' rather than
+      // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
+      // passes PropTypes.object.
+      return 'object';
+    }
+    if (isSymbol(propType, propValue)) {
+      return 'symbol';
+    }
+    return propType;
+  }
+  // This handles more types than `getPropType`. Only used for error messages.
+  // See `createPrimitiveTypeChecker`.
+  function getPreciseType(propValue) {
+    if (typeof propValue === 'undefined' || propValue === null) {
+      return '' + propValue;
+    }
+    var propType = getPropType(propValue);
+    if (propType === 'object') {
+      if (propValue instanceof Date) {
+        return 'date';
+      } else if (propValue instanceof RegExp) {
+        return 'regexp';
+      }
+    }
+    return propType;
+  }
+  // Returns a string that is postfixed to a warning about an invalid type.
+  // For example, "undefined" or "of type array"
+  function getPostfixForTypeWarning(value) {
+    var type = getPreciseType(value);
+    switch (type) {
+      case 'array':
+      case 'object':
+        return 'an ' + type;
+      case 'boolean':
+      case 'date':
+      case 'regexp':
+        return 'a ' + type;
+      default:
+        return type;
+    }
+  }
+  // Returns class name of the object, if any.
+  function getClassName(propValue) {
+    if (!propValue.constructor || !propValue.constructor.name) {
+      return ANONYMOUS;
+    }
+    return propValue.constructor.name;
+  }
+  ReactPropTypes.checkPropTypes = checkPropTypes;
+  ReactPropTypes.resetWarningCache = checkPropTypes.resetWarningCache;
+  ReactPropTypes.PropTypes = ReactPropTypes;
+  return ReactPropTypes;
+};
+
+},{"react-is":"68QIU","object-assign":"3eM6x","./lib/ReactPropTypesSecret":"3OVnw","./checkPropTypes":"R8SC7"}],"3OVnw":[function(require,module,exports) {
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+'use strict';
+
+var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
+
+module.exports = ReactPropTypesSecret;
+
+},{}],"R8SC7":[function(require,module,exports) {
+/**
+* Copyright (c) 2013-present, Facebook, Inc.
+*
+* This source code is licensed under the MIT license found in the
+* LICENSE file in the root directory of this source tree.
+*/
+"use strict";
+var printWarning = function () {};
+if ("development" !== 'production') {
+  var ReactPropTypesSecret = require('./lib/ReactPropTypesSecret');
+  var loggedTypeFailures = {};
+  var has = Function.call.bind(Object.prototype.hasOwnProperty);
+  printWarning = function (text) {
+    var message = 'Warning: ' + text;
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+}
+/**
+* Assert that the values match with the type specs.
+* Error messages are memorized and will only be shown once.
+*
+* @param {object} typeSpecs Map of name to a ReactPropType
+* @param {object} values Runtime values that need to be type-checked
+* @param {string} location e.g. "prop", "context", "child context"
+* @param {string} componentName Name of the component for error messages.
+* @param {?Function} getStack Returns the component stack.
+* @private
+*/
+function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
+  if ("development" !== 'production') {
+    for (var typeSpecName in typeSpecs) {
+      if (has(typeSpecs, typeSpecName)) {
+        var error;
+        // Prop type validation may throw. In case they do, we don't want to
+        // fail the render phase where it didn't fail before. So we log it.
+        // After these have been cleaned up, we'll let them throw.
+        try {
+          // This is intentionally an invariant that gets caught. It's the same
+          // behavior as without this statement except with a better message.
+          if (typeof typeSpecs[typeSpecName] !== 'function') {
+            var err = Error((componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' + 'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.');
+            err.name = 'Invariant Violation';
+            throw err;
+          }
+          error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
+        } catch (ex) {
+          error = ex;
+        }
+        if (error && !(error instanceof Error)) {
+          printWarning((componentName || 'React class') + ': type specification of ' + location + ' `' + typeSpecName + '` is invalid; the type checker ' + 'function must return `null` or an `Error` but returned a ' + typeof error + '. ' + 'You may have forgotten to pass an argument to the type checker ' + 'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' + 'shape all require an argument).');
+        }
+        if (error instanceof Error && !((error.message in loggedTypeFailures))) {
+          // Only monitor this failure once because there tends to be a lot of the
+          // same error.
+          loggedTypeFailures[error.message] = true;
+          var stack = getStack ? getStack() : '';
+          printWarning('Failed ' + location + ' type: ' + error.message + (stack != null ? stack : ''));
+        }
+      }
+    }
+  }
+}
+/**
+* Resets warning cache when testing.
+*
+* @private
+*/
+checkPropTypes.resetWarningCache = function () {
+  if ("development" !== 'production') {
+    loggedTypeFailures = {};
+  }
+};
+module.exports = checkPropTypes;
+
+},{"./lib/ReactPropTypesSecret":"3OVnw"}],"1jHjl":[function() {},{}],"6fxIo":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -26861,38 +27478,21 @@ try {
   _parcelHelpers.defineInteropFlag(exports);
   var _react = require('react');
   var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _jsxFileName = "/Users/kala/Desktop/CF/courses/full_stack_ immersion/client_side_ programming_ react/project/myFlix-client/src/components/MovieView/MovieView.jsx";
-  const MovieView = ({selectedMovie, showAllMovies}) => {
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  const MovieView = ({selectedMovie, onBackClick}) => {
     return (
       /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "movie-view",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 5,
-          columnNumber: 9
-        }
+        className: "movie-view"
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "image-cover",
         style: {
           backgroundImage: `url(${selectedMovie.image})`
-        },
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 6,
-          columnNumber: 13
         }
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "close-box",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 7,
-          columnNumber: 17
-        }
+        className: "close-box"
       }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        onClick: () => showAllMovies(),
+        onClick: () => onBackClick(),
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
         height: "24",
@@ -26902,124 +27502,51 @@ try {
         strokeWidth: "2",
         strokeLinecap: "round",
         strokeLinejoin: "round",
-        className: "feather feather-x",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 8,
-          columnNumber: 21
-        }
+        className: "feather feather-x"
       }, /*#__PURE__*/_reactDefault.default.createElement("line", {
         x1: "18",
         y1: "6",
         x2: "6",
-        y2: "18",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 20,
-          columnNumber: 29
-        }
+        y2: "18"
       }), /*#__PURE__*/_reactDefault.default.createElement("line", {
         x1: "6",
         y1: "6",
         x2: "18",
-        y2: "18",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 21,
-          columnNumber: 29
-        }
+        y2: "18"
       })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "main-content",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 25,
-          columnNumber: 13
-        }
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", {
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 26,
-          columnNumber: 17
-        }
-      }, selectedMovie.name), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 27,
-          columnNumber: 17
-        }
+        className: "main-content"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedMovie.name), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
       }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "description",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 28,
-          columnNumber: 17
-        }
+        className: "description"
       }, selectedMovie.description)), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attributes",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 30,
-          columnNumber: 13
-        }
+        className: "attributes"
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attribute",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 31,
-          columnNumber: 17
-        }
+        className: "attribute"
       }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 32,
-          columnNumber: 21
-        }
-      }, "Director"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 33,
-          columnNumber: 21
-        }
-      }, selectedMovie.director.name)), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attribute",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 35,
-          columnNumber: 17
-        }
+        className: "label"
+      }, "Director"), /*#__PURE__*/_reactDefault.default.createElement("p", null, selectedMovie.director.name)), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attribute"
       }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label",
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 36,
-          columnNumber: 21
-        }
-      }, "Genre"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        __self: undefined,
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 37,
-          columnNumber: 21
-        }
-      }, selectedMovie.genre.name))))
+        className: "label"
+      }, "Genre"), /*#__PURE__*/_reactDefault.default.createElement("p", null, selectedMovie.genre.name))))
     );
   };
   _c = MovieView;
+  MovieView.propTypes = {
+    selectedMovie: _propTypesDefault.default.shape({
+      description: _propTypesDefault.default.string.isRequired,
+      director: _propTypesDefault.default.shape({
+        name: _propTypesDefault.default.string.isRequired
+      }).isRequired,
+      genre: _propTypesDefault.default.shape({
+        name: _propTypesDefault.default.string.isRequired
+      }).isRequired,
+      image: _propTypesDefault.default.string.isRequired,
+      name: _propTypesDefault.default.string.isRequired
+    }).isRequired,
+    onBackClick: _propTypesDefault.default.func.isRequired
+  };
   exports.default = MovieView;
   var _c;
   $RefreshReg$(_c, "MovieView");
@@ -27029,6 +27556,2169 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}]},["1j6wU","68WUB","1DVjT"], "1DVjT", "parcelRequire279c")
+},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","prop-types":"4dfy5"}],"7rA65":[function(require,module,exports) {
+module.exports = require('./lib/axios');
+},{"./lib/axios":"4qfhW"}],"4qfhW":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./utils');
+var bind = require('./helpers/bind');
+var Axios = require('./core/Axios');
+var mergeConfig = require('./core/mergeConfig');
+var defaults = require('./defaults');
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios(defaultConfig);
+  var instance = bind(Axios.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(mergeConfig(axios.defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = require('./cancel/Cancel');
+axios.CancelToken = require('./cancel/CancelToken');
+axios.isCancel = require('./cancel/isCancel');
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = require('./helpers/spread');
+
+// Expose isAxiosError
+axios.isAxiosError = require('./helpers/isAxiosError');
+
+module.exports = axios;
+
+// Allow use of default import syntax in TypeScript
+module.exports.default = axios;
+
+},{"./utils":"7J9rV","./helpers/bind":"78Fwk","./core/Axios":"26bz2","./core/mergeConfig":"42z1a","./defaults":"5j10E","./cancel/Cancel":"1Ql7i","./cancel/CancelToken":"hHamf","./cancel/isCancel":"3MAgn","./helpers/spread":"9FoXt","./helpers/isAxiosError":"1bzv8"}],"7J9rV":[function(require,module,exports) {
+'use strict';
+
+var bind = require('./helpers/bind');
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is a Buffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Buffer, otherwise false
+ */
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
+    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a plain Object
+ *
+ * @param {Object} val The value to test
+ * @return {boolean} True if value is a plain Object, otherwise false
+ */
+function isPlainObject(val) {
+  if (toString.call(val) !== '[object Object]') {
+    return false;
+  }
+
+  var prototype = Object.getPrototypeOf(val);
+  return prototype === null || prototype === Object.prototype;
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
+                                           navigator.product === 'NativeScript' ||
+                                           navigator.product === 'NS')) {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (isPlainObject(result[key]) && isPlainObject(val)) {
+      result[key] = merge(result[key], val);
+    } else if (isPlainObject(val)) {
+      result[key] = merge({}, val);
+    } else if (isArray(val)) {
+      result[key] = val.slice();
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+/**
+ * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+ *
+ * @param {string} content with BOM
+ * @return {string} content value without BOM
+ */
+function stripBOM(content) {
+  if (content.charCodeAt(0) === 0xFEFF) {
+    content = content.slice(1);
+  }
+  return content;
+}
+
+module.exports = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isPlainObject: isPlainObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  extend: extend,
+  trim: trim,
+  stripBOM: stripBOM
+};
+
+},{"./helpers/bind":"78Fwk"}],"78Fwk":[function(require,module,exports) {
+'use strict';
+
+module.exports = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+},{}],"26bz2":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+var buildURL = require('../helpers/buildURL');
+var InterceptorManager = require('./InterceptorManager');
+var dispatchRequest = require('./dispatchRequest');
+var mergeConfig = require('./mergeConfig');
+
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = arguments[1] || {};
+    config.url = arguments[0];
+  } else {
+    config = config || {};
+  }
+
+  config = mergeConfig(this.defaults, config);
+
+  // Set config.method
+  if (config.method) {
+    config.method = config.method.toLowerCase();
+  } else if (this.defaults.method) {
+    config.method = this.defaults.method.toLowerCase();
+  } else {
+    config.method = 'get';
+  }
+
+  // Hook up interceptors middleware
+  var chain = [dispatchRequest, undefined];
+  var promise = Promise.resolve(config);
+
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    chain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+
+Axios.prototype.getUri = function getUri(config) {
+  config = mergeConfig(this.defaults, config);
+  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: (config || {}).data
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+module.exports = Axios;
+
+},{"./../utils":"7J9rV","../helpers/buildURL":"25KfR","./InterceptorManager":"33sRR","./dispatchRequest":"1mCjo","./mergeConfig":"42z1a"}],"25KfR":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+module.exports = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    var hashmarkIndex = url.indexOf('#');
+    if (hashmarkIndex !== -1) {
+      url = url.slice(0, hashmarkIndex);
+    }
+
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+},{"./../utils":"7J9rV"}],"33sRR":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+module.exports = InterceptorManager;
+
+},{"./../utils":"7J9rV"}],"1mCjo":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+var transformData = require('./transformData');
+var isCancel = require('../cancel/isCancel');
+var defaults = require('../defaults');
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+},{"./../utils":"7J9rV","./transformData":"1ueU6","../cancel/isCancel":"3MAgn","../defaults":"5j10E"}],"1ueU6":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+module.exports = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+},{"./../utils":"7J9rV"}],"3MAgn":[function(require,module,exports) {
+'use strict';
+
+module.exports = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+},{}],"5j10E":[function(require,module,exports) {
+"use strict";
+var process = require("process");
+var utils = require('./utils');
+var normalizeHeaderName = require('./helpers/normalizeHeaderName');
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = require('./adapters/xhr');
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = require('./adapters/http');
+  }
+  return adapter;
+}
+var defaults = {
+  adapter: getDefaultAdapter(),
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Accept');
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) || utils.isArrayBuffer(data) || utils.isBuffer(data) || utils.isStream(data) || utils.isFile(data) || utils.isBlob(data)) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) {}
+    }
+    return data;
+  }],
+  /**
+  * A timeout in milliseconds to abort a request. If set to 0 (default) a
+  * timeout is not created.
+  */
+  timeout: 0,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+  maxContentLength: -1,
+  maxBodyLength: -1,
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+module.exports = defaults;
+
+},{"process":"352Fm","./utils":"7J9rV","./helpers/normalizeHeaderName":"5yMqL","./adapters/xhr":"6pJqL","./adapters/http":"6pJqL"}],"352Fm":[function(require,module,exports) {
+// shim for using process in browser
+var process = module.exports = {};
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+var cachedSetTimeout;
+var cachedClearTimeout;
+function defaultSetTimout() {
+  throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout() {
+  throw new Error('clearTimeout has not been defined');
+}
+(function () {
+  try {
+    if (typeof setTimeout === 'function') {
+      cachedSetTimeout = setTimeout;
+    } else {
+      cachedSetTimeout = defaultSetTimout;
+    }
+  } catch (e) {
+    cachedSetTimeout = defaultSetTimout;
+  }
+  try {
+    if (typeof clearTimeout === 'function') {
+      cachedClearTimeout = clearTimeout;
+    } else {
+      cachedClearTimeout = defaultClearTimeout;
+    }
+  } catch (e) {
+    cachedClearTimeout = defaultClearTimeout;
+  }
+})();
+function runTimeout(fun) {
+  if (cachedSetTimeout === setTimeout) {
+    // normal enviroments in sane situations
+    return setTimeout(fun, 0);
+  }
+  // if setTimeout wasn't available but was latter defined
+  if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+    cachedSetTimeout = setTimeout;
+    return setTimeout(fun, 0);
+  }
+  try {
+    // when when somebody has screwed with setTimeout but no I.E. maddness
+    return cachedSetTimeout(fun, 0);
+  } catch (e) {
+    try {
+      // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+      return cachedSetTimeout.call(null, fun, 0);
+    } catch (e) {
+      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+      return cachedSetTimeout.call(this, fun, 0);
+    }
+  }
+}
+function runClearTimeout(marker) {
+  if (cachedClearTimeout === clearTimeout) {
+    // normal enviroments in sane situations
+    return clearTimeout(marker);
+  }
+  // if clearTimeout wasn't available but was latter defined
+  if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+    cachedClearTimeout = clearTimeout;
+    return clearTimeout(marker);
+  }
+  try {
+    // when when somebody has screwed with setTimeout but no I.E. maddness
+    return cachedClearTimeout(marker);
+  } catch (e) {
+    try {
+      // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+      return cachedClearTimeout.call(null, marker);
+    } catch (e) {
+      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+      // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+      return cachedClearTimeout.call(this, marker);
+    }
+  }
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+function cleanUpNextTick() {
+  if (!draining || !currentQueue) {
+    return;
+  }
+  draining = false;
+  if (currentQueue.length) {
+    queue = currentQueue.concat(queue);
+  } else {
+    queueIndex = -1;
+  }
+  if (queue.length) {
+    drainQueue();
+  }
+}
+function drainQueue() {
+  if (draining) {
+    return;
+  }
+  var timeout = runTimeout(cleanUpNextTick);
+  draining = true;
+  var len = queue.length;
+  while (len) {
+    currentQueue = queue;
+    queue = [];
+    while (++queueIndex < len) {
+      if (currentQueue) {
+        currentQueue[queueIndex].run();
+      }
+    }
+    queueIndex = -1;
+    len = queue.length;
+  }
+  currentQueue = null;
+  draining = false;
+  runClearTimeout(timeout);
+}
+process.nextTick = function (fun) {
+  var args = new Array(arguments.length - 1);
+  if (arguments.length > 1) {
+    for (var i = 1; i < arguments.length; i++) {
+      args[i - 1] = arguments[i];
+    }
+  }
+  queue.push(new Item(fun, args));
+  if (queue.length === 1 && !draining) {
+    runTimeout(drainQueue);
+  }
+};
+// v8 likes predictible objects
+function Item(fun, array) {
+  this.fun = fun;
+  this.array = array;
+}
+Item.prototype.run = function () {
+  this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = '';
+// empty string to avoid regexp issues
+process.versions = {};
+function noop() {}
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+process.listeners = function (name) {
+  return [];
+};
+process.binding = function (name) {
+  throw new Error('process.binding is not supported');
+};
+process.cwd = function () {
+  return '/';
+};
+process.chdir = function (dir) {
+  throw new Error('process.chdir is not supported');
+};
+process.umask = function () {
+  return 0;
+};
+
+},{}],"5yMqL":[function(require,module,exports) {
+'use strict';
+
+var utils = require('../utils');
+
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+},{"../utils":"7J9rV"}],"6pJqL":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+var settle = require('./../core/settle');
+var cookies = require('./../helpers/cookies');
+var buildURL = require('./../helpers/buildURL');
+var buildFullPath = require('../core/buildFullPath');
+var parseHeaders = require('./../helpers/parseHeaders');
+var isURLSameOrigin = require('./../helpers/isURLSameOrigin');
+var createError = require('../core/createError');
+
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password ? unescape(encodeURIComponent(config.auth.password)) : '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    var fullPath = buildFullPath(config.baseURL, config.url);
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    // Listen for ready state
+    request.onreadystatechange = function handleLoad() {
+      if (!request || request.readyState !== 4) {
+        return;
+      }
+
+      // The request errored out and we didn't get a response, this will be
+      // handled by onerror instead
+      // With one exception: request that using file: protocol, most browsers
+      // will return status as 0 even though it's a successful request
+      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+        return;
+      }
+
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle browser request cancellation (as opposed to a manual cancellation)
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+        cookies.read(config.xsrfCookieName) :
+        undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (!utils.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!config.withCredentials;
+    }
+
+    // Add responseType to request if needed
+    if (config.responseType) {
+      try {
+        request.responseType = config.responseType;
+      } catch (e) {
+        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+        if (config.responseType !== 'json') {
+          throw e;
+        }
+      }
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (!requestData) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+},{"./../utils":"7J9rV","./../core/settle":"72M6J","./../helpers/cookies":"1m0F1","./../helpers/buildURL":"25KfR","../core/buildFullPath":"5fWja","./../helpers/parseHeaders":"1KizL","./../helpers/isURLSameOrigin":"6Gtz3","../core/createError":"7ETv1"}],"72M6J":[function(require,module,exports) {
+'use strict';
+
+var createError = require('./createError');
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+},{"./createError":"7ETv1"}],"7ETv1":[function(require,module,exports) {
+'use strict';
+
+var enhanceError = require('./enhanceError');
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+module.exports = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+},{"./enhanceError":"2O2Ud"}],"2O2Ud":[function(require,module,exports) {
+'use strict';
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+module.exports = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+
+  error.request = request;
+  error.response = response;
+  error.isAxiosError = true;
+
+  error.toJSON = function toJSON() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: this.config,
+      code: this.code
+    };
+  };
+  return error;
+};
+
+},{}],"1m0F1":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+    (function standardBrowserEnv() {
+      return {
+        write: function write(name, value, expires, path, domain, secure) {
+          var cookie = [];
+          cookie.push(name + '=' + encodeURIComponent(value));
+
+          if (utils.isNumber(expires)) {
+            cookie.push('expires=' + new Date(expires).toGMTString());
+          }
+
+          if (utils.isString(path)) {
+            cookie.push('path=' + path);
+          }
+
+          if (utils.isString(domain)) {
+            cookie.push('domain=' + domain);
+          }
+
+          if (secure === true) {
+            cookie.push('secure');
+          }
+
+          document.cookie = cookie.join('; ');
+        },
+
+        read: function read(name) {
+          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+          return (match ? decodeURIComponent(match[3]) : null);
+        },
+
+        remove: function remove(name) {
+          this.write(name, '', Date.now() - 86400000);
+        }
+      };
+    })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return {
+        write: function write() {},
+        read: function read() { return null; },
+        remove: function remove() {}
+      };
+    })()
+);
+
+},{"./../utils":"7J9rV"}],"5fWja":[function(require,module,exports) {
+'use strict';
+
+var isAbsoluteURL = require('../helpers/isAbsoluteURL');
+var combineURLs = require('../helpers/combineURLs');
+
+/**
+ * Creates a new URL by combining the baseURL with the requestedURL,
+ * only when the requestedURL is not already an absolute URL.
+ * If the requestURL is absolute, this function returns the requestedURL untouched.
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} requestedURL Absolute or relative URL to combine
+ * @returns {string} The combined full path
+ */
+module.exports = function buildFullPath(baseURL, requestedURL) {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
+
+},{"../helpers/isAbsoluteURL":"4FcN1","../helpers/combineURLs":"qMap4"}],"4FcN1":[function(require,module,exports) {
+'use strict';
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+module.exports = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+},{}],"qMap4":[function(require,module,exports) {
+'use strict';
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+},{}],"1KizL":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+module.exports = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+},{"./../utils":"7J9rV"}],"6Gtz3":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+    (function standardBrowserEnv() {
+      var msie = /(msie|trident)/i.test(navigator.userAgent);
+      var urlParsingNode = document.createElement('a');
+      var originURL;
+
+      /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+      function resolveURL(url) {
+        var href = url;
+
+        if (msie) {
+        // IE needs attribute set twice to normalize properties
+          urlParsingNode.setAttribute('href', href);
+          href = urlParsingNode.href;
+        }
+
+        urlParsingNode.setAttribute('href', href);
+
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+          href: urlParsingNode.href,
+          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+          host: urlParsingNode.host,
+          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+          hostname: urlParsingNode.hostname,
+          port: urlParsingNode.port,
+          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+            urlParsingNode.pathname :
+            '/' + urlParsingNode.pathname
+        };
+      }
+
+      originURL = resolveURL(window.location.href);
+
+      /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+      return function isURLSameOrigin(requestURL) {
+        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+        return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+      };
+    })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return function isURLSameOrigin() {
+        return true;
+      };
+    })()
+);
+
+},{"./../utils":"7J9rV"}],"42z1a":[function(require,module,exports) {
+'use strict';
+
+var utils = require('../utils');
+
+/**
+ * Config-specific merge-function which creates a new config-object
+ * by merging two configuration objects together.
+ *
+ * @param {Object} config1
+ * @param {Object} config2
+ * @returns {Object} New object resulting from merging config2 to config1
+ */
+module.exports = function mergeConfig(config1, config2) {
+  // eslint-disable-next-line no-param-reassign
+  config2 = config2 || {};
+  var config = {};
+
+  var valueFromConfig2Keys = ['url', 'method', 'data'];
+  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy', 'params'];
+  var defaultToConfig2Keys = [
+    'baseURL', 'transformRequest', 'transformResponse', 'paramsSerializer',
+    'timeout', 'timeoutMessage', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
+    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress', 'decompress',
+    'maxContentLength', 'maxBodyLength', 'maxRedirects', 'transport', 'httpAgent',
+    'httpsAgent', 'cancelToken', 'socketPath', 'responseEncoding'
+  ];
+  var directMergeKeys = ['validateStatus'];
+
+  function getMergedValue(target, source) {
+    if (utils.isPlainObject(target) && utils.isPlainObject(source)) {
+      return utils.merge(target, source);
+    } else if (utils.isPlainObject(source)) {
+      return utils.merge({}, source);
+    } else if (utils.isArray(source)) {
+      return source.slice();
+    }
+    return source;
+  }
+
+  function mergeDeepProperties(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  }
+
+  utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    }
+  });
+
+  utils.forEach(mergeDeepPropertiesKeys, mergeDeepProperties);
+
+  utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  utils.forEach(directMergeKeys, function merge(prop) {
+    if (prop in config2) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (prop in config1) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  var axiosKeys = valueFromConfig2Keys
+    .concat(mergeDeepPropertiesKeys)
+    .concat(defaultToConfig2Keys)
+    .concat(directMergeKeys);
+
+  var otherKeys = Object
+    .keys(config1)
+    .concat(Object.keys(config2))
+    .filter(function filterAxiosKeys(key) {
+      return axiosKeys.indexOf(key) === -1;
+    });
+
+  utils.forEach(otherKeys, mergeDeepProperties);
+
+  return config;
+};
+
+},{"../utils":"7J9rV"}],"1Ql7i":[function(require,module,exports) {
+'use strict';
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+
+},{}],"hHamf":[function(require,module,exports) {
+'use strict';
+
+var Cancel = require('./Cancel');
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+
+},{"./Cancel":"1Ql7i"}],"9FoXt":[function(require,module,exports) {
+'use strict';
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+},{}],"1bzv8":[function(require,module,exports) {
+'use strict';
+
+/**
+ * Determines whether the payload is an error thrown by Axios
+ *
+ * @param {*} payload The value to test
+ * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
+ */
+module.exports = function isAxiosError(payload) {
+  return (typeof payload === 'object') && (payload.isAxiosError === true);
+};
+
+},{}],"4DfHF":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  require('../../form.scss');
+  require('./registration-view.scss');
+  var _s = $RefreshSig$();
+  const RegistrationView = ({setRegistration, setUser}) => {
+    _s();
+    const [birthDate, setBirthDate] = _react.useState('');
+    const [birthDateError, setBirthDateError] = _react.useState(false);
+    const [email, setEmail] = _react.useState('');
+    const [password1, setPassword1] = _react.useState('');
+    const [password2, setPassword2] = _react.useState('');
+    const [passwordMatchError, setPasswordMatchError] = _react.useState(false);
+    const [username, setUsername] = _react.useState('');
+    _react.useEffect(() => {
+      document.body.style.backgroundColor = '#0376E3';
+      return () => {
+        document.body.style.backgroundColor = '#1B1D24';
+      };
+    });
+    const handleSubmit = e => {
+      e.preventDefault();
+      // Reset error values
+      setBirthDateError(false);
+      setPasswordMatchError(false);
+      // Make sure passwords match
+      if (password1 !== password2) {
+        setPasswordMatchError(false);
+        return;
+      }
+      const user = {
+        password1,
+        email,
+        username
+      };
+      // Check if birthDate was entered and if it is valid
+      // if it is add it to user object
+      if (!validateBirthDate()) return;
+      user['birthDate'] = birthDate;
+      setUser(user);
+      setRegistration();
+    };
+    const onChangeBirthDate = e => {
+      setBirthDate(e.target.value);
+      validateBirthDate(e.target.value);
+    };
+    const onChangePassword1 = e => {
+      setPassword1(e.target.value);
+      setPasswordMatchError(false);
+      if (password2 !== '' && e.target.value !== password2) setPasswordMatchError(true);
+    };
+    const onChangePassword2 = e => {
+      setPassword2(e.target.value);
+      setPasswordMatchError(false);
+      if (password1 !== '' && password1 !== e.target.value) setPasswordMatchError(true);
+    };
+    const validateBirthDate = (birthdate = birthDate) => {
+      const regex = /\d\d\d\d-\d\d-\d\d/;
+      // valid date format
+      if (!birthdate.match(regex)) {
+        setBirthDateError(`${birthdate} is not a valid date. 
+                Please enter a date in this format: yyyy-mm-dd`);
+        return false;
+      } else if (birthdate && birthdate.match(regex)) {
+        setBirthDateError(null);
+        return true;
+      }
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "form-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("form", {
+        id: "registration-form",
+        onSubmit: e => handleSubmit(e)
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Great to Meet you!"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Create an account"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "form-group"
+      }, /*#__PURE__*/_reactDefault.default.createElement("label", {
+        className: "form-label",
+        htmlFor: "username"
+      }, "Username*"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("input", {
+        id: "username",
+        type: "text",
+        placeholder: "Enter your username",
+        onChange: e => setUsername(e.target.value),
+        value: username,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-user"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M20 21v-2a4 4 0 0 0-4-4H8a4  4 0 0 0-4 4v2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("circle", {
+        cx: "12",
+        cy: "7",
+        r: "4"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "form-group"
+      }, /*#__PURE__*/_reactDefault.default.createElement("label", {
+        className: "form-label",
+        htmlFor: "birth-date"
+      }, "Birthday"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: `input-container 
+                            ${birthDateError ? 'error' : ''}`
+      }, /*#__PURE__*/_reactDefault.default.createElement("input", {
+        id: "birth-date",
+        type: "text",
+        placeholder: "2021-05-10",
+        onChange: e => onChangeBirthDate(e),
+        value: birthDate
+      }), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-calendar"
+      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
+        x: "3",
+        y: "4",
+        width: "18",
+        height: "18",
+        rx: "2",
+        ry: "2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "16",
+        y1: "2",
+        x2: "16",
+        y2: "6"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "8",
+        y1: "2",
+        x2: "8",
+        y2: "6"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "3",
+        y1: "10",
+        x2: "21",
+        y2: "10"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "form-group"
+      }, /*#__PURE__*/_reactDefault.default.createElement("label", {
+        className: "form-label",
+        htmlFor: "email"
+      }, "Email*"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("input", {
+        id: "email",
+        type: "email",
+        placeholder: "me@gmail.com",
+        onChange: e => setEmail(e.target.value),
+        value: email,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-mail"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+      }), /*#__PURE__*/_reactDefault.default.createElement("polyline", {
+        points: "22,6 12,13 2,6"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "form-group"
+      }, /*#__PURE__*/_reactDefault.default.createElement("label", {
+        className: "form-label",
+        htmlFor: "password1"
+      }, "Password*"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: `input-container ${passwordMatchError ? 'error' : ''}`
+      }, /*#__PURE__*/_reactDefault.default.createElement("input", {
+        id: "password1",
+        type: "password",
+        onChange: e => onChangePassword1(e),
+        placeholder: "Enter your password",
+        value: password1,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-lock"
+      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
+        x: "3",
+        y: "11",
+        width: "18",
+        height: "11",
+        rx: "2",
+        ry: "2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M7 11V7a5 5 0 0 1 10 0v4"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "form-group"
+      }, /*#__PURE__*/_reactDefault.default.createElement("label", {
+        className: "form-label",
+        htmlFor: "password2"
+      }, "Password*"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: `input-container ${passwordMatchError ? 'error' : ''}`
+      }, /*#__PURE__*/_reactDefault.default.createElement("input", {
+        id: "password2",
+        type: "password",
+        onChange: e => onChangePassword2(e),
+        placeholder: "Enter your password again",
+        value: password2,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-lock"
+      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
+        x: "3",
+        y: "11",
+        width: "18",
+        height: "11",
+        rx: "2",
+        ry: "2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M7 11V7a5 5 0 0 1 10 0v4"
+      })))), birthDateError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, birthDateError) : null, passwordMatchError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Passwords must match") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "btn-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("button", {
+        type: "submit"
+      }, "Register"))))
+    );
+  };
+  _s(RegistrationView, "KmdDZYQw9Yw9hnBGoqPq3ZUzj7Q=");
+  _c = RegistrationView;
+  RegistrationView.propTypes = {
+    setRegistration: _propTypesDefault.default.func.isRequired,
+    setUser: _propTypesDefault.default.func.isRequired
+  };
+  exports.default = RegistrationView;
+  var _c;
+  $RefreshReg$(_c, "RegistrationView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","../../form.scss":"6WYmM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./registration-view.scss":"4BDo8","prop-types":"4dfy5"}],"6WYmM":[function() {},{}],"4BDo8":[function() {},{}],"1zhWx":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  require('../../form.scss');
+  require('./login-view.scss');
+  var _s = $RefreshSig$();
+  const LoginView = ({setUser, onRegistrationClick}) => {
+    _s();
+    const [username, setUsername] = _react.useState('');
+    const [password, setPassword] = _react.useState('');
+    _react.useEffect(() => {
+      document.body.style.backgroundColor = '#0376E3';
+      return () => {
+        document.body.style.backgroundColor = '#1B1D24';
+      };
+    });
+    const handleSubmit = e => {
+      e.preventDefault();
+      const user = {
+        username,
+        password
+      };
+      setUser(user);
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "form-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("form", {
+        id: "login-form",
+        onSubmit: e => handleSubmit(e)
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Great to Meet you!"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Login to your account"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "form-group"
+      }, /*#__PURE__*/_reactDefault.default.createElement("label", {
+        className: "form-label",
+        htmlFor: "email"
+      }, "Username"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("input", {
+        type: "text",
+        placeholder: "Enter your username",
+        onChange: e => setUsername(e.target.value),
+        value: username,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-user"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("circle", {
+        cx: "12",
+        cy: "7",
+        r: "4"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "form-group"
+      }, /*#__PURE__*/_reactDefault.default.createElement("label", {
+        className: "form-label",
+        htmlFor: "password"
+      }, "Password"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("input", {
+        type: "password",
+        onChange: e => setPassword(e.target.value),
+        placeholder: "Enter your password",
+        value: password,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-lock"
+      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
+        x: "3",
+        y: "11",
+        width: "18",
+        height: "11",
+        rx: "2",
+        ry: "2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M7 11V7a5 5 0 0 1 10 0v4"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "btn-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("button", {
+        type: "submit"
+      }, "Login"))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "btn-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("button", {
+        type: "button",
+        onClick: onRegistrationClick
+      }, "Register")))
+    );
+  };
+  _s(LoginView, "1Ee1R0489EdHkYDBlGzgXw+XbCU=");
+  _c = LoginView;
+  LoginView.propTypes = {
+    onRegistrationClick: _propTypesDefault.default.func.isRequired,
+    setUser: _propTypesDefault.default.func.isRequired
+  };
+  exports.default = LoginView;
+  var _c;
+  $RefreshReg$(_c, "LoginView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","../../form.scss":"6WYmM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./login-view.scss":"2Muu9","prop-types":"4dfy5"}],"6WYmM":[function() {},{}],"2Muu9":[function() {},{}],"3JwwG":[function() {},{}]},["1j6wU","68WUB","1DVjT"], "1DVjT", "parcelRequire279c")
 
 //# sourceMappingURL=index.02675e63.js.map

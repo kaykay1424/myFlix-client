@@ -1,3 +1,4 @@
 node_modules
 .parcel-cache
 .eslintrc.json
+stylelint.config.js

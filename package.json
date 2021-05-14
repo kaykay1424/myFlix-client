@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "myFlix is a single-page, responsive app built with React that allows users access to information about different movies, actors, directors, and genres through routing, user interactions, and user interfaces.",
   "main": "src/index.html",
+  "babel": {
+    "presets": ["@babel/preset-react"]
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "parcel src/index.html"
@@ -14,10 +17,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/core": "7.14.2",
+    "axios": "0.21.1",
+    "prop-types": "15.7.2",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "7.14.2",
+    "@babel/eslint-plugin": "7.13.16",
+    "@babel/plugin-syntax-jsx": "7.12.13",
+    "@babel/preset-react": "7.13.13",
     "@parcel/transformer-sass": "2.0.0-beta.2",
     "eslint": "7.26.0",
     "eslint-plugin-react": "7.23.2"

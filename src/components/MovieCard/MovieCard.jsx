@@ -1,6 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import './movie-card.scss';
 
-const MovieCard = ({movie, showMovieDetails}) => {
+const MovieCard = ({movie, onMovieClick}) => {
     const createExcerpt = (description) => {
         return description.slice(0, 45);
     };
@@ -30,11 +32,20 @@ const MovieCard = ({movie, showMovieDetails}) => {
                 </svg>
                 <span 
                     className="read-more-link" 
-                    onClick={() => showMovieDetails(movie)}>Read More
+                    onClick={() => onMovieClick(movie)}>Read More
                 </span>
             </div> 
         </div>
     );       
+};
+
+MovieCard.propTypes = {
+    movie: PropTypes.shape({
+        description: PropTypes.string.isRequired,
+        image: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired
+    }).isRequired,
+    onMovieClick: PropTypes.func.isRequired
 };
 
 export default MovieCard;

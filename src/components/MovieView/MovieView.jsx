@@ -1,12 +1,20 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-const MovieView = ({selectedMovie, showAllMovies}) => {
+const MovieView = ({selectedMovie, onBackClick}) => {    
     return (
         <div className="movie-view">
-            <div className="image-cover" style={{backgroundImage: `url(${selectedMovie.image})`}}>
+            <div 
+                className="image-cover" 
+                style={
+                    {
+                        backgroundImage: `url(${selectedMovie.image})`
+                    }
+                }
+            >
                 <div className="close-box">
                     <svg 
-                        onClick={() => showAllMovies()} 
+                        onClick={() => onBackClick()} 
                         xmlns="http://www.w3.org/2000/svg" 
                         width="24" 
                         height="24" 
@@ -16,10 +24,11 @@ const MovieView = ({selectedMovie, showAllMovies}) => {
                         strokeWidth="2" 
                         strokeLinecap="round" 
                         strokeLinejoin="round" 
-                        className="feather feather-x">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
+                        className="feather feather-x"
+                    >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
                 </div>
             </div>
             <div className="main-content">
@@ -39,6 +48,21 @@ const MovieView = ({selectedMovie, showAllMovies}) => {
             </div>
         </div>                 
     );
+};
+
+MovieView.propTypes = {
+    selectedMovie: PropTypes.shape({
+        description: PropTypes.string.isRequired,
+        director: PropTypes.shape({
+            name: PropTypes.string.isRequired
+        }).isRequired,
+        genre: PropTypes.shape({
+            name: PropTypes.string.isRequired
+        }).isRequired,
+        image: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired
+    }).isRequired,
+    onBackClick: PropTypes.func.isRequired
 };
 
 export default MovieView;

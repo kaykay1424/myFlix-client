@@ -1,0 +1,54 @@
+@import '../../variables';
+.movie-view {
+    background-color: $secondary-background-color;
+    color: #fff;
+    height: 90vh;
+    margin: 4em auto 0 auto;
+    max-width: 100%;
+    width: 700px;
+    .attribute {
+        margin-right: 4em;
+        .label + p {
+            color: $link-color;
+        }
+    }
+    .attributes {
+        border-bottom: 1px solid $border-color;
+        border-top: 1px solid $border-color;
+        display: flex;
+        margin-bottom: 4em;
+        margin-top: 4em;
+        padding-left: 10%;
+        padding-right: 10%;
+    }
+    .main-content {
+        padding-left: 10%;
+        padding-right: 10%;
+    }
+    .close-box {
+        background-color: $main-background-color;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        // height: 36px;
+        padding: 3px;
+        position: absolute;
+        right: 30px;
+        text-align: center;
+        top: 20px;
+        // width: 36px;
+    }
+    .description {
+        color: #b0b5bf;
+    }
+    .image-cover {
+        background-size: cover; 
+        background-position: top center; 
+        background-repeat: no-repeat; 
+        height: 200px;
+        position: relative;
+    }
+    .main-content {
+        margin-top: 4em;
+    }
+}

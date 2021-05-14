@@ -1,64 +1,126 @@
-/******* Variables *********/
 body {
-  background-color: #1B1D24;
-  font-family: Archivo;
+  background-color: #1b1d24;
+  font-family: "Calibri";
+}
+
+button {
+  cursor: pointer;
+}
+
+.error {
+  color: #f5866f;
 }
 
 .label {
-  color: #828D99;
+  color: #828d99;
+  font-size: 15px;
 }
-
-.movie-view {
-  background-color: #1E2127;
-  color: #fff;
-  height: 90vh;
-  margin: 4em auto 0 auto;
-  max-width: 100%;
-  width: 700px;
+.movie-card {
+  background-color: #1e2127;
+  display: flex;
+  flex-direction: column;
+  padding: 1em;
 }
-.movie-view .attribute {
-  margin-right: 4em;
+.movie-card button {
+  align-self: flex-start;
+  display: inline-block;
 }
-.movie-view .attribute .label + p {
-  color: #117DCE;
+.movie-card svg {
+  display: inline-block;
+  color: #f5f5f5;
 }
-.movie-view .attributes {
+.movie-card .description {
   border-bottom: 1px solid #2f333b;
-  border-top: 1px solid #2f333b;
-  display: flex;
-  margin-bottom: 4em;
-  margin-top: 4em;
+  height: 53px;
 }
-.movie-view .attributes,
-.movie-view .main-content {
-  padding-left: 10%;
-  padding-right: 10%;
-}
-.movie-view .close-box {
-  background-color: #1B1D24;
-  border-radius: 50%;
+.movie-card .read-more-link {
+  align-self: center;
+  color: #117dce;
   cursor: pointer;
+  margin-left: 1em;
+}
+.movie-card .read-more-link-container {
   display: flex;
-  padding: 3px;
-  position: absolute;
-  right: 30px;
+}
+.form-container {
+  background-color: #1e2127;
+  border-radius: 2px;
+  color: #fff;
+  margin: 2em auto;
+  max-width: 100%;
+  padding: 2em 0;
   text-align: center;
-  top: 20px;
+  width: 430px;
 }
-.movie-view .description {
-  color: #b0b5bf;
+.form-container button {
+  background-color: #0093ff;
+  border: 1px solid #0093ff;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 15px;
+  height: 36px;
+  margin-top: 2em;
+  width: 154px;
 }
-.movie-view .image-cover {
-  background-size: cover;
-  background-position: top center;
-  background-repeat: no-repeat;
-  height: 200px;
-  position: relative;
+.form-container form {
+  margin: auto;
+  width: 80%;
 }
-.movie-view .main-content {
+.form-container form .btn-container {
+  border-top: none;
+  display: flex;
+  justify-content: flex-end;
+}
+.form-container form .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1em;
+  text-align: left;
+}
+.form-container form .form-group input {
+  background-color: #1e2127;
+  border: 0;
+  outline: 0;
+}
+.form-container form .form-group label {
+  margin-bottom: 5px;
+}
+.form-container form .form-group .form-label {
+  color: #bec2cc;
+  font-size: 15px;
+}
+.form-container form .form-group .input-container {
+  border: 1px solid #2f333b;
+  display: flex;
+  height: 36px;
+  justify-content: space-between;
+  padding-left: 5px;
+  padding-right: 5px;
+  width: 334px;
+}
+.form-container form .form-group .input-container input {
+  color: #bec2cc;
+  width: 95%;
+}
+.form-container form .form-group .input-container svg {
+  align-self: center;
+}
+.form-container form .form-group .input-container.error {
+  border: 1px solid #f5866f;
+  color: inherit;
+}
+#registration-form button {
+  width: 124px;
+}
+#login-form + .btn-container {
+  border-top: 1px solid #2f333b;
   margin-top: 4em;
+  padding-bottom: 0.5em;
+  padding-top: 0.5em;
 }
-
+#login-form + .btn-container button {
+  width: 80%;
+}
 .movies-container {
   color: #fff;
   display: grid;
@@ -66,32 +128,5 @@ body {
   grid-template-columns: repeat(3, 1fr);
   margin: auto;
   width: 80%;
-}
-.movies-container .movie-card {
-  background-color: #1E2127;
-  display: flex;
-  flex-direction: column;
-  padding: 1em;
-}
-.movies-container .movie-card button {
-  align-self: flex-start;
-  display: inline-block;
-}
-.movies-container .movie-card svg {
-  display: inline-block;
-  color: #F5F5F5;
-}
-.movies-container .movie-card .description {
-  border-bottom: 1px solid #2f333b;
-  height: 53px;
-}
-.movies-container .movie-card .read-more-link {
-  align-self: center;
-  color: #117DCE;
-  cursor: pointer;
-  margin-left: 1em;
-}
-.movies-container .movie-card .read-more-link-container {
-  display: flex;
 }
 /*# sourceMappingURL=index.d22b8a02.css.map */

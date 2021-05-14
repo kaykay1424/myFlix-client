@@ -1,0 +1,28 @@
+@import '../../variables';
+.movie-card {
+    background-color: $secondary-background-color;
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+    button {
+        align-self: flex-start;
+        display: inline-block;
+    }
+    svg {
+        display: inline-block;
+        color: #f5f5f5;
+    }
+    .description {
+        border-bottom: 1px solid $border-color;
+        height: 53px;
+    }
+    .read-more-link {
+        align-self: center;
+        color: $link-color;
+        cursor: pointer;
+        margin-left: 1em;
+    }
+    .read-more-link-container {
+        display: flex;
+    }
+}
