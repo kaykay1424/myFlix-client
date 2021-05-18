@@ -1,12 +1,18 @@
-@import '../../variables';
+@import '../../utils/partials/variables';
+.card.movie-card {
+    background-color: $secondary-background-color;
+}
 .movie-card {
     background-color: $secondary-background-color;
-    display: flex;
-    flex-direction: column;
-    padding: 1em;
+    // display: flex;
+    // flex-direction: column;
+    // padding: 1em;
     button {
         align-self: flex-start;
         display: inline-block;
+    }
+    img {
+        margin: 1em 0;
     }
     svg {
         display: inline-block;

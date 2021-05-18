@@ -1,7 +1,20 @@
-@import '_variables';
+@import './utils/partials/variables';
 body {
     background-color: $main-background-color;
     font-family: 'Calibri';
+    margin: 0;
+    padding: 0;
+}
+html {
+    margin: 0;
+    padding: 0;
+}
+* {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+a {
+    text-decoration: none;
 }
 button {
     cursor: pointer;

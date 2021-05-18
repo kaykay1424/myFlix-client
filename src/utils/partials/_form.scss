@@ -1,0 +1,74 @@
+@import 'variables';
+.form-container {
+    background-color: $secondary-background-color;
+    border-radius: 2px;
+    color: $form-icon-color;
+    margin-bottom: 2em;
+    margin-top: 2em;
+    // margin: 2em auto;
+    padding: 2em 0;
+    text-align: center;
+    // width: 430px;
+    button {
+        background-color: #0093ff;
+        border: 1px solid #0093ff;
+        border-radius: 5px;
+        color: #fff;
+        font-size: 15px;
+        height: 36px;
+        margin-top: 2em;
+        width: 154px;
+    }    
+    form {
+        margin: auto;
+        width: 80%;
+        .btn-container {
+            border-top: none;
+            display: flex;
+            justify-content: flex-end;
+        }        
+       
+    } // form    
+} // .form-container
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1em;
+    text-align: left;
+    label {
+        margin-bottom: 5px;
+    }  
+} // .form-group 
+.form-label {
+    color: $form-label-color;
+    font-size: 15px;
+}
+.input-container {
+    border: 1px solid $border-color;
+    input {
+        background-color: $secondary-background-color;
+        border: 0 !important;
+        color: $form-label-color;
+        outline: 0 !important;
+    }
+    input.form-control:focus {
+        box-shadow: none;
+    }
+    .input-group-text {
+        background-color: transparent;
+        border: 0;
+        svg.focused {
+            color: $secondary-background-color;
+        }
+    }    
+}
+form svg {
+    color: $form-icon-color;
+}
+[class*="input-group"].focused {
+    background-color: #fff;
+}
+.input-container.error {
+    border: 1px solid #f5866f;
+    color: inherit;
+}

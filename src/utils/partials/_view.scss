@@ -1,5 +1,5 @@
-@import '../../utils/partials/variables';
-.movie-view {
+@import './variables';
+.view {
     background-color: $secondary-background-color;
     color: #fff;
     height: 90vh;
@@ -50,5 +50,16 @@
         margin-top: 4em;
         padding-left: 10%;
         padding-right: 10%;
+    }
+    .related-attributes {
+        // display: flex;
+        padding-left: 10%;
+        padding-right: 10%;
+        img {
+            max-width: 100%;
+        }
+        .card {
+            display: inline-block;
+        }
     }
 }

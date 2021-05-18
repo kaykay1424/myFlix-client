@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const MovieView = ({selectedMovie, onBackClick}) => {    
+import '../../utils/partials/_view.scss';
+
+const MovieView = ({selectedMovie, onBackClick, onItemClick}) => {    
     return (
-        <div className="movie-view">
+        <>
             <div 
                 className="image-cover" 
                 style={
@@ -14,7 +16,7 @@ const MovieView = ({selectedMovie, onBackClick}) => {
             >
                 <div className="close-box">
                     <svg 
-                        onClick={() => onBackClick()} 
+                        onClick={() => onBackClick('selectedMovie')} 
                         xmlns="http://www.w3.org/2000/svg" 
                         width="24" 
                         height="24" 
@@ -39,14 +41,22 @@ const MovieView = ({selectedMovie, onBackClick}) => {
             <div className="attributes">
                 <div className="attribute">
                     <p className="label">Director</p>
-                    <p>{selectedMovie.director.name}</p>
+                    <p onClick={() => 
+                        onItemClick('selectedDirector', selectedMovie.director)}
+                    >
+                        {selectedMovie.director.name}
+                    </p>
                 </div>
                 <div className="attribute">
                     <p className="label">Genre</p>
-                    <p>{selectedMovie.genre.name}</p>
+                    <p onClick={() => 
+                        onItemClick('selectedGenre', selectedMovie.genre)}
+                    >
+                        {selectedMovie.genre.name}
+                    </p>
                 </div>
-            </div>
-        </div>                 
+            </div> 
+        </>              
     );
 };
 
@@ -62,7 +72,8 @@ MovieView.propTypes = {
         image: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired
     }).isRequired,
-    onBackClick: PropTypes.func.isRequired
+    onBackClick: PropTypes.func.isRequired,
+    onItemClick: PropTypes.func.isRequired
 };
 
 export default MovieView;
