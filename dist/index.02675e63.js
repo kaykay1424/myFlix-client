@@ -1065,8 +1065,6 @@ try {
       view: ''
     };
     setNavbar = (loggedIn, view = '') => {
-      // console.log('view ' + view)
-      // console.log(loggedIn)
       loggedIn ? this.setState({
         isUserLoggedIn: true
       }) : this.setState({
@@ -43590,8 +43588,8 @@ try {
   };
   _c = RelatedAttributeCard;
   RelatedAttributeCard.propTypes = {
-    image: _propTypesDefault.default.String.isRequired,
-    description: _propTypesDefault.default.String.isRequired
+    image: _propTypesDefault.default.string.isRequired,
+    description: _propTypesDefault.default.string.isRequired
   };
   exports.default = RelatedAttributeCard;
   var _c;
@@ -43763,8 +43761,8 @@ try {
   _s(MainNavbar, "a1cMJ8t0eYFnsCEdGcHtaGJdbCM=");
   _c = MainNavbar;
   MainNavbar.propTypes = {
-    isUserLoggedIn: _propTypesDefault.default.object.isRequired,
-    view: _propTypesDefault.default.string.isRequired
+    isUserLoggedIn: _propTypesDefault.default.bool.isRequired,
+    view: _propTypesDefault.default.string
   };
   exports.default = MainNavbar;
   var _c;

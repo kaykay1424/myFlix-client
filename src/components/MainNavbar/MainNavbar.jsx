@@ -94,8 +94,8 @@ const MainNavbar = ({isUserLoggedIn, view}) => {
 };
 
 MainNavbar.propTypes = {
-    isUserLoggedIn: PropTypes.object.isRequired,
-    view: PropTypes.string.isRequired
+    isUserLoggedIn: PropTypes.bool.isRequired,
+    view: PropTypes.string
 };
 
 export default MainNavbar;

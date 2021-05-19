@@ -14,8 +14,6 @@ class MyFlixApplication extends React.Component {
     }
 
     setNavbar = (loggedIn, view='') => {
-        // console.log('view ' + view)
-        // console.log(loggedIn)
         loggedIn 
             ? this.setState({
                 isUserLoggedIn: true

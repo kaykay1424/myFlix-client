@@ -12,8 +12,8 @@ const RelatedAttributeCard = ({image, description}) => {
 };
 
 RelatedAttributeCard.propTypes = {
-    image: PropTypes.String.isRequired,
-    description: PropTypes.String.isRequired
+    image: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired
 };
 
 export default RelatedAttributeCard;
