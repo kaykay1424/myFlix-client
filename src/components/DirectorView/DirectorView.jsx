@@ -1,11 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {Link} from 'react-router-dom';
 
 import '../../utils/partials/_view.scss';
 import './director-view.scss';
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
 
-const DirectorView = ({selectedDirector, onBackClick, otherMovies}) => {    
+const DirectorView = ({
+    selectedDirector, 
+    onBackClick, 
+    onItemClick, 
+    otherMovies}) => {   
     return (
         <>
             <div className="image-cover" >
@@ -38,10 +43,14 @@ const DirectorView = ({selectedDirector, onBackClick, otherMovies}) => {
                     <p className="label">Birth Year</p>
                     <p>{selectedDirector.birthYear}</p>
                 </div>
-                <div className="attribute">
-                    <p className="label">Death Year</p>
-                    <p>{selectedDirector.deathYear}</p>
-                </div>
+                {selectedDirector.deathYear 
+                    ? 
+                    <div className="attribute">
+                        <p className="label">Death Year</p>
+                        <p>{selectedDirector.deathYear}</p>
+                    </div>
+                    : null
+                }
             </div> 
             {otherMovies.length > 0
                 ? (<>
@@ -54,7 +63,17 @@ const DirectorView = ({selectedDirector, onBackClick, otherMovies}) => {
                                     <RelatedAttributeCard 
                                         key={i}
                                         image={movie.image} 
-                                        description={movie.name} />
+                                        description={<Link 
+                                            to={`/movies/${movie._id}`}>
+                                            <p 
+                                                onClick={() => 
+                                                    onItemClick(
+                                                        'selectedMovie', movie)}
+                                            >
+                                                {movie.name}
+                                            </p>
+                                        </Link>} 
+                                    />
                                 )
                             )  
                         }
@@ -67,14 +86,14 @@ const DirectorView = ({selectedDirector, onBackClick, otherMovies}) => {
 };
 
 DirectorView.propTypes = {
-    director: PropTypes.shape({
+    selectedDirector: PropTypes.shape({
         bio: PropTypes.string.isRequired,
         birthYear: PropTypes.number.isRequired,
         deathYear: PropTypes.number,
         name: PropTypes.string.isRequired
     }).isRequired,
-    selectedDirector: PropTypes.object.isRequired,
     onBackClick: PropTypes.func.isRequired,
+    onItemClick: PropTypes.func,
     otherMovies: PropTypes.array.isRequired
 };
 

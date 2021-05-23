@@ -1,8 +1,16 @@
 body {
+  background-color: #1b1d24 !important;
+}
+
+.my-flix {
   background-color: #1b1d24;
   font-family: "Calibri";
   margin: 0;
   padding: 0;
+}
+.my-flix a {
+  color: #117dce;
+  text-decoration: none;
 }
 
 html {
@@ -13,10 +21,6 @@ html {
 * {
   box-sizing: border-box;
   max-width: 100%;
-}
-
-a {
-  text-decoration: none;
 }
 
 button {
@@ -80,8 +84,7 @@ button {
   display: flex;
   margin-bottom: 4em;
   margin-top: 4em;
-  padding-left: 10%;
-  padding-right: 10%;
+  padding: 1em 10% 1em 10%;
 }
 .view .close-box {
   background-color: #1b1d24;
@@ -215,7 +218,13 @@ form svg {
   background-color: #1e2127;
   margin: 1em 2em 1em 0;
 }
+.related-attribute-card.card img {
+  margin-bottom: 1em;
+}
 #director-view .image-cover {
+  height: auto;
+}
+#genre-view .image-cover {
   height: auto;
 }
 .form-container {
@@ -301,8 +310,11 @@ form svg {
   position: relative;
 }
 #main-navbar.navbar.logged-out {
-  background-color: transparent;
+  background-color: #117dce;
   height: auto;
+}
+#main-navbar.navbar.logged-out .navbar-brand {
+  color: #fff;
 }
 #main-navbar.navbar form .input-group.input-container {
   width: 100%;

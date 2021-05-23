@@ -2,4 +2,7 @@
 .related-attribute-card.card {
     background-color: $secondary-background-color;
     margin: 1em 2em 1em 0;
+    img {
+        margin-bottom: 1em;
+    }
 }

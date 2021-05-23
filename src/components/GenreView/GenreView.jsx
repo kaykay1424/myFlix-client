@@ -1,17 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {Link} from 'react-router-dom';
 
 import '../../utils/partials/_view.scss';
-// import './director-view.scss';
+import './genre-view.scss';
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
 
-const GenreView = ({selectedGenre, onBackClick, otherMovies}) => {    
+const GenreView = ({
+    selectedGenre, 
+    onBackClick, 
+    onItemClick, 
+    otherMovies}) => {    
     return (
         <>
             <div className="image-cover" >
                 <div className="close-box">
                     <svg 
-                        onClick={() => onBackClick('selectedGenre')} 
+                        onClick={() => onBackClick()} 
                         xmlns="http://www.w3.org/2000/svg" 
                         width="24" 
                         height="24" 
@@ -44,7 +49,19 @@ const GenreView = ({selectedGenre, onBackClick, otherMovies}) => {
                                 return <RelatedAttributeCard 
                                     key={i}
                                     image={movie.image} 
-                                    description={<p>{movie.name}</p>} />;})  
+                                    description={<Link 
+                                        to={`/movies/${movie._id}`}
+                                    >
+                                        <p 
+                                            onClick={
+                                                () => onItemClick(
+                                                    'selectedMovie', movie)
+                                            }
+                                        >
+                                            {movie.name}
+                                        </p>
+                                    </Link>} 
+                                />;})  
                         }
                     </div>
                 </>)
@@ -55,9 +72,9 @@ const GenreView = ({selectedGenre, onBackClick, otherMovies}) => {
 };
 
 GenreView.propTypes = {
-    name: PropTypes.string.isRequired,
     selectedGenre: PropTypes.object.isRequired,
     onBackClick: PropTypes.func.isRequired,
+    onItemClick: PropTypes.func,
     otherMovies: PropTypes.array.isRequired
 };
 

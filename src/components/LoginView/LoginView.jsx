@@ -1,30 +1,30 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
+import axios from 'axios';
+import {Link} from 'react-router-dom';
 import {Button, Form, FormControl, InputGroup} from 'react-bootstrap';
 
 import {addFocusedClass, removeFocusedClass} from '../../utils/helpers';
 import '../../utils/partials/_form.scss';
 import './login-view.scss';
 
-const LoginView = ({setUser, onRegistrationClick}) => {
+const LoginView = ({setUser}) => {
     const [username, setUsername] = useState('');
+    const [loginError, setLoginError] = useState(false);
     const [password, setPassword] = useState('');
-
-    useEffect(() => {
-        document.body.style.backgroundColor = '#0376E3';
-        return () => {
-            document.body.style.backgroundColor = '#1B1D24';
-        };
-    });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const user = {
+        axios.post('https://my-flix-2021.herokuapp.com/login',{
             username,
             password
-        };
-
-        setUser(user);
+        })
+            .then(response => {
+                setUser(response.data);                
+            }, (err) => {
+                setLoginError(err);
+            });
+        
     };
 
     return (  
@@ -140,20 +140,25 @@ const LoginView = ({setUser, onRegistrationClick}) => {
                     <Button type="submit">Login</Button>
                 </div>            
             </Form>
+            {loginError 
+                ? (<p className="error">There was an error.
+                    Please try again.</p>)
+                : null
+            }   
             <div className="btn-container">
-                <Button 
-                    type="button" 
-                    onClick={onRegistrationClick}
-                >
-                    Register
-                </Button>
+                <Link to="/register">
+                    <Button 
+                        type="button" 
+                    >
+                        Register
+                    </Button>
+                </Link>
             </div>  
         </>
     );
 };
 
 LoginView.propTypes = {
-    onRegistrationClick: PropTypes.func.isRequired,
     setUser: PropTypes.func.isRequired
 };
 

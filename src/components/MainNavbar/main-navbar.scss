@@ -5,8 +5,11 @@
     background-color: $main-background-color;
     position: relative;
     &.logged-out {
-        background-color: transparent;
+        background-color: $link-color;
         height: auto;
+        .navbar-brand {
+            color: #fff;
+        }
     }     
     form .input-group.input-container {
         width: 100%;

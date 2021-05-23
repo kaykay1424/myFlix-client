@@ -1,18 +1,19 @@
 import React, {useState, useEffect} from 'react';
-import PropTypes from 'prop-types';
+import axios from 'axios';
 import {Button, Form, FormControl, InputGroup} from 'react-bootstrap';
 
 import {addFocusedClass, removeFocusedClass} from '../../utils/helpers';
 import '../../utils/partials/_form.scss';
 import './registration-view.scss';
 
-const RegistrationView = ({setRegistration, setUser}) => {
+const RegistrationView = () => {
     const [birthDate, setBirthDate] = useState('');
     const [birthDateError, setBirthDateError] = useState(false);
     const [email, setEmail] = useState('');
     const [password1, setPassword1] = useState('');
     const [password2, setPassword2] = useState('');
     const [passwordMatchError, setPasswordMatchError] = useState(false);
+    const [registrationError, setRegistrationError] = useState(false);
     const [username, setUsername] = useState('');
     
     useEffect(() => {
@@ -35,7 +36,7 @@ const RegistrationView = ({setRegistration, setUser}) => {
         }
 
         const user = {
-            password1,
+            password: password1,
             email,
             username            
         };
@@ -45,8 +46,12 @@ const RegistrationView = ({setRegistration, setUser}) => {
         if (!validateBirthDate()) return;
         user['birthDate'] = birthDate;
 
-        setUser(user);
-        setRegistration();
+        axios.post('https://my-flix-2021.herokuapp.com/users', user)
+            .then(() => {
+                window.open('/', '_self');               
+            }, (err) => {
+                setRegistrationError(err);
+            });
     };
 
     const onChangeBirthDate = (e) => {
@@ -346,17 +351,17 @@ const RegistrationView = ({setRegistration, setUser}) => {
             {passwordMatchError 
                 ? (<p className="error">Passwords must match</p>)
                 : null
-            }              
+            } 
+            {registrationError 
+                ? (<p className="error">There was an error.
+                    Please try again.</p>)
+                : null
+            }             
             <div className="btn-container">
                 <Button type="submit">Register</Button>
             </div>            
         </Form>
     );
-};
-
-RegistrationView.propTypes = {
-    setRegistration: PropTypes.func.isRequired,
-    setUser: PropTypes.func.isRequired
 };
 
 export default RegistrationView;

@@ -1,9 +1,16 @@
 @import './utils/partials/variables';
 body {
+    background-color: $main-background-color !important;
+}
+.my-flix {
     background-color: $main-background-color;
     font-family: 'Calibri';
     margin: 0;
     padding: 0;
+    a {
+        color: $link-color;
+        text-decoration: none;
+    }
 }
 html {
     margin: 0;
@@ -12,9 +19,6 @@ html {
 * {
     box-sizing: border-box;
     max-width: 100%;
-}
-a {
-    text-decoration: none;
 }
 button {
     cursor: pointer;

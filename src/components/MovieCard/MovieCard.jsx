@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {Card} from 'react-bootstrap';
+import {Link} from 'react-router-dom';
 import './movie-card.scss';
 
 const MovieCard = ({movie, onItemClick}) => {
@@ -32,13 +33,13 @@ const MovieCard = ({movie, onItemClick}) => {
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
-                    <span 
+                    <Link to={`/movies/${movie._id}`} 
                         className="read-more-link" 
                         onClick={() => 
                             onItemClick('selectedMovie', movie)}
                     >
                         Read More
-                    </span>
+                    </Link>
                 </div> 
             </Card.Body>
         </Card>
@@ -47,6 +48,7 @@ const MovieCard = ({movie, onItemClick}) => {
 
 MovieCard.propTypes = {
     movie: PropTypes.shape({
+        _id: PropTypes.string.isRequired,
         description: PropTypes.string.isRequired,
         image: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired

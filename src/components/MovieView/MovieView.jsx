@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {Link} from 'react-router-dom';
 
 import '../../utils/partials/_view.scss';
 
-const MovieView = ({selectedMovie, onBackClick, onItemClick}) => {    
+const MovieView = ({selectedMovie, onBackClick, onItemClick}) => {   
     return (
         <>
             <div 
@@ -16,7 +17,9 @@ const MovieView = ({selectedMovie, onBackClick, onItemClick}) => {
             >
                 <div className="close-box">
                     <svg 
-                        onClick={() => onBackClick('selectedMovie')} 
+                        onClick={
+                            () => onBackClick()
+                        }                            
                         xmlns="http://www.w3.org/2000/svg" 
                         width="24" 
                         height="24" 
@@ -41,19 +44,26 @@ const MovieView = ({selectedMovie, onBackClick, onItemClick}) => {
             <div className="attributes">
                 <div className="attribute">
                     <p className="label">Director</p>
-                    <p onClick={() => 
-                        onItemClick('selectedDirector', selectedMovie.director)}
+                    <Link 
+                        to={`/directors/${selectedMovie.director.name}`} 
+                        onClick={
+                            () => onItemClick(
+                                'selectedDirector', selectedMovie.director
+                            )}
                     >
                         {selectedMovie.director.name}
-                    </p>
+                    </Link>
                 </div>
                 <div className="attribute">
                     <p className="label">Genre</p>
-                    <p onClick={() => 
-                        onItemClick('selectedGenre', selectedMovie.genre)}
+                    <Link to={`/genres/${selectedMovie.genre.name}`} 
+                        onClick={
+                            () => onItemClick(
+                                'selectedGenre', selectedMovie.genre
+                            )}
                     >
                         {selectedMovie.genre.name}
-                    </p>
+                    </Link>
                 </div>
             </div> 
         </>              

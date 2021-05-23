@@ -12,7 +12,7 @@ class MyFlixApplication extends React.Component {
         isUserLoggedIn: false,
         view: ''
     }
-
+    
     setNavbar = (loggedIn, view='') => {
         loggedIn 
             ? this.setState({
