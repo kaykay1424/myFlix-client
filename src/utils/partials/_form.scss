@@ -27,8 +27,13 @@
             display: flex;
             justify-content: flex-end;
         }        
-       
-    } // form    
+    } // form  
+    input {
+        background-color: $secondary-background-color;
+        border: 0 !important;
+        color: $form-label-color;
+        outline: 0 !important;
+    }  
 } // .form-container
 .form-group {
     display: flex;
@@ -44,13 +49,7 @@
     font-size: 15px;
 }
 .input-container {
-    border: 1px solid $border-color;
-    input {
-        background-color: $secondary-background-color;
-        border: 0 !important;
-        color: $form-label-color;
-        outline: 0 !important;
-    }
+    border: 1px solid $border-color;    
     input.form-control:focus {
         box-shadow: none;
     }

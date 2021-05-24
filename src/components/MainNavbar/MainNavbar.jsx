@@ -90,14 +90,16 @@ const MainNavbar = ({isUserLoggedIn, view}) => {
                         </Nav>
                         <Nav className="nav-links">
                             <Nav.Link 
-                                href="/account" 
-                                className="link"
+                                href="/profile" 
+                                className={
+                                    `link ${window.location.pathname === '/profile' 
+                                        ? 'active': ''}`}
                             >
-                            Account
+                            Profile
                             </Nav.Link>
                             <Nav.Link href="/" className={
-                                `link ${view === 'MainView' 
-                                || view === 'MovieView' ? 'active': ''}`}
+                                `link ${window.location.pathname === '/' 
+                                    ? 'active': ''}`}
                             >
                             Movies
                             </Nav.Link>

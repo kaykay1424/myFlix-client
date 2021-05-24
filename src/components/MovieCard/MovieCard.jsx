@@ -2,13 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Card} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
+
+import {createExcerpt} from '../../utils/helpers';
 import './movie-card.scss';
 
 const MovieCard = ({movie, onItemClick}) => {
-    const createExcerpt = (description) => {
-        return description.slice(0, 45);
-    };
-
     return (
         <Card className="movie-card">
             <Card.Body>            

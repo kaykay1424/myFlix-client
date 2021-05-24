@@ -13,6 +13,7 @@ import DirectorView from '../DirectorView/DirectorView';
 import MovieCard from '../MovieCard/MovieCard';
 import MovieView from '../MovieView/MovieView';
 import LoginView from '../LoginView/LoginView';
+import ProfileView from '../ProfileView/ProfileView';
 import RegistrationView from '../RegistrationView/RegistrationView';
 
 import './main-view.scss';
@@ -96,10 +97,10 @@ class MainView extends React.Component {
 
     setUser = ({token, user}) => { 
         this.setState({
-            user: user.username
+            user: user._id
         });   
         localStorage.setItem('token', token);
-        localStorage.setItem('user', user.username);
+        localStorage.setItem('user', user._id);
         this.setNavbarAttributes(true);
         this.getMovies(token);    
     }
@@ -164,16 +165,7 @@ class MainView extends React.Component {
                         })};
                     </Row>;
                 }} />
-             
-                <Route path="/register" render={() => {
-                    if (user) return <Redirect to="/" />;
-                    return <Row className="justify-content-md-center">
-                        <Col className="form-container" md={5}>
-                            <RegistrationView />
-                        </Col>                    
-                    </Row>;
-                }} />
-
+                             
                 <Route path="/movies/:id" render={({history, match}) => {
                     // If user is not logged in, show login view
                     if (!user) return showLogin();
@@ -237,7 +229,35 @@ class MainView extends React.Component {
                             />
                         </Col>
                     </Row>;
-                }} />                
+                }} />     
+
+                <Route path="/register" render={() => {
+                    // if user is already logged in redirect to home page
+                    if (user) return <Redirect to="/" />;
+                    return <Row className="justify-content-md-center">
+                        <Col className="form-container" md={5}>
+                            <RegistrationView />
+                        </Col>                    
+                    </Row>;
+                }} />
+
+                <Route path="/profile" render={() => {
+                    // If user is not logged in, show login view
+                    if (!user) return showLogin();
+                    return <Row className="justify-content-md-center">
+                        <Col 
+                            id="profile-view" 
+                            className="form-container" 
+                            md={8}
+                        >
+                            <ProfileView 
+                                userId={user} 
+                                logoutUser={this.logoutUser} 
+                            />
+                        </Col>
+                    </Row>;
+                }} />
+
             </Router>
         );               
     }   

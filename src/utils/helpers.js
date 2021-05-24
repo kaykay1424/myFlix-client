@@ -1,3 +1,6 @@
+export const createExcerpt = (description) => {
+    return description.slice(0, 45);
+};
 
 export const addFocusedClass = (e) => {
     const element = e.target;

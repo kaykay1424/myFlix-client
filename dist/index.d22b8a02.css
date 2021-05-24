@@ -153,6 +153,12 @@ button {
   display: flex;
   justify-content: flex-end;
 }
+.form-container input {
+  background-color: #1e2127;
+  border: 0 !important;
+  color: #bec2cc;
+  outline: 0 !important;
+}
 
 .form-group {
   display: flex;
@@ -171,12 +177,6 @@ button {
 
 .input-container {
   border: 1px solid #2f333b;
-}
-.input-container input {
-  background-color: #1e2127;
-  border: 0 !important;
-  color: #bec2cc;
-  outline: 0 !important;
 }
 .input-container input.form-control:focus {
   box-shadow: none;
@@ -227,6 +227,47 @@ form svg {
 #genre-view .image-cover {
   height: auto;
 }
+.user-list {
+  background-color: #1b1d24;
+  padding: 1em;
+  margin-bottom: 1.5em;
+  text-align: left;
+}
+.user-list ul {
+  list-style-type: none;
+  padding-left: 0 !important;
+}
+.user-list .heading {
+  font-size: 20px;
+}
+.user-list .user-list-item {
+  display: flex;
+  justify-content: space-between;
+}
+.user-list .user-list-item .details p {
+  margin: 5px 0 5px 0;
+}
+.user-list .user-list-item .details .description {
+  color: #828d99;
+}
+.user-list .user-list-item .list-type {
+  text-transform: capitalize;
+}
+.user-list .user-list-item svg {
+  align-self: flex-end;
+  cursor: pointer;
+}
+#profile-view .delete-user-container span {
+  color: #828d99;
+  font-size: 13px;
+}
+#profile-view .delete-user-container svg {
+  cursor: pointer;
+  margin-right: 1em;
+}
+#profile-view .justify-content-end {
+  margin-top: 10em;
+}
 .form-container {
   background-color: #1e2127;
   border-radius: 2px;
@@ -255,6 +296,12 @@ form svg {
   display: flex;
   justify-content: flex-end;
 }
+.form-container input {
+  background-color: #1e2127;
+  border: 0 !important;
+  color: #bec2cc;
+  outline: 0 !important;
+}
 
 .form-group {
   display: flex;
@@ -273,12 +320,6 @@ form svg {
 
 .input-container {
   border: 1px solid #2f333b;
-}
-.input-container input {
-  background-color: #1e2127;
-  border: 0 !important;
-  color: #bec2cc;
-  outline: 0 !important;
 }
 .input-container input.form-control:focus {
   box-shadow: none;
