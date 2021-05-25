@@ -1,5 +1,12 @@
 @import '../../utils/partials/variables';
 #profile-view {
+    form .btn-container {
+        justify-content: flex-start;
+    }
+    h1 {
+        margin-left: 1em;
+        text-align: left;
+    }
     .delete-user-container { 
         span {
             color: $label-color;
@@ -9,7 +16,7 @@
             cursor: pointer;
             margin-right: 1em;
         }
-    }
+    }   
     .justify-content-end {
         margin-top: 10em;
     }

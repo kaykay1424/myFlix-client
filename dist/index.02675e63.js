@@ -26657,6 +26657,7 @@ try {
               /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
                 className: "justify-content-md-center"
               }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+                id: "movie-view",
                 className: "view",
                 md: 6
               }, /*#__PURE__*/_reactDefault.default.createElement(_MovieViewMovieViewDefault.default, {
@@ -26664,7 +26665,8 @@ try {
                   return movie._id === match.params.id;
                 }),
                 onItemClick: this.handleItemClick,
-                onBackClick: () => history.goBack()
+                onBackClick: () => history.goBack(),
+                userId: user
               })))
             );
           }
@@ -44348,6 +44350,9 @@ module.exports = hoistNonReactStatics;
 },{"react-is":"68QIU"}],"1nff4":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
+_parcelHelpers.export(exports, "addToList", function () {
+  return addToList;
+});
 _parcelHelpers.export(exports, "createExcerpt", function () {
   return createExcerpt;
 });
@@ -44357,6 +44362,20 @@ _parcelHelpers.export(exports, "addFocusedClass", function () {
 _parcelHelpers.export(exports, "removeFocusedClass", function () {
   return removeFocusedClass;
 });
+var _axios = require('axios');
+var _axiosDefault = _parcelHelpers.interopDefault(_axios);
+const addToList = (userId, listType, itemId, itemIdType) => {
+  const token = localStorage.getItem('token'), data = {};
+  data[itemIdType] = itemId;
+  return _axiosDefault.default({
+    method: 'patch',
+    url: `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}/${itemId}`,
+    data,
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+};
 const createExcerpt = description => {
   return description.slice(0, 45);
 };
@@ -44375,102 +44394,7 @@ const removeFocusedClass = e => {
   element.nextSibling.firstChild.firstChild.classList.remove('focused');
 };
 
-},{"@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU"}],"6fxIo":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactRouterDom = require('react-router-dom');
-  require('../../utils/partials/_view.scss');
-  const MovieView = ({selectedMovie, onBackClick, onItemClick}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "image-cover",
-        style: {
-          backgroundImage: `url(${selectedMovie.image})`
-        }
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "close-box"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        onClick: () => onBackClick(),
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-x"
-      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "18",
-        y1: "6",
-        x2: "6",
-        y2: "18"
-      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "6",
-        y1: "6",
-        x2: "18",
-        y2: "18"
-      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "main-content"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedMovie.name), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "description"
-      }, selectedMovie.description)), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attributes"
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attribute"
-      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Director"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: `/directors/${selectedMovie.director.name}`,
-        onClick: () => onItemClick('selectedDirector', selectedMovie.director)
-      }, selectedMovie.director.name)), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attribute"
-      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Genre"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: `/genres/${selectedMovie.genre.name}`,
-        onClick: () => onItemClick('selectedGenre', selectedMovie.genre)
-      }, selectedMovie.genre.name))))
-    );
-  };
-  _c = MovieView;
-  MovieView.propTypes = {
-    selectedMovie: _propTypesDefault.default.shape({
-      description: _propTypesDefault.default.string.isRequired,
-      director: _propTypesDefault.default.shape({
-        name: _propTypesDefault.default.string.isRequired
-      }).isRequired,
-      genre: _propTypesDefault.default.shape({
-        name: _propTypesDefault.default.string.isRequired
-      }).isRequired,
-      image: _propTypesDefault.default.string.isRequired,
-      name: _propTypesDefault.default.string.isRequired
-    }).isRequired,
-    onBackClick: _propTypesDefault.default.func.isRequired,
-    onItemClick: _propTypesDefault.default.func.isRequired
-  };
-  exports.default = MovieView;
-  var _c;
-  $RefreshReg$(_c, "MovieView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","prop-types":"4dfy5","../../utils/partials/_view.scss":"552MA","react-router-dom":"1PMSK"}],"552MA":[function() {},{}],"7rA65":[function(require,module,exports) {
+},{"@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","axios":"7rA65"}],"7rA65":[function(require,module,exports) {
 module.exports = require('./lib/axios');
 },{"./lib/axios":"4qfhW"}],"4qfhW":[function(require,module,exports) {
 'use strict';
@@ -46215,7 +46139,155 @@ module.exports = function isAxiosError(payload) {
   return (typeof payload === 'object') && (payload.isAxiosError === true);
 };
 
-},{}],"4DfHF":[function(require,module,exports) {
+},{}],"6fxIo":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRouterDom = require('react-router-dom');
+  var _utilsHelpers = require('../../utils/helpers');
+  require('../../utils/partials/_view.scss');
+  require('./movie-view.scss');
+  var _s = $RefreshSig$();
+  const MovieView = ({selectedMovie, onBackClick, onItemClick, userId}) => {
+    _s();
+    const [favorited, setFavorited] = _react.useState(false);
+    const [willWatch, setWillWatch] = _react.useState(false);
+    const addToFavoritesList = () => {
+      _utilsHelpers.addToList(userId, 'favorite-movies', selectedMovie._id, 'movie_id').then(() => {
+        setFavorited(true);
+      });
+    };
+    const addToWatchList = () => {
+      _utilsHelpers.addToList(userId, 'to-watch-movies', selectedMovie._id, 'movie_id').then(() => {
+        setWillWatch(true);
+      });
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "image-cover",
+        style: {
+          backgroundImage: `url(${selectedMovie.image})`
+        }
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "close-box"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => onBackClick(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-x"
+      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "18",
+        y1: "6",
+        x2: "6",
+        y2: "18"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "6",
+        y1: "6",
+        x2: "18",
+        y2: "18"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "main-content"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedMovie.name, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "user-list-icons"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => addToFavoritesList(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: `feather feather-heart 
+                            ${favorited ? 'added-to-list' : ''}`,
+        title: "Add this movie to your Favorite Movies list"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M20.84 4.61a5.5 5.5 0 0 0-7.78  0L12 5.67l-1.06-1.06a5.5  5.5 0 0 0-7.78 7.78l1.06  1.06L12 21.23l7.78-7.78  1.06-1.06a5.5 5.5 0 0 0  0-7.78z"
+      })), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => addToWatchList(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: `feather feather-bookmark 
+                            ${willWatch ? 'added-to-list' : ''}`,
+        title: "Add this movie to your To Watch Movies list"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M19 21l-7-5-7  5V5a2 2 0 0  1 2-2h10a2 2  0 0 1 2 2z"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, selectedMovie.description)), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attributes"
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attribute"
+      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Director"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: `/directors/${selectedMovie.director.name}`,
+        onClick: () => onItemClick('selectedDirector', selectedMovie.director)
+      }, selectedMovie.director.name)), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attribute"
+      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Genre"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: `/genres/${selectedMovie.genre.name}`,
+        onClick: () => onItemClick('selectedGenre', selectedMovie.genre)
+      }, selectedMovie.genre.name))))
+    );
+  };
+  _s(MovieView, "Tn7KqSbrV1fo7xUUfyS3ayydBHc=");
+  _c = MovieView;
+  MovieView.propTypes = {
+    selectedMovie: _propTypesDefault.default.shape({
+      _id: _propTypesDefault.default.string.isRequired,
+      description: _propTypesDefault.default.string.isRequired,
+      director: _propTypesDefault.default.shape({
+        name: _propTypesDefault.default.string.isRequired
+      }).isRequired,
+      genre: _propTypesDefault.default.shape({
+        name: _propTypesDefault.default.string.isRequired
+      }).isRequired,
+      image: _propTypesDefault.default.string.isRequired,
+      name: _propTypesDefault.default.string.isRequired
+    }).isRequired,
+    onBackClick: _propTypesDefault.default.func.isRequired,
+    onItemClick: _propTypesDefault.default.func.isRequired,
+    userId: _propTypesDefault.default.string.isRequired
+  };
+  exports.default = MovieView;
+  var _c;
+  $RefreshReg$(_c, "MovieView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","prop-types":"4dfy5","../../utils/partials/_view.scss":"552MA","react-router-dom":"1PMSK","./movie-view.scss":"74xbX","../../utils/helpers":"1nff4"}],"552MA":[function() {},{}],"74xbX":[function() {},{}],"4DfHF":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -46240,6 +46312,8 @@ try {
     const [password1, setPassword1] = _react.useState('');
     const [password2, setPassword2] = _react.useState('');
     const [passwordMatchError, setPasswordMatchError] = _react.useState(false);
+    const [usernameLengthError, setUsernameLengthError] = _react.useState(false);
+    const [usernameTypeError, setUsernameTypeError] = _react.useState(false);
     const [registrationError, setRegistrationError] = _react.useState(false);
     const [username, setUsername] = _react.useState('');
     _react.useEffect(() => {
@@ -46278,14 +46352,36 @@ try {
       validateBirthDate(e.target.value);
     };
     const onChangePassword1 = e => {
-      setPassword1(e.target.value);
+      const value = e.target.value;
+      setPassword1(value);
       setPasswordMatchError(false);
-      if (password2 !== '' && e.target.value !== password2) setPasswordMatchError(true);
+      setUsernameLengthError(false);
+      setUsernameTypeError(false);
+      if (password2 !== '' && value !== password2) setPasswordMatchError(true);
     };
     const onChangePassword2 = e => {
       setPassword2(e.target.value);
       setPasswordMatchError(false);
       if (password1 !== '' && password1 !== e.target.value) setPasswordMatchError(true);
+    };
+    const onChangeUsername = e => {
+      const value = e.target.value;
+      setUsername(value);
+      setUsernameLengthError(false);
+      setUsernameTypeError(false);
+      if (value !== '') {
+        if (value.length < 6) setUsernameLengthError(true);
+        const nonAlphaCharacters = value.match(/\W/g);
+        // If there are non alphabetical characters
+        // make sure that they are only numbers
+        // Username should only contain alphanumeric characters
+        if (nonAlphaCharacters) {
+          for (let i = 0; i < nonAlphaCharacters.length; i++) {
+            if (!nonAlphaCharacters[i].match(/\d/)) setUsernameTypeError(true);
+            return;
+          }
+        }
+      }
     };
     const validateBirthDate = (birthdate = birthDate) => {
       const regex = /\d\d\d\d-\d\d-\d\d/;
@@ -46317,7 +46413,7 @@ try {
         placeholder: "Enter your username",
         onBlur: e => _utilsHelpers.removeFocusedClass(e),
         onFocus: e => _utilsHelpers.addFocusedClass(e),
-        onChange: e => setUsername(e.target.value),
+        onChange: e => onChangeUsername(e),
         value: username,
         required: true
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
@@ -46483,7 +46579,11 @@ try {
         d: "M7 11V7a5 5 0 0 1 10 0v4"
       })))))), birthDateError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "error"
-      }, birthDateError) : null, passwordMatchError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+      }, birthDateError) : null, usernameLengthError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Username must be at least 6 characters long.") : null, usernameTypeError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Username must only contain alphanumeric characters.") : null, passwordMatchError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "error"
       }, "Passwords must match") : null, registrationError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "error"
@@ -46494,7 +46594,7 @@ try {
       }, "Register")))
     );
   };
-  _s(RegistrationView, "H4W3nJ/+HXuLioE6GpEBc2eVjlE=");
+  _s(RegistrationView, "cahSAmDsOijZ8eQRo23iYptsRg4=");
   _c = RegistrationView;
   exports.default = RegistrationView;
   var _c;
@@ -46892,6 +46992,8 @@ try {
     const [deleteUserError, setDeleteUserError] = _react.useState(false);
     const [passwordMatchError, setPasswordMatchError] = _react.useState(false);
     const [updateProfileError, setUpdateProfileError] = _react.useState(false);
+    const [usernameLengthError, setUsernameLengthError] = _react.useState(false);
+    const [usernameTypeError, setUsernameTypeError] = _react.useState(false);
     const token = localStorage.getItem('token');
     _react.useEffect(() => {
       _axiosDefault.default.get(`https://my-flix-2021.herokuapp.com/users/${userId}`, {
@@ -46977,6 +47079,25 @@ try {
       setPasswordMatchError(false);
       if (newPassword1 !== '' && newPassword1 !== e.target.value) setPasswordMatchError(true);
     };
+    const onChangeUsername = e => {
+      const value = e.target.value;
+      setUsername(value);
+      setUsernameLengthError(false);
+      setUsernameTypeError(false);
+      if (value !== '') {
+        if (value.length < 6) setUsernameLengthError(true);
+        const nonAlphaCharacters = value.match(/\W/g);
+        // If there are non alphabetical characters
+        // make sure that they are only numbers
+        // Username should only contain alphanumeric characters
+        if (nonAlphaCharacters) {
+          for (let i = 0; i < nonAlphaCharacters.length; i++) {
+            if (!nonAlphaCharacters[i].match(/\d/)) setUsernameTypeError(true);
+            return;
+          }
+        }
+      }
+    };
     const validateBirthDate = (birthdate = birthDate) => {
       const regex = /\d\d\d\d-\d\d-\d\d/;
       // valid date format
@@ -46990,7 +47111,7 @@ try {
       }
     };
     return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Personal Info"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Personal Info"))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
         id: "edit-profile-form",
         onSubmit: e => handleSubmit(e)
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
@@ -46999,7 +47120,7 @@ try {
         id: "username",
         type: "text",
         placeholder: "Enter your username",
-        onChange: e => setUsername(e.target.value),
+        onChange: e => onChangeUsername(e),
         value: username,
         required: true
       })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
@@ -47047,11 +47168,15 @@ try {
         onChange: e => onChangeNewPassword2(e),
         placeholder: "Enter your password again",
         value: newPassword2
-      })))), birthDateError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+      })))), usernameLengthError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Username must be at least 6 characters long.") : null, usernameTypeError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Username must only contain alphanumeric characters.") : null, birthDateError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "error"
       }, birthDateError) : null, passwordMatchError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "error"
-      }, "Passwords must match") : null, updateProfileError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+      }, "Passwords must match.") : null, updateProfileError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "error"
       }, "There was an error updating your profile. Please try again.") : null, successfulUpdate ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "text-info"
@@ -47108,7 +47233,7 @@ try {
       }, "Your account could not be deleted. Please try again") : null)))
     );
   };
-  _s(ProfileView, "zewt3L1XAIcDpfgYEkxAdpYAqcY=");
+  _s(ProfileView, "ZKN6uKoOFG7l8hPnalT1IDv/m7s=");
   _c = ProfileView;
   ProfileView.propTypes = {
     logoutUser: _propTypesDefault.default.func.isRequired,
@@ -47158,17 +47283,17 @@ try {
       const listTypeString = listType.replace(/-/g, ' ');
       if (listTypeString.match(/movies/i)) {
         return (
-          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
             to: "/"
-          }, "movies"), "to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
+          }, "movies"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
             className: "list-type"
           }, listTypeString), " list!")
         );
       } else if (listTypeString.match(/actors/i)) {
         return (
-          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
             to: "/actors"
-          }, "actors"), "to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
+          }, "actors"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
             className: "list-type"
           }, listTypeString), " list!")
         );
@@ -47179,8 +47304,7 @@ try {
       data[itemIdType] = itemId;
       _axiosDefault.default({
         method: 'delete',
-        url: `https://my-flix-2021.herokuapp.com/users/
-            ${userId}/${listType}/${itemId}`,
+        url: `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}/${itemId}`,
         data,
         headers: {
           Authorization: `Bearer ${token}`
@@ -47230,7 +47354,7 @@ try {
         );
       }) : addItemsToListLink()), error ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "error"
-      }, "There was an error removing that item from your ", listType, ".") : null)
+      }, "There was an error removing that item from your", listType.replace(/-/g, ' '), " list.") : null)
     );
   };
   _s(UserList, "wqZ8XUITYSmvxIIOXK3f7cJazjA=");

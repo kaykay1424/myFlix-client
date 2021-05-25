@@ -23,17 +23,15 @@ const UserList = ({title, listType, userId, token, itemIdType}) => {
         const listTypeString = listType.replace(/-/g, ' ');
         if (listTypeString.match(/movies/i)) {
             return <p>
-                Add some 
-                <Link to="/">movies</Link> 
-                to your <span className="list-type">
+                Add some <Link to="/">movies</Link> to 
+                your <span className="list-type">
                     {listTypeString}
                 </span> list!
             </p>;
         } else if (listTypeString.match(/actors/i)) {
             return <p>
-                Add some 
-                <Link to="/actors">actors</Link> 
-                to your <span className="list-type">
+                Add some <Link to="/actors">actors</Link> to 
+                your <span className="list-type">
                     {listTypeString}</span> list!
             </p>;
         }
@@ -44,8 +42,7 @@ const UserList = ({title, listType, userId, token, itemIdType}) => {
         data[itemIdType] = itemId;
         axios({
             method: 'delete',
-            url: `https://my-flix-2021.herokuapp.com/users/
-            ${userId}/${listType}/${itemId}`,
+            url: `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}/${itemId}`,
             data,
             headers:  {Authorization: `Bearer ${token}`}
         }).then(() => {
@@ -113,7 +110,8 @@ const UserList = ({title, listType, userId, token, itemIdType}) => {
                 ? 
                 <p 
                     className="error"
-                >There was an error removing that item from your {listType}.</p>
+                >There was an error removing that item from your 
+                    {listType.replace(/-/g,' ')} list.</p>
                 : null
             }
         </div>

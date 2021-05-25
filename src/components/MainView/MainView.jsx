@@ -170,7 +170,7 @@ class MainView extends React.Component {
                     // If user is not logged in, show login view
                     if (!user) return showLogin();
                     return <Row className="justify-content-md-center">
-                        <Col className="view" md={6}>    
+                        <Col id="movie-view" className="view" md={6}>    
                             <MovieView 
                                 selectedMovie={movies.find(
                                     movie => {
@@ -179,6 +179,7 @@ class MainView extends React.Component {
                                 }  
                                 onItemClick={this.handleItemClick}
                                 onBackClick={() => history.goBack()} 
+                                userId={user}
                             />
                         </Col>
                     </Row>;

@@ -13,6 +13,8 @@ const RegistrationView = () => {
     const [password1, setPassword1] = useState('');
     const [password2, setPassword2] = useState('');
     const [passwordMatchError, setPasswordMatchError] = useState(false);
+    const [usernameLengthError, setUsernameLengthError] = useState(false);
+    const [usernameTypeError, setUsernameTypeError] = useState(false);
     const [registrationError, setRegistrationError] = useState(false);
     const [username, setUsername] = useState('');
     
@@ -60,9 +62,12 @@ const RegistrationView = () => {
     };
 
     const onChangePassword1 = (e) => {
-        setPassword1(e.target.value);
+        const value = e.target.value;
+        setPassword1(value);
         setPasswordMatchError(false);
-        if (password2 !== '' && (e.target.value !== password2)) 
+        setUsernameLengthError(false);
+        setUsernameTypeError(false);
+        if (password2 !== '' && (value  !== password2)) 
             setPasswordMatchError(true);
     };
 
@@ -71,6 +76,29 @@ const RegistrationView = () => {
         setPasswordMatchError(false);
         if (password1 !== '' && (password1 !== e.target.value)) 
             setPasswordMatchError(true);
+    };
+
+    const onChangeUsername = (e) => {
+        const value = e.target.value;
+        setUsername(value);
+        setUsernameLengthError(false);
+        setUsernameTypeError(false);
+        if (value  !== '') {
+            if (value .length < 6) 
+                setUsernameLengthError(true);
+
+            const nonAlphaCharacters = value.match(/\W/g);
+            // If there are non alphabetical characters 
+            // make sure that they are only numbers
+            // Username should only contain alphanumeric characters
+            if (nonAlphaCharacters) {
+                for (let i = 0; i < nonAlphaCharacters.length; i++) {
+                    if (!nonAlphaCharacters[i].match(/\d/))
+                        setUsernameTypeError(true);
+                    return;
+                }
+            }
+        }
     };
 
     const validateBirthDate = (birthdate=birthDate) => {        
@@ -109,7 +137,7 @@ const RegistrationView = () => {
                         onFocus={
                             (e) => addFocusedClass(e)
                         }
-                        onChange={(e) => setUsername(e.target.value)} 
+                        onChange={(e) => onChangeUsername(e)} 
                         value={username} 
                         required
                     />
@@ -346,6 +374,18 @@ const RegistrationView = () => {
             </Form.Group>
             {birthDateError 
                 ? (<p className="error">{birthDateError}</p>)
+                : null
+            }
+            {usernameLengthError 
+                ? (<p className="error">
+                    Username must be at least 6 characters long.
+                </p>)
+                : null
+            }
+            {usernameTypeError 
+                ? (<p className="error">
+                    Username must only contain alphanumeric characters.
+                </p>)
                 : null
             }
             {passwordMatchError 

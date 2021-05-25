@@ -122,6 +122,64 @@ button {
 .view .related-attributes .card {
   display: inline-block;
 }
+#movie-view {
+  background-color: #1e2127;
+  color: #fff;
+  height: 90vh;
+  padding: 0;
+}
+#movie-view h1 {
+  display: flex;
+  justify-content: space-between;
+}
+#movie-view h1 svg {
+  cursor: pointer;
+  height: 18px;
+}
+#movie-view h1 svg:hover, #movie-view h1 svg.added-to-list {
+  fill: #fff;
+}
+#movie-view .attribute {
+  margin-right: 4em;
+}
+#movie-view .attribute .label + p {
+  color: #117dce;
+}
+#movie-view .attributes {
+  border-bottom: 1px solid #2f333b;
+  border-top: 1px solid #2f333b;
+  display: flex;
+  margin-bottom: 4em;
+  margin-top: 4em;
+  padding-left: 10%;
+  padding-right: 10%;
+}
+#movie-view .close-box {
+  background-color: #1b1d24;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  padding: 3px;
+  position: absolute;
+  right: 30px;
+  text-align: center;
+  top: 20px;
+}
+#movie-view .description {
+  color: #b0b5bf;
+}
+#movie-view .image-cover {
+  background-color: #fff;
+  background-position: top center;
+  background-repeat: no-repeat;
+  height: 200px;
+  position: relative;
+}
+#movie-view .main-content {
+  margin-top: 4em;
+  padding-left: 10%;
+  padding-right: 10%;
+}
 #registration-form button {
   width: 124px;
 }
@@ -256,6 +314,13 @@ form svg {
 .user-list .user-list-item svg {
   align-self: flex-end;
   cursor: pointer;
+}
+#profile-view form .btn-container {
+  justify-content: flex-start;
+}
+#profile-view h1 {
+  margin-left: 1em;
+  text-align: left;
 }
 #profile-view .delete-user-container span {
   color: #828d99;

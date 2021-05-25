@@ -1,5 +1,5 @@
 @import '../../utils/partials/variables';
-.movie-view {
+#movie-view {
     background-color: $secondary-background-color;
     color: #fff;
     height: 90vh;
@@ -7,6 +7,18 @@
     // max-width: 100%;
     padding: 0;
     // width: 700px;
+    h1 {
+        display: flex;
+        justify-content: space-between;
+        svg {
+            cursor: pointer;
+            height: 18px;
+            &:hover,
+            &.added-to-list {
+                fill: #fff;
+            }
+        }
+    }
     .attribute {
         margin-right: 4em;
         .label + p {

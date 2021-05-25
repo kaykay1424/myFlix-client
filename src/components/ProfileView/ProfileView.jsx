@@ -21,6 +21,8 @@ const ProfileView = ({userId, logoutUser}) => {
     const [deleteUserError, setDeleteUserError] = useState(false);
     const [passwordMatchError, setPasswordMatchError] = useState(false);
     const [updateProfileError, setUpdateProfileError] = useState(false);
+    const [usernameLengthError, setUsernameLengthError] = useState(false);
+    const [usernameTypeError, setUsernameTypeError] = useState(false);
 
     const token = localStorage.getItem('token');
 
@@ -125,6 +127,30 @@ const ProfileView = ({userId, logoutUser}) => {
         if (newPassword1 !== '' && (newPassword1 !== e.target.value)) 
             setPasswordMatchError(true);
     };
+
+    const onChangeUsername = (e) => {
+        const value = e.target.value;
+        setUsername(value);
+        setUsernameLengthError(false);
+        setUsernameTypeError(false);
+        if (value  !== '') {
+            if (value .length < 6) 
+                setUsernameLengthError(true);
+
+            const nonAlphaCharacters = value.match(/\W/g);
+            // If there are non alphabetical characters 
+            // make sure that they are only numbers
+            // Username should only contain alphanumeric characters
+            if (nonAlphaCharacters) {
+                for (let i = 0; i < nonAlphaCharacters.length; i++) {
+                    if (!nonAlphaCharacters[i].match(/\d/))
+                        setUsernameTypeError(true);
+                    return;
+                }
+            }
+        }
+    };
+
     
     const validateBirthDate = (birthdate=birthDate) => {        
         const regex = /\d\d\d\d-\d\d-\d\d/; // valid date format
@@ -141,10 +167,15 @@ const ProfileView = ({userId, logoutUser}) => {
 
     return (
         <>
-            <h1>Personal Info</h1>
+            <Row>
+                <Col>
+                    <h1>Personal Info</h1>
+                </Col>
+            </Row>
             <Row>
                 
                 <Col>
+                
                     <Form 
                         id="edit-profile-form" 
                         onSubmit={(e) => handleSubmit(e)}
@@ -157,7 +188,7 @@ const ProfileView = ({userId, logoutUser}) => {
                                 id="username"
                                 type="text" 
                                 placeholder="Enter your username" 
-                                onChange={(e) => setUsername(e.target.value)} 
+                                onChange={(e) => onChangeUsername(e)} 
                                 value={username} 
                                 required
                             />      
@@ -258,13 +289,25 @@ const ProfileView = ({userId, logoutUser}) => {
                                 </Form.Group>
                             </Col>
                         </Form.Row>
-                        
+                        {usernameLengthError 
+                            ? (<p className="error">
+                                Username must be at least 6 characters long.
+                            </p>)
+                            : null
+                        }
+                        {usernameTypeError 
+                            ? (<p className="error">
+                                Username must only contain 
+                                alphanumeric characters.
+                            </p>)
+                            : null
+                        }
                         {birthDateError 
                             ? (<p className="error">{birthDateError}</p>)
                             : null
                         }
                         {passwordMatchError 
-                            ? (<p className="error">Passwords must match</p>)
+                            ? (<p className="error">Passwords must match.</p>)
                             : null
                         } 
                         {updateProfileError 
