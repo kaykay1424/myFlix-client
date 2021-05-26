@@ -1,41 +1,93 @@
-/******* Variables *********/
 body {
-  background-color: #1B1D24;
-  font-family: Archivo;
+  background-color: #1b1d24 !important;
+}
+
+.my-flix {
+  background-color: #1b1d24;
+  font-family: "Calibri";
+  margin: 0;
+  padding: 0;
+}
+.my-flix a {
+  color: #117dce;
+  text-decoration: none;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+button {
+  cursor: pointer;
+}
+
+.error {
+  color: #f5866f;
 }
 
 .label {
-  color: #828D99;
+  color: #828d99;
+  font-size: 15px;
+}
+.card.movie-card {
+  background-color: #1e2127;
 }
 
-.movie-view {
-  background-color: #1E2127;
+.movie-card {
+  background-color: #1e2127;
+}
+.movie-card button {
+  align-self: flex-start;
+  display: inline-block;
+}
+.movie-card img {
+  margin: 1em 0;
+}
+.movie-card svg {
+  display: inline-block;
+  color: #f5f5f5;
+}
+.movie-card .description {
+  border-bottom: 1px solid #2f333b;
+  height: 53px;
+}
+.movie-card .read-more-link {
+  align-self: center;
+  color: #117dce;
+  cursor: pointer;
+  margin-left: 1em;
+}
+.movie-card .read-more-link-container {
+  display: flex;
+}
+.view {
+  background-color: #1e2127;
   color: #fff;
   height: 90vh;
-  margin: 4em auto 0 auto;
-  max-width: 100%;
-  width: 700px;
+  padding: 0;
 }
-.movie-view .attribute {
+.view .attribute {
   margin-right: 4em;
 }
-.movie-view .attribute .label + p {
-  color: #117DCE;
+.view .attribute .label + p {
+  color: #117dce;
 }
-.movie-view .attributes {
+.view .attributes {
   border-bottom: 1px solid #2f333b;
   border-top: 1px solid #2f333b;
   display: flex;
   margin-bottom: 4em;
   margin-top: 4em;
+  padding: 1em 10% 1em 10%;
 }
-.movie-view .attributes,
-.movie-view .main-content {
-  padding-left: 10%;
-  padding-right: 10%;
-}
-.movie-view .close-box {
-  background-color: #1B1D24;
+.view .close-box {
+  background-color: #1b1d24;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
@@ -45,53 +97,395 @@ body {
   text-align: center;
   top: 20px;
 }
-.movie-view .description {
+.view .description {
   color: #b0b5bf;
 }
-.movie-view .image-cover {
-  background-size: cover;
+.view .image-cover {
+  background-color: #fff;
   background-position: top center;
   background-repeat: no-repeat;
   height: 200px;
   position: relative;
 }
-.movie-view .main-content {
+.view .main-content {
   margin-top: 4em;
+  padding-left: 10%;
+  padding-right: 10%;
 }
-
-.movies-container {
+.view .related-attributes {
+  padding-left: 10%;
+  padding-right: 10%;
+}
+.view .related-attributes img {
+  max-width: 100%;
+}
+.view .related-attributes .card {
+  display: inline-block;
+}
+#movie-view {
+  background-color: #1e2127;
   color: #fff;
-  display: grid;
-  grid-gap: 2em;
-  grid-template-columns: repeat(3, 1fr);
+  height: 90vh;
+  padding: 0;
+}
+#movie-view h1 {
+  display: flex;
+  justify-content: space-between;
+}
+#movie-view h1 svg {
+  cursor: pointer;
+  height: 18px;
+}
+#movie-view h1 svg:hover, #movie-view h1 svg.added-to-list {
+  fill: #fff;
+}
+#movie-view .attribute {
+  margin-right: 4em;
+}
+#movie-view .attribute .label + p {
+  color: #117dce;
+}
+#movie-view .attributes {
+  border-bottom: 1px solid #2f333b;
+  border-top: 1px solid #2f333b;
+  display: flex;
+  margin-bottom: 4em;
+  margin-top: 4em;
+  padding-left: 10%;
+  padding-right: 10%;
+}
+#movie-view .close-box {
+  background-color: #1b1d24;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  padding: 3px;
+  position: absolute;
+  right: 30px;
+  text-align: center;
+  top: 20px;
+}
+#movie-view .description {
+  color: #b0b5bf;
+}
+#movie-view .image-cover {
+  background-color: #fff;
+  background-position: top center;
+  background-repeat: no-repeat;
+  height: 200px;
+  position: relative;
+}
+#movie-view .main-content {
+  margin-top: 4em;
+  padding-left: 10%;
+  padding-right: 10%;
+}
+#registration-form button {
+  width: 124px;
+}
+.form-container {
+  background-color: #1e2127;
+  border-radius: 2px;
+  color: #f5f5f5;
+  margin-bottom: 2em;
+  margin-top: 2em;
+  padding: 2em 0;
+  text-align: center;
+}
+.form-container button {
+  background-color: #0093ff;
+  border: 1px solid #0093ff;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 15px;
+  height: 36px;
+  margin-top: 2em;
+  width: 154px;
+}
+.form-container form {
   margin: auto;
   width: 80%;
 }
-.movies-container .movie-card {
-  background-color: #1E2127;
+.form-container form .btn-container {
+  border-top: none;
+  display: flex;
+  justify-content: flex-end;
+}
+.form-container input {
+  background-color: #1e2127;
+  border: 0 !important;
+  color: #bec2cc;
+  outline: 0 !important;
+}
+
+.form-group {
   display: flex;
   flex-direction: column;
+  margin-top: 1em;
+  text-align: left;
+}
+.form-group label {
+  margin-bottom: 5px;
+}
+
+.form-label {
+  color: #bec2cc;
+  font-size: 15px;
+}
+
+.input-container {
+  border: 1px solid #2f333b;
+}
+.input-container input.form-control:focus {
+  box-shadow: none;
+}
+.input-container .input-group-text {
+  background-color: transparent;
+  border: 0;
+}
+.input-container .input-group-text svg.focused {
+  color: #1e2127;
+}
+
+form svg {
+  color: #f5f5f5;
+}
+
+[class*=input-group].focused {
+  background-color: #fff;
+}
+
+.input-container.error {
+  border: 1px solid #f5866f;
+  color: inherit;
+}
+#login-form + .btn-container {
+  border-top: 1px solid #2f333b;
+  margin-top: 4em;
+  padding-bottom: 0.5em;
+  padding-top: 0.5em;
+}
+#login-form + .btn-container button {
+  width: 80%;
+}
+.movies-container {
+  color: #fff;
+  grid-row-gap: 2em;
+}
+.related-attribute-card.card {
+  background-color: #1e2127;
+  margin: 1em 2em 1em 0;
+}
+.related-attribute-card.card img {
+  margin-bottom: 1em;
+}
+#director-view .image-cover {
+  height: auto;
+}
+#genre-view .image-cover {
+  height: auto;
+}
+.user-list {
+  background-color: #1b1d24;
   padding: 1em;
+  margin-bottom: 1.5em;
+  text-align: left;
 }
-.movies-container .movie-card button {
-  align-self: flex-start;
-  display: inline-block;
+.user-list ul {
+  list-style-type: none;
+  padding-left: 0 !important;
 }
-.movies-container .movie-card svg {
-  display: inline-block;
-  color: #F5F5F5;
+.user-list .heading {
+  font-size: 20px;
 }
-.movies-container .movie-card .description {
-  border-bottom: 1px solid #2f333b;
-  height: 53px;
-}
-.movies-container .movie-card .read-more-link {
-  align-self: center;
-  color: #117DCE;
-  cursor: pointer;
-  margin-left: 1em;
-}
-.movies-container .movie-card .read-more-link-container {
+.user-list .user-list-item {
   display: flex;
+  justify-content: space-between;
+}
+.user-list .user-list-item .details p {
+  margin: 5px 0 5px 0;
+}
+.user-list .user-list-item .details .description {
+  color: #828d99;
+}
+.user-list .user-list-item .list-type {
+  text-transform: capitalize;
+}
+.user-list .user-list-item svg {
+  align-self: flex-end;
+  cursor: pointer;
+}
+#profile-view form .btn-container {
+  justify-content: flex-start;
+}
+#profile-view h1 {
+  margin-left: 1em;
+  text-align: left;
+}
+#profile-view .delete-user-container span {
+  color: #828d99;
+  font-size: 13px;
+}
+#profile-view .delete-user-container svg {
+  cursor: pointer;
+  margin-right: 1em;
+}
+#profile-view .justify-content-end {
+  margin-top: 10em;
+}
+.form-container {
+  background-color: #1e2127;
+  border-radius: 2px;
+  color: #f5f5f5;
+  margin-bottom: 2em;
+  margin-top: 2em;
+  padding: 2em 0;
+  text-align: center;
+}
+.form-container button {
+  background-color: #0093ff;
+  border: 1px solid #0093ff;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 15px;
+  height: 36px;
+  margin-top: 2em;
+  width: 154px;
+}
+.form-container form {
+  margin: auto;
+  width: 80%;
+}
+.form-container form .btn-container {
+  border-top: none;
+  display: flex;
+  justify-content: flex-end;
+}
+.form-container input {
+  background-color: #1e2127;
+  border: 0 !important;
+  color: #bec2cc;
+  outline: 0 !important;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1em;
+  text-align: left;
+}
+.form-group label {
+  margin-bottom: 5px;
+}
+
+.form-label {
+  color: #bec2cc;
+  font-size: 15px;
+}
+
+.input-container {
+  border: 1px solid #2f333b;
+}
+.input-container input.form-control:focus {
+  box-shadow: none;
+}
+.input-container .input-group-text {
+  background-color: transparent;
+  border: 0;
+}
+.input-container .input-group-text svg.focused {
+  color: #1e2127;
+}
+
+form svg {
+  color: #f5f5f5;
+}
+
+[class*=input-group].focused {
+  background-color: #fff;
+}
+
+.input-container.error {
+  border: 1px solid #f5866f;
+  color: inherit;
+}
+
+#main-navbar.navbar {
+  align-items: flex-start;
+  background-color: #1b1d24;
+  position: relative;
+}
+#main-navbar.navbar.logged-out {
+  background-color: #117dce;
+  height: auto;
+}
+#main-navbar.navbar.logged-out .navbar-brand {
+  color: #fff;
+}
+#main-navbar.navbar form .input-group.input-container {
+  width: 100%;
+}
+#main-navbar.navbar form .input-group-text {
+  background-color: transparent;
+  border: 0;
+}
+#main-navbar.navbar a.link.nav-link {
+  color: #fff !important;
+  text-transform: uppercase;
+}
+#main-navbar.navbar .navbar-brand.logged-in {
+  color: #117dce;
+}
+#main-navbar.navbar .navbar-brand.logged-out {
+  color: #fff;
+}
+#main-navbar.navbar .navbar-brand {
+  text-transform: initial;
+}
+#main-navbar.navbar .navbar-toggler {
+  background-color: #fff;
+}
+#main-navbar.navbar #main-navbar-collapse {
+  margin-top: 2em;
+}
+
+.nav-links.navbar-nav a {
+  color: #fff;
+}
+.nav-links.navbar-nav .active {
+  border-bottom: 1px solid #0093ff;
+}
+
+@media screen and (min-width: 992px) {
+  .nav-links.navbar-nav {
+    bottom: 0;
+    display: flex;
+    justify-content: flex-start;
+    left: 0;
+    padding-left: 0.5rem;
+    position: absolute;
+    width: 215px;
+  }
+  .nav-links.navbar-nav a {
+    height: 46px;
+    margin-right: 1rem;
+    padding-bottom: 46px;
+  }
+
+  #main-navbar.navbar {
+    height: 128px;
+  }
+  #main-navbar.navbar a.link.nav-link {
+    min-width: 178px;
+  }
+  #main-navbar.navbar form {
+    width: 70%;
+  }
+  #main-navbar.navbar #main-navbar-collapse {
+    margin-top: 0;
+  }
+  #main-navbar.navbar .navbar-nav:not(.nav-links) a {
+    text-align: right;
+  }
 }
 /*# sourceMappingURL=index.d22b8a02.css.map */

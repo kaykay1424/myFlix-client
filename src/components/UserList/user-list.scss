@@ -1,0 +1,33 @@
+@import '../../utils/partials/variables';
+.user-list {
+    background-color: $main-background-color;
+    padding: 1em;
+    margin-bottom: 1.5em;
+    text-align: left;
+    ul {
+        list-style-type: none;
+        padding-left: 0 !important;
+    }
+    .heading {
+        font-size: 20px;
+    }
+    .user-list-item {
+        display: flex;
+        justify-content: space-between;
+        .details {
+            p {
+                margin: 5px 0 5px 0;
+            }
+            .description {
+                color: $label-color;
+            }
+        }
+        .list-type {
+            text-transform: capitalize;
+        }
+        svg {
+            align-self: flex-end;
+            cursor: pointer;
+        }
+    }
+}

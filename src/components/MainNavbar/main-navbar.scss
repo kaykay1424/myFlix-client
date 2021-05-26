@@ -1,0 +1,81 @@
+@import '../../utils/partials/variables';
+@import '../../utils/partials/form';
+#main-navbar.navbar {
+    align-items: flex-start;
+    background-color: $main-background-color;
+    position: relative;
+    &.logged-out {
+        background-color: $link-color;
+        height: auto;
+        .navbar-brand {
+            color: #fff;
+        }
+    }     
+    form .input-group.input-container {
+        width: 100%;
+    }
+    form .input-group-text {
+        background-color: transparent;
+        border: 0;
+    }
+    a.link.nav-link {
+        color: #fff !important;
+        text-transform: uppercase;
+    }    
+    .navbar-brand.logged-in {
+        color: $link-color;
+    }
+    .navbar-brand.logged-out {
+        color: #fff;
+    }
+    .navbar-brand {
+        text-transform: initial;
+    }
+    .navbar-toggler {
+        background-color: #fff;
+    }
+    #main-navbar-collapse {
+        margin-top: 2em;
+    }
+}
+.nav-links.navbar-nav {      
+    a {
+        color: #fff;
+    }
+    .active {
+        border-bottom: 1px solid #0093ff;
+    }
+}
+
+@media screen and (min-width: 992px) {
+    .nav-links.navbar-nav {
+        bottom: 0;
+        display: flex;
+        justify-content: flex-start;
+        left: 0;
+        padding-left: 0.5rem; 
+        position: absolute;
+        width: 215px;
+        a {
+            height: 46px;
+            margin-right: 1rem;
+            padding-bottom: 46px;
+        }
+    }
+    #main-navbar.navbar {
+        height: 128px;
+        a.link.nav-link {
+            // height: 30px;
+            min-width: 178px;
+        }
+        form {
+            width: 70%;
+        }
+        #main-navbar-collapse {
+            margin-top: 0;
+        }
+        .navbar-nav:not(.nav-links) a {
+            text-align: right;
+        }
+    }
+}
