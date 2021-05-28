@@ -1,10 +1,23 @@
+/********** Modules **********/
 import React from 'react';
 import ReactDOM from 'react-dom';
-import MainView from './components/MainView/MainView';
-
 import {Container} from 'react-bootstrap';
+
+/*********** -Redux ************/
+
+import {createStore} from 'redux';
+import {Provider} from 'react-redux';
+import {devToolsEnhancer} from 'redux-devtools-extension';
+import myFlixApp from './reducers/reducers';
+
+/*********** Components ************/
+
+import MainView from './components/MainView/MainView';
 import MainNavbar from './components/MainNavbar/MainNavbar';
+
 import './index.scss';
+
+const store = createStore(myFlixApp, devToolsEnhancer());
 
 // Main component (will eventually use all the others)
 class MyFlixApplication extends React.Component {  
@@ -28,7 +41,7 @@ class MyFlixApplication extends React.Component {
     
     render() {
         return (
-            <>
+            <Provider store={store}>
                 <MainNavbar 
                     isUserLoggedIn={this.state.isUserLoggedIn} 
                     view={this.state.view}
@@ -36,7 +49,7 @@ class MyFlixApplication extends React.Component {
                 <Container className="my-flix" fluid>
                     <MainView setNavbar={this.setNavbar} />
                 </Container>
-            </>
+            </Provider>
         );
     }
 }
