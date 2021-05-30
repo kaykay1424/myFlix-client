@@ -1052,7 +1052,6 @@ try {
   var _reactDefault = _parcelHelpers.interopDefault(_react);
   var _reactDom = require('react-dom');
   var _reactDomDefault = _parcelHelpers.interopDefault(_reactDom);
-  var _reactBootstrap = require('react-bootstrap');
   var _redux = require('redux');
   var _reactRedux = require('react-redux');
   var _reduxDevtoolsExtension = require('redux-devtools-extension');
@@ -1060,39 +1059,16 @@ try {
   var _reducersReducersDefault = _parcelHelpers.interopDefault(_reducersReducers);
   var _componentsMainViewMainView = require('./components/MainView/MainView');
   var _componentsMainViewMainViewDefault = _parcelHelpers.interopDefault(_componentsMainViewMainView);
-  var _componentsMainNavbarMainNavbar = require('./components/MainNavbar/MainNavbar');
-  var _componentsMainNavbarMainNavbarDefault = _parcelHelpers.interopDefault(_componentsMainNavbarMainNavbar);
+  require('./components/MainNavbar/MainNavbar');
   require('./index.scss');
   const store = _redux.createStore(_reducersReducersDefault.default, _reduxDevtoolsExtension.devToolsEnhancer());
   // Main component (will eventually use all the others)
   class MyFlixApplication extends _reactDefault.default.Component {
-    state = {
-      isUserLoggedIn: false,
-      view: ''
-    };
-    setNavbar = (loggedIn, view = '') => {
-      loggedIn ? this.setState({
-        isUserLoggedIn: true
-      }) : this.setState({
-        isUserLoggedIn: false
-      });
-      this.setState({
-        view: view
-      });
-    };
     render() {
       return (
         /*#__PURE__*/_reactDefault.default.createElement(_reactRedux.Provider, {
           store: store
-        }, /*#__PURE__*/_reactDefault.default.createElement(_componentsMainNavbarMainNavbarDefault.default, {
-          isUserLoggedIn: this.state.isUserLoggedIn,
-          view: this.state.view
-        }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Container, {
-          className: "my-flix",
-          fluid: true
-        }, /*#__PURE__*/_reactDefault.default.createElement(_componentsMainViewMainViewDefault.default, {
-          setNavbar: this.setNavbar
-        })))
+        }, /*#__PURE__*/_reactDefault.default.createElement(_componentsMainViewMainViewDefault.default, null))
       );
     }
   }
@@ -1104,7 +1080,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","react-dom":"2sg1U","./index.scss":"5iJih","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./components/MainView/MainView":"5VFKs","react-bootstrap":"4n7hB","./components/MainNavbar/MainNavbar":"6h1DY","redux":"7panR","react-redux":"7GDa4","redux-devtools-extension":"3vUkb","./reducers/reducers":"2736c"}],"3b2NM":[function(require,module,exports) {
+},{"react":"3b2NM","react-dom":"2sg1U","./index.scss":"5iJih","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./components/MainView/MainView":"5VFKs","./components/MainNavbar/MainNavbar":"6h1DY","redux":"7panR","react-redux":"7GDa4","redux-devtools-extension":"3vUkb","./reducers/reducers":"2736c"}],"3b2NM":[function(require,module,exports) {
 "use strict";
 if ("development" === 'production') {
   module.exports = require('./cjs/react.production.min.js');
@@ -26512,10 +26488,13 @@ try {
   var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
   var _reactBootstrap = require('react-bootstrap');
   var _reactRouterDom = require('react-router-dom');
+  var _reactRedux = require('react-redux');
   var _GenreViewGenreView = require('../GenreView/GenreView');
   var _GenreViewGenreViewDefault = _parcelHelpers.interopDefault(_GenreViewGenreView);
   var _DirectorViewDirectorView = require('../DirectorView/DirectorView');
   var _DirectorViewDirectorViewDefault = _parcelHelpers.interopDefault(_DirectorViewDirectorView);
+  var _MainNavbarMainNavbar = require('../MainNavbar/MainNavbar');
+  var _MainNavbarMainNavbarDefault = _parcelHelpers.interopDefault(_MainNavbarMainNavbar);
   var _MovieCardMovieCard = require('../MovieCard/MovieCard');
   var _MovieCardMovieCardDefault = _parcelHelpers.interopDefault(_MovieCardMovieCard);
   var _MovieViewMovieView = require('../MovieView/MovieView');
@@ -26526,255 +26505,291 @@ try {
   var _ProfileViewProfileViewDefault = _parcelHelpers.interopDefault(_ProfileViewProfileView);
   var _RegistrationViewRegistrationView = require('../RegistrationView/RegistrationView');
   var _RegistrationViewRegistrationViewDefault = _parcelHelpers.interopDefault(_RegistrationViewRegistrationView);
+  var _actionsActions = require('../../actions/actions');
   require('./main-view.scss');
-  class MainView extends _reactDefault.default.Component {
-    state = {
-      registration: false,
-      error: null,
-      movies: [],
-      selectedDirector: null,
-      selectedGenre: null,
-      selectedMovie: null,
-      user: null
+  var _s = $RefreshSig$();
+  const MainView = ({actors, movies, selectedMovie, logoutUser, setActors, setMovies, setFavoritedMovies, setFeaturedMovies, setUserInfo}) => {
+    _s();
+    const token = localStorage.getItem('token');
+    const [error, setError] = _react.useState(false);
+    const getActors = token => {
+      _axiosDefault.default.get('https://my-flix-2021.herokuapp.com/actors', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(response => {
+        setActors(response.data);
+      }).catch(error => {
+        setError(error);
+      });
     };
-    componentDidMount() {
-      if (window.location.pathname === '/logout') return this.logoutUser();
-      const token = localStorage.getItem('token');
-      if (token) {
-        this.setState({
-          user: localStorage.getItem('user')
-        });
-        this.setNavbarAttributes(true);
-        this.getMovies(localStorage.getItem('token'));
-      } else {
-        this.setNavbarAttributes(false);
-      }
-    }
-    getMovies = token => {
+    const getFavoritedMovies = token => {
+      _axiosDefault.default.get('https://my-flix-2021.herokuapp.com/favorite-movies', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(response => {
+        setFavoritedMovies(response.data);
+      }).catch(error => {
+        setError(error);
+      });
+    };
+    const getMovies = token => {
       _axiosDefault.default.get('https://my-flix-2021.herokuapp.com/movies', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       }).then(response => {
-        this.setState({
-          movies: response.data
-        });
+        const movies = response.data;
+        setMovies(movies);
+        setFeaturedMovies(movies.filter(movie => movie.featured));
       }).catch(error => {
-        this.setError(error);
+        setError(error);
       });
     };
-    handleBackClick = selected => {
-      this.setState({
-        [selected]: null
-      });
-    };
-    handleItemClick = (typeOfItem, itemSelected) => {
-      this.setState({
-        [typeOfItem]: itemSelected
-      });
-    };
-    logoutUser = () => {
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-      this.setState({
-        user: null
-      });
-      this.setNavbarAttributes(false);
-      window.open('/', '_self');
-    };
-    setError = error => {
-      this.setState({
-        error
-      });
-    };
-    setNavbarAttributes = isUserLoggedIn => {
-      if (isUserLoggedIn) {
-        this.props.setNavbar(true, 'MovieView');
-      } else {
-        this.props.setNavbar(false);
-      }
-    };
-    setUser = ({token, user}) => {
-      this.setState({
-        user: user._id
+    const onLoggedIn = ({token, user}) => {
+      setUserInfo({
+        birthDate: user.birthDate,
+        favoriteActors: user.favoriteActors,
+        favoriteMovies: user.favoriteMovies,
+        email: user.email,
+        id: user._id,
+        password: user.password,
+        toWatchMovies: user.toWatchMovies,
+        username: user.username
       });
       localStorage.setItem('token', token);
       localStorage.setItem('user', user._id);
-      this.setNavbarAttributes(true);
-      this.getMovies(token);
+      getActors(token);
+      getMovies(token);
+      getFavoritedMovies(token);
     };
-    render() {
-      const {error, movies, selectedDirector, selectedGenre, selectedMovie, user} = this.state;
-      const showLogin = () => {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-            className: "justify-content-md-center"
-          }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-            className: "form-container",
-            md: 5
-          }, /*#__PURE__*/_reactDefault.default.createElement(_LoginViewLoginViewDefault.default, {
-            setUser: this.setUser
-          })))
-        );
-      };
+    const onLogout = () => {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      logoutUser();
+      window.open('/', '_self');
+    };
+    const showLogin = path => {
+      if (path == 'logout') onLogout();
       return (
-        /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.BrowserRouter, null, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
-          exact: true,
-          path: "/",
-          render: () => {
-            // If user is not logged in, show login view
-            if (!user) return showLogin();
-            // if there is an error loading the movies
-            if (error) {
-              return (
-                /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-                  className: "justify-content-md-center"
-                }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-                  md: "5"
-                }, /*#__PURE__*/_reactDefault.default.createElement("div", null, "An error has occurred. Please try again.")))
-              );
-            }
-            // If there are no movies to display
-            if (movies.length === 0) return (
-              /*#__PURE__*/_reactDefault.default.createElement("div", {
-                className: "movies-container"
-              })
-            );
-            return (
-              /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-                className: "movies-container justify-content-md-center"
-              }, movies.map(movie => {
-                return (
-                  /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-                    key: movie._id,
-                    md: 4
-                  }, /*#__PURE__*/_reactDefault.default.createElement(_MovieCardMovieCardDefault.default, {
-                    movie: movie,
-                    onItemClick: this.handleItemClick
-                  }))
-                );
-              }), ";")
-            );
-          }
-        }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
-          path: "/movies/:id",
-          render: ({history, match}) => {
-            // If user is not logged in, show login view
-            if (!user) return showLogin();
-            return (
-              /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-                className: "justify-content-md-center"
-              }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-                id: "movie-view",
-                className: "view",
-                md: 6
-              }, /*#__PURE__*/_reactDefault.default.createElement(_MovieViewMovieViewDefault.default, {
-                selectedMovie: movies.find(movie => {
-                  return movie._id === match.params.id;
-                }),
-                onItemClick: this.handleItemClick,
-                onBackClick: () => history.goBack(),
-                userId: user
-              })))
-            );
-          }
-        }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
-          path: "/genres/:name",
-          render: ({history, match}) => {
-            // If user is not logged in, show login view
-            if (!user) return showLogin();
-            return (
-              /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-                className: "justify-content-md-center"
-              }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-                id: "genre-view",
-                className: "view",
-                md: 6
-              }, /*#__PURE__*/_reactDefault.default.createElement(_GenreViewGenreViewDefault.default, {
-                onItemClick: this.handleItemClick,
-                selectedGenre: movies.find(({genre}) => {
-                  return genre.name === match.params.name;
-                }).genre,
-                otherMovies: movies.filter(movie => {
-                  return movie.name !== selectedMovie.name && movie.genre.name === selectedGenre.name;
-                }),
-                onBackClick: () => history.goBack()
-              })))
-            );
-          }
-        }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
-          path: "/directors/:name",
-          render: ({history, match}) => {
-            // If user is not logged in, show login view
-            if (!user) return showLogin();
-            return (
-              /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-                className: "justify-content-md-center"
-              }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-                id: "director-view",
-                className: "view",
-                md: 6
-              }, /*#__PURE__*/_reactDefault.default.createElement(_DirectorViewDirectorViewDefault.default, {
-                onItemClick: this.handleItemClick,
-                selectedDirector: movies.find(({director}) => director.name === match.params.name).director,
-                otherMovies: movies.filter(movie => {
-                  return movie.name !== selectedMovie.name && movie.director.name === selectedDirector.name;
-                }),
-                onBackClick: () => history.goBack()
-              })))
-            );
-          }
-        }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
-          path: "/register",
-          render: () => {
-            // if user is already logged in redirect to home page
-            if (user) return (
-              /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
-                to: "/"
-              })
-            );
-            return (
-              /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-                className: "justify-content-md-center"
-              }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-                className: "form-container",
-                md: 5
-              }, /*#__PURE__*/_reactDefault.default.createElement(_RegistrationViewRegistrationViewDefault.default, null)))
-            );
-          }
-        }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
-          path: "/profile",
-          render: () => {
-            // If user is not logged in, show login view
-            if (!user) return showLogin();
-            return (
-              /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-                className: "justify-content-md-center"
-              }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-                id: "profile-view",
-                className: "form-container",
-                md: 8
-              }, /*#__PURE__*/_reactDefault.default.createElement(_ProfileViewProfileViewDefault.default, {
-                userId: user,
-                logoutUser: this.logoutUser
-              })))
-            );
-          }
-        }))
+        /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+          className: "justify-content-md-center"
+        }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+          className: "form-container",
+          md: 5
+        }, /*#__PURE__*/_reactDefault.default.createElement(_LoginViewLoginViewDefault.default, {
+          onLoggedIn: onLoggedIn
+        }))))
       );
-    }
-  }
-  MainView.propTypes = {
-    setNavbar: _propTypesDefault.default.func.isRequired
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.BrowserRouter, null, /*#__PURE__*/_reactDefault.default.createElement(_MainNavbarMainNavbarDefault.default, null), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Container, {
+        className: "my-flix",
+        fluid: true
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        exact: true,
+        path: "/",
+        render: () => {
+          // If user is not logged in, show login view
+          if (!token) return showLogin();
+          // if there is an error loading the movies
+          if (error) {
+            return (
+              /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+                className: "justify-content-md-center"
+              }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+                md: "5"
+              }, /*#__PURE__*/_reactDefault.default.createElement("div", null, "An error has occurred. Please try again."))))
+            );
+          }
+          // If there are no movies to display
+          if (movies.length === 0) return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+              className: "movies-container"
+            }))
+          );
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+              className: "movies-container  justify-content-md-center"
+            }, movies.map(movie => {
+              return (
+                /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+                  key: movie._id,
+                  md: 4
+                }, /*#__PURE__*/_reactDefault.default.createElement(_MovieCardMovieCardDefault.default, {
+                  movie: movie
+                }))
+              );
+            }), ";"), ";")
+          );
+        }
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        path: "/movies/:id",
+        render: ({history, match}) => {
+          // If user is not logged in, show login view
+          if (!token) return showLogin();
+          const movie = movies.find(movie => {
+            // console.log(movie)
+            return movie._id === match.params.id;
+          });
+          const movieActors = movie.stars.map(star => {
+            const matchingActor = actors.find(actor => {
+              return star.actor === actor.name;
+            });
+            return {
+              ...star,
+              id: matchingActor._id,
+              image: matchingActor.image
+            };
+          });
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+              className: "justify-content-md-center"
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+              id: "movie-view",
+              className: "view",
+              md: 6
+            }, /*#__PURE__*/_reactDefault.default.createElement(_MovieViewMovieViewDefault.default, {
+              movie: movie,
+              movieActors: movieActors,
+              onBackClick: () => history.goBack()
+            }))))
+          );
+        }
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        path: "/genres/:name",
+        render: ({history, match}) => {
+          // If user is not logged in, show login view
+          if (!token) return showLogin();
+          const selectedGenre = movies.find(({genre}) => {
+            return genre.name === match.params.name;
+          }).genre;
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+              className: "justify-content-md-center"
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+              id: "genre-view",
+              className: "view",
+              md: 6
+            }, /*#__PURE__*/_reactDefault.default.createElement(_GenreViewGenreViewDefault.default, {
+              onItemClick: undefined.handleItemClick,
+              selectedGenre: selectedGenre,
+              otherMovies: movies.filter(movie => {
+                return movie.name !== selectedMovie.name && movie.genre.name === selectedGenre.name;
+              }),
+              onBackClick: () => history.goBack()
+            }))))
+          );
+        }
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        path: "/directors/:name",
+        render: ({history, match}) => {
+          // If user is not logged in, show login view
+          if (!token) return showLogin();
+          const selectedDirector = movies.find(({director}) => director.name === match.params.name).director;
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+              className: "justify-content-md-center"
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+              id: "director-view",
+              className: "view",
+              md: 6
+            }, /*#__PURE__*/_reactDefault.default.createElement(_DirectorViewDirectorViewDefault.default, {
+              onItemClick: undefined.handleItemClick,
+              selectedDirector: selectedDirector,
+              otherMovies: movies.filter(movie => {
+                return movie.name !== selectedMovie.name && movie.director.name === selectedDirector.name;
+              }),
+              onBackClick: () => history.goBack()
+            }))), ";")
+          );
+        }
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        path: "/register",
+        render: () => {
+          // if user is already logged in redirect to home page
+          if (token) return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
+              to: "/"
+            })
+          );
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+              className: "justify-content-md-center"
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+              className: "form-container",
+              md: 5
+            }, /*#__PURE__*/_reactDefault.default.createElement(_RegistrationViewRegistrationViewDefault.default, null))))
+          );
+        }
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        path: "/profile",
+        render: () => {
+          // If user is not logged in, show login view
+          if (!token) return showLogin();
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+              className: "justify-content-md-center"
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+              id: "profile-view",
+              className: "form-container",
+              md: 8
+            }, /*#__PURE__*/_reactDefault.default.createElement(_ProfileViewProfileViewDefault.default, {
+              onLogout: onLogout
+            }))))
+          );
+        }
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        path: "/logout",
+        render: () => {
+          showLogin('logout');
+        }
+      })))
+    );
   };
-  exports.default = MainView;
+  _s(MainView, "AvrsuJm02Cqlq6/LWpvA21zDecQ=");
+  _c = MainView;
+  MainView.propTypes = {
+    actors: _propTypesDefault.default.array.isRequired,
+    logoutUser: _propTypesDefault.default.func.isRequired,
+    movies: _propTypesDefault.default.array.isRequired,
+    selectedMovie: _propTypesDefault.default.object.isRequired,
+    setActors: _propTypesDefault.default.func.isRequired,
+    setFavoritedMovies: _propTypesDefault.default.func.isRequired,
+    setFeaturedMovies: _propTypesDefault.default.func.isRequired,
+    setMovies: _propTypesDefault.default.func.isRequired,
+    setUserInfo: _propTypesDefault.default.func.isRequired,
+    user: _propTypesDefault.default.object.isRequired
+  };
+  const mapStateToProps = state => {
+    return {
+      actors: state.actors,
+      favoritedMovies: state.favoritedMovies,
+      featuredMovies: state.featuredMovies,
+      movies: state.movies,
+      selectedMovie: state.selectedMovie,
+      user: state.user
+    };
+  };
+  exports.default = _reactRedux.connect(mapStateToProps, {
+    setFavoritedMovies: _actionsActions.setFavoritedMovies,
+    setFeaturedMovies: _actionsActions.setFeaturedMovies,
+    logoutUser: _actionsActions.logoutUser,
+    setActors: _actionsActions.setActors,
+    setMovies: _actionsActions.setMovies,
+    setSelectedMovie: _actionsActions.setSelectedMovie,
+    setUserInfo: _actionsActions.setUserInfo
+  })(MainView);
+  var _c;
+  $RefreshReg$(_c, "MainView");
   helpers.postlude(module);
 } finally {
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../MovieCard/MovieCard":"7csoe","../MovieView/MovieView":"6fxIo","axios":"7rA65","../RegistrationView/RegistrationView":"4DfHF","../LoginView/LoginView":"1zhWx","./main-view.scss":"3JwwG","prop-types":"4dfy5","react-bootstrap":"4n7hB","../DirectorView/DirectorView":"7nJwh","../GenreView/GenreView":"4kDeE","react-router-dom":"1PMSK","../ProfileView/ProfileView":"7iKJS"}],"7csoe":[function(require,module,exports) {
+},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../MovieCard/MovieCard":"7csoe","../MovieView/MovieView":"6fxIo","axios":"7rA65","../RegistrationView/RegistrationView":"4DfHF","../LoginView/LoginView":"1zhWx","./main-view.scss":"3JwwG","prop-types":"4dfy5","react-bootstrap":"4n7hB","../DirectorView/DirectorView":"7nJwh","../GenreView/GenreView":"4kDeE","react-router-dom":"1PMSK","../ProfileView/ProfileView":"7iKJS","react-redux":"7GDa4","../../actions/actions":"5S6cN","../MainNavbar/MainNavbar":"6h1DY"}],"7csoe":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -26790,7 +26805,7 @@ try {
   var _reactRouterDom = require('react-router-dom');
   var _utilsHelpers = require('../../utils/helpers');
   require('./movie-card.scss');
-  const MovieCard = ({movie, onItemClick}) => {
+  const MovieCard = ({movie}) => {
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card, {
         className: "movie-card"
@@ -26822,8 +26837,7 @@ try {
         points: "12 5 19 12 12 19"
       })), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
         to: `/movies/${movie._id}`,
-        className: "read-more-link",
-        onClick: () => onItemClick('selectedMovie', movie)
+        className: "read-more-link"
       }, "Read More"))))
     );
   };
@@ -26834,8 +26848,7 @@ try {
       description: _propTypesDefault.default.string.isRequired,
       image: _propTypesDefault.default.string.isRequired,
       name: _propTypesDefault.default.string.isRequired
-    }).isRequired,
-    onItemClick: _propTypesDefault.default.func.isRequired
+    }).isRequired
   };
   exports.default = MovieCard;
   var _c;
@@ -46160,29 +46173,47 @@ try {
   var _propTypes = require('prop-types');
   var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
   var _reactRouterDom = require('react-router-dom');
+  var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
+  var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
+  var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
   var _utilsHelpers = require('../../utils/helpers');
   require('../../utils/partials/_view.scss');
   require('./movie-view.scss');
   var _s = $RefreshSig$();
-  const MovieView = ({selectedMovie, onBackClick, onItemClick, userId}) => {
+  const MovieView = ({addUserFavoriteMovie, addUserToWatchMovie, favoritedMovies, movieActors, movie, setSelectedMovie, onBackClick, user}) => {
     _s();
     const [favorited, setFavorited] = _react.useState(false);
     const [willWatch, setWillWatch] = _react.useState(false);
+    _react.useEffect(() => {
+      setSelectedMovie(movie);
+    }, []);
     const addToFavoritesList = () => {
-      _utilsHelpers.addToList(userId, 'favorite-movies', selectedMovie._id, 'movie_id').then(() => {
+      _utilsHelpers.addToList(user.id, 'favorite-movies', movie._id, 'movie_id').then(() => {
         setFavorited(true);
+        addUserFavoriteMovie(movie._id);
+        _actionsActions.setFavoritedMovies(favoritedMovies.map(favoritedMovie => {
+          if (favoritedMovie.name === movie.name) {
+            return {
+              ...movie,
+              usersFavorited: favoritedMovie.usersFavorited++
+            };
+          }
+          return movie;
+        }));
       });
     };
     const addToWatchList = () => {
-      _utilsHelpers.addToList(userId, 'to-watch-movies', selectedMovie._id, 'movie_id').then(() => {
+      _utilsHelpers.addToList(user.id, 'to-watch-movies', movie._id, 'movie_id').then(() => {
         setWillWatch(true);
+        addUserToWatchMovie(movie._id);
       });
     };
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "image-cover",
         style: {
-          backgroundImage: `url(${selectedMovie.image})`
+          backgroundImage: `url(${movie.image})`
         }
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "close-box"
@@ -46210,7 +46241,7 @@ try {
         y2: "18"
       })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "main-content"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedMovie.name, /*#__PURE__*/_reactDefault.default.createElement("div", {
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, movie.name, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "user-list-icons"
       }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
         onClick: () => addToFavoritesList(),
@@ -46224,7 +46255,7 @@ try {
         strokeLinecap: "round",
         strokeLinejoin: "round",
         className: `feather feather-heart 
-                            ${favorited ? 'added-to-list' : ''}`,
+                            ${favorited || user.favoriteMovies && user.favoriteMovies.indexOf(movie._id) > -1 ? 'added-to-list' : ''}`,
         title: "Add this movie to your Favorite Movies list"
       }, /*#__PURE__*/_reactDefault.default.createElement("path", {
         d: "M20.84 4.61a5.5 5.5 0 0 0-7.78  0L12 5.67l-1.06-1.06a5.5  5.5 0 0 0-7.78 7.78l1.06  1.06L12 21.23l7.78-7.78  1.06-1.06a5.5 5.5 0 0 0  0-7.78z"
@@ -46240,7 +46271,7 @@ try {
         strokeLinecap: "round",
         strokeLinejoin: "round",
         className: `feather feather-bookmark 
-                            ${willWatch ? 'added-to-list' : ''}`,
+                            ${willWatch || user.toWatchMovies && user.toWatchMovies.indexOf(movie._id) > -1 ? 'added-to-list' : ''}`,
         title: "Add this movie to your To Watch Movies list"
       }, /*#__PURE__*/_reactDefault.default.createElement("path", {
         d: "M19 21l-7-5-7  5V5a2 2 0 0  1 2-2h10a2 2  0 0 1 2 2z"
@@ -46248,29 +46279,61 @@ try {
         className: "label"
       }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "description"
-      }, selectedMovie.description)), /*#__PURE__*/_reactDefault.default.createElement("div", {
+      }, movie.description), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Release Year"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, movie.releaseYear), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Rating"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, movie.rating)), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "attributes"
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "attribute"
       }, /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "label"
       }, "Director"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: `/directors/${selectedMovie.director.name}`,
-        onClick: () => onItemClick('selectedDirector', selectedMovie.director)
-      }, selectedMovie.director.name)), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        to: `/directors/${movie.director.name}`
+      }, movie.director.name)), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "attribute"
       }, /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "label"
       }, "Genre"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: `/genres/${selectedMovie.genre.name}`,
-        onClick: () => onItemClick('selectedGenre', selectedMovie.genre)
-      }, selectedMovie.genre.name))))
+        to: `/genres/${movie.genre.name}`
+      }, movie.genre.name))), movie.stars.length > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "related-attributes"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Stars of ", /*#__PURE__*/_reactDefault.default.createElement("i", null, movie.name), " "), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "related-attributes-card-container"
+      }, movieActors.map((actor, i) => {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
+            key: i,
+            image: actor.image,
+            description: /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("p", {
+              className: "label"
+            }, /*#__PURE__*/_reactDefault.default.createElement("b", null, "Actor: "), " ", /*#__PURE__*/_reactDefault.default.createElement("br", null), /*#__PURE__*/_reactDefault.default.createElement("span", {
+              className: "description"
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+              to: `/actors/
+                                                            ${actor._id}`
+            }, actor.actor))), /*#__PURE__*/_reactDefault.default.createElement("p", {
+              className: "label"
+            }, /*#__PURE__*/_reactDefault.default.createElement("b", null, "Character: "), " ", /*#__PURE__*/_reactDefault.default.createElement("br", null), /*#__PURE__*/_reactDefault.default.createElement("span", {
+              className: "description"
+            }, actor.character)))
+          })
+        );
+      })))) : null)
     );
   };
-  _s(MovieView, "Tn7KqSbrV1fo7xUUfyS3ayydBHc=");
+  _s(MovieView, "zWe27iCj0K6kxPif8QfeM+Eem3U=");
   _c = MovieView;
   MovieView.propTypes = {
-    selectedMovie: _propTypesDefault.default.shape({
+    addUserFavoriteMovie: _propTypesDefault.default.func.isRequired,
+    addUserToWatchMovie: _propTypesDefault.default.func.isRequired,
+    favoritedMovies: _propTypesDefault.default.array.isRequired,
+    movie: _propTypesDefault.default.shape({
       _id: _propTypesDefault.default.string.isRequired,
       description: _propTypesDefault.default.string.isRequired,
       director: _propTypesDefault.default.shape({
@@ -46280,13 +46343,32 @@ try {
         name: _propTypesDefault.default.string.isRequired
       }).isRequired,
       image: _propTypesDefault.default.string.isRequired,
-      name: _propTypesDefault.default.string.isRequired
+      name: _propTypesDefault.default.string.isRequired,
+      rating: _propTypesDefault.default.number,
+      releaseYear: _propTypesDefault.default.number,
+      stars: _propTypesDefault.default.array
     }).isRequired,
+    movieActors: _propTypesDefault.default.array.isRequired,
     onBackClick: _propTypesDefault.default.func.isRequired,
     onItemClick: _propTypesDefault.default.func.isRequired,
-    userId: _propTypesDefault.default.string.isRequired
+    setSelectedMovie: _propTypesDefault.default.func.isRequired,
+    setFavoritedMovies: _propTypesDefault.default.func.isRequired,
+    user: _propTypesDefault.default.shape({
+      id: _propTypesDefault.default.string.isRequired,
+      favoriteMovies: _propTypesDefault.default.array.isRequired,
+      toWatchMovies: _propTypesDefault.default.array.isRequired
+    })
   };
-  exports.default = MovieView;
+  const mapStateToProps = state => ({
+    favoritedMovies: state.favoritedMovies,
+    user: state.user
+  });
+  exports.default = _reactRedux.connect(mapStateToProps, {
+    addUserFavoriteMovie: _actionsActions.addUserFavoriteMovie,
+    addUserToWatchMovie: _actionsActions.addUserToWatchMovie,
+    setFavoritedMovies: _actionsActions.setFavoritedMovies,
+    setSelectedMovie: _actionsActions.setSelectedMovie
+  })(MovieView);
   var _c;
   $RefreshReg$(_c, "MovieView");
   helpers.postlude(module);
@@ -46295,557 +46377,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","prop-types":"4dfy5","../../utils/partials/_view.scss":"552MA","react-router-dom":"1PMSK","./movie-view.scss":"74xbX","../../utils/helpers":"1nff4"}],"552MA":[function() {},{}],"74xbX":[function() {},{}],"4DfHF":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _axios = require('axios');
-  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
-  var _reactBootstrap = require('react-bootstrap');
-  var _utilsHelpers = require('../../utils/helpers');
-  require('../../utils/partials/_form.scss');
-  require('./registration-view.scss');
-  var _s = $RefreshSig$();
-  const RegistrationView = () => {
-    _s();
-    const [birthDate, setBirthDate] = _react.useState('');
-    const [birthDateError, setBirthDateError] = _react.useState(false);
-    const [email, setEmail] = _react.useState('');
-    const [password1, setPassword1] = _react.useState('');
-    const [password2, setPassword2] = _react.useState('');
-    const [passwordMatchError, setPasswordMatchError] = _react.useState(false);
-    const [usernameLengthError, setUsernameLengthError] = _react.useState(false);
-    const [usernameTypeError, setUsernameTypeError] = _react.useState(false);
-    const [registrationError, setRegistrationError] = _react.useState(false);
-    const [username, setUsername] = _react.useState('');
-    _react.useEffect(() => {
-      document.body.style.backgroundColor = '#0376E3';
-      return () => {
-        document.body.style.backgroundColor = '#1B1D24';
-      };
-    });
-    const handleSubmit = e => {
-      e.preventDefault();
-      // Reset error values
-      setBirthDateError(false);
-      setPasswordMatchError(false);
-      // Make sure passwords match
-      if (password1 !== password2) {
-        setPasswordMatchError(false);
-        return;
-      }
-      const user = {
-        password: password1,
-        email,
-        username
-      };
-      // Check if birthDate was entered and if it is valid
-      // if it is add it to user object
-      if (!validateBirthDate()) return;
-      user['birthDate'] = birthDate;
-      _axiosDefault.default.post('https://my-flix-2021.herokuapp.com/users', user).then(() => {
-        window.open('/', '_self');
-      }, err => {
-        setRegistrationError(err);
-      });
-    };
-    const onChangeBirthDate = e => {
-      setBirthDate(e.target.value);
-      validateBirthDate(e.target.value);
-    };
-    const onChangePassword1 = e => {
-      const value = e.target.value;
-      setPassword1(value);
-      setPasswordMatchError(false);
-      setUsernameLengthError(false);
-      setUsernameTypeError(false);
-      if (password2 !== '' && value !== password2) setPasswordMatchError(true);
-    };
-    const onChangePassword2 = e => {
-      setPassword2(e.target.value);
-      setPasswordMatchError(false);
-      if (password1 !== '' && password1 !== e.target.value) setPasswordMatchError(true);
-    };
-    const onChangeUsername = e => {
-      const value = e.target.value;
-      setUsername(value);
-      setUsernameLengthError(false);
-      setUsernameTypeError(false);
-      if (value !== '') {
-        if (value.length < 6) setUsernameLengthError(true);
-        const nonAlphaCharacters = value.match(/\W/g);
-        // If there are non alphabetical characters
-        // make sure that they are only numbers
-        // Username should only contain alphanumeric characters
-        if (nonAlphaCharacters) {
-          for (let i = 0; i < nonAlphaCharacters.length; i++) {
-            if (!nonAlphaCharacters[i].match(/\d/)) setUsernameTypeError(true);
-            return;
-          }
-        }
-      }
-    };
-    const validateBirthDate = (birthdate = birthDate) => {
-      const regex = /\d\d\d\d-\d\d-\d\d/;
-      // valid date format
-      if (!birthdate.match(regex)) {
-        setBirthDateError(`${birthdate} is not a valid date. 
-                Please enter a date in this format: yyyy-mm-dd`);
-        return false;
-      } else if (birthdate && birthdate.match(regex)) {
-        setBirthDateError(null);
-        return true;
-      }
-    };
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
-        id: "registration-form",
-        onSubmit: e => handleSubmit(e)
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Great to Meet you!"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Text, {
-        className: "label"
-      }, "Create an account"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
-        controlId: "username"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Username*"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
-        className: "input-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "username",
-        type: "text",
-        placeholder: "Enter your username",
-        onBlur: e => _utilsHelpers.removeFocusedClass(e),
-        onFocus: e => _utilsHelpers.addFocusedClass(e),
-        onChange: e => onChangeUsername(e),
-        value: username,
-        required: true
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-user"
-      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M20 21v-2a4 4 0 0 0-4-4H8a4  4 0 0 0-4 4v2"
-      }), /*#__PURE__*/_reactDefault.default.createElement("circle", {
-        cx: "12",
-        cy: "7",
-        r: "4"
-      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
-        controlId: "birth-date"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Birthday"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
-        className: `input-container 
-                        ${birthDateError ? 'error' : ''}`
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "birth-date",
-        type: "text",
-        placeholder: "2021-05-10",
-        onBlur: e => _utilsHelpers.removeFocusedClass(e),
-        onFocus: e => _utilsHelpers.addFocusedClass(e),
-        onChange: e => onChangeBirthDate(e),
-        value: birthDate
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-calendar"
-      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
-        x: "3",
-        y: "4",
-        width: "18",
-        height: "18",
-        rx: "2",
-        ry: "2"
-      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "16",
-        y1: "2",
-        x2: "16",
-        y2: "6"
-      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "8",
-        y1: "2",
-        x2: "8",
-        y2: "6"
-      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "3",
-        y1: "10",
-        x2: "21",
-        y2: "10"
-      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Email*"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
-        className: "input-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "email",
-        type: "email",
-        placeholder: "me@gmail.com",
-        onBlur: e => _utilsHelpers.removeFocusedClass(e),
-        onFocus: e => _utilsHelpers.addFocusedClass(e),
-        onChange: e => setEmail(e.target.value),
-        value: email,
-        required: true
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-mail"
-      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-      }), /*#__PURE__*/_reactDefault.default.createElement("polyline", {
-        points: "22,6 12,13 2,6"
-      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
-        controlId: "password1"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Password*"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
-        className: `input-container ${passwordMatchError ? 'error' : ''}`
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "password1",
-        type: "password",
-        onBlur: e => _utilsHelpers.removeFocusedClass(e),
-        onFocus: e => _utilsHelpers.addFocusedClass(e),
-        onChange: e => onChangePassword1(e),
-        placeholder: "Enter your password",
-        value: password1,
-        required: true
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-lock"
-      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
-        x: "3",
-        y: "11",
-        width: "18",
-        height: "11",
-        rx: "2",
-        ry: "2"
-      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M7 11V7a5 5 0 0 1 10 0v4"
-      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
-        controlId: "password2"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Password*"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
-        className: `input-container ${passwordMatchError ? 'error' : ''}`
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "password2",
-        type: "password",
-        onBlur: e => _utilsHelpers.removeFocusedClass(e),
-        onFocus: e => _utilsHelpers.addFocusedClass(e),
-        onChange: e => onChangePassword2(e),
-        placeholder: "Enter your password again",
-        value: password2,
-        required: true
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-lock"
-      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
-        x: "3",
-        y: "11",
-        width: "18",
-        height: "11",
-        rx: "2",
-        ry: "2"
-      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M7 11V7a5 5 0 0 1 10 0v4"
-      })))))), birthDateError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, birthDateError) : null, usernameLengthError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "Username must be at least 6 characters long.") : null, usernameTypeError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "Username must only contain alphanumeric characters.") : null, passwordMatchError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "Passwords must match") : null, registrationError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "There was an error. Please try again.") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "btn-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
-        type: "submit"
-      }, "Register")))
-    );
-  };
-  _s(RegistrationView, "cahSAmDsOijZ8eQRo23iYptsRg4=");
-  _c = RegistrationView;
-  exports.default = RegistrationView;
-  var _c;
-  $RefreshReg$(_c, "RegistrationView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./registration-view.scss":"4BDo8","../../utils/partials/_form.scss":"5D0uY","react-bootstrap":"4n7hB","../../utils/helpers":"1nff4","axios":"7rA65"}],"4BDo8":[function() {},{}],"5D0uY":[function() {},{}],"1zhWx":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _axios = require('axios');
-  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
-  var _reactRouterDom = require('react-router-dom');
-  var _reactBootstrap = require('react-bootstrap');
-  var _utilsHelpers = require('../../utils/helpers');
-  require('../../utils/partials/_form.scss');
-  require('./login-view.scss');
-  var _s = $RefreshSig$();
-  const LoginView = ({setUser}) => {
-    _s();
-    const [username, setUsername] = _react.useState('');
-    const [loginError, setLoginError] = _react.useState(false);
-    const [password, setPassword] = _react.useState('');
-    const handleSubmit = e => {
-      e.preventDefault();
-      _axiosDefault.default.post('https://my-flix-2021.herokuapp.com/login', {
-        username,
-        password
-      }).then(response => {
-        setUser(response.data);
-      }, err => {
-        setLoginError(err);
-      });
-    };
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
-        id: "login-form",
-        onSubmit: e => handleSubmit(e)
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Great to Meet you!"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Text, {
-        className: "label"
-      }, "Login to your account"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
-        controlId: "email"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Username"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
-        className: "input-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        type: "text",
-        placeholder: "Enter your username",
-        onBlur: e => _utilsHelpers.removeFocusedClass(e),
-        onFocus: e => _utilsHelpers.addFocusedClass(e),
-        onChange: e => setUsername(e.target.value),
-        value: username,
-        required: true
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-user"
-      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-      }), /*#__PURE__*/_reactDefault.default.createElement("circle", {
-        cx: "12",
-        cy: "7",
-        r: "4"
-      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
-        controlId: "password",
-        className: "form-group"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
-        className: "input-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        type: "password",
-        onBlur: e => _utilsHelpers.removeFocusedClass(e),
-        onFocus: e => _utilsHelpers.addFocusedClass(e),
-        onChange: e => setPassword(e.target.value),
-        placeholder: "Enter your password",
-        value: password,
-        required: true
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-lock"
-      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
-        x: "3",
-        y: "11",
-        width: "18",
-        height: "11",
-        rx: "2",
-        ry: "2"
-      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M7 11V7a5 5 0 0 1 10 0v4"
-      })))))), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "btn-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
-        type: "submit"
-      }, "Login"))), loginError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "There was an error. Please try again.") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "btn-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: "/register"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
-        type: "button"
-      }, "Register"))))
-    );
-  };
-  _s(LoginView, "Q0DOD4fIQaMtcr0yrRc4JqEd3vg=");
-  _c = LoginView;
-  LoginView.propTypes = {
-    setUser: _propTypesDefault.default.func.isRequired
-  };
-  exports.default = LoginView;
-  var _c;
-  $RefreshReg$(_c, "LoginView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./login-view.scss":"2Muu9","prop-types":"4dfy5","react-bootstrap":"4n7hB","../../utils/partials/_form.scss":"5D0uY","../../utils/helpers":"1nff4","axios":"7rA65","react-router-dom":"1PMSK"}],"2Muu9":[function() {},{}],"5D0uY":[function() {},{}],"3JwwG":[function() {},{}],"7nJwh":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactRouterDom = require('react-router-dom');
-  require('../../utils/partials/_view.scss');
-  require('./director-view.scss');
-  var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
-  var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
-  const DirectorView = ({selectedDirector, onBackClick, onItemClick, otherMovies}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "image-cover"
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "close-box"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        onClick: () => onBackClick('selectedDirector'),
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-x"
-      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "18",
-        y1: "6",
-        x2: "6",
-        y2: "18"
-      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "6",
-        y1: "6",
-        x2: "18",
-        y2: "18"
-      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "main-content"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedDirector.name), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Biography"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "description"
-      }, selectedDirector.bio)), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attributes"
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attribute"
-      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Birth Year"), /*#__PURE__*/_reactDefault.default.createElement("p", null, selectedDirector.birthYear)), selectedDirector.deathYear ? /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attribute"
-      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Death Year"), /*#__PURE__*/_reactDefault.default.createElement("p", null, selectedDirector.deathYear)) : null), otherMovies.length > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Other ", selectedDirector.name, " Movies"), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "related-attributes"
-      }, otherMovies.map((movie, i) => /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
-        key: i,
-        image: movie.image,
-        description: /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-          to: `/movies/${movie._id}`
-        }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-          onClick: () => onItemClick('selectedMovie', movie)
-        }, movie.name))
-      })))) : null)
-    );
-  };
-  _c = DirectorView;
-  DirectorView.propTypes = {
-    selectedDirector: _propTypesDefault.default.shape({
-      bio: _propTypesDefault.default.string.isRequired,
-      birthYear: _propTypesDefault.default.number.isRequired,
-      deathYear: _propTypesDefault.default.number,
-      name: _propTypesDefault.default.string.isRequired
-    }).isRequired,
-    onBackClick: _propTypesDefault.default.func.isRequired,
-    onItemClick: _propTypesDefault.default.func,
-    otherMovies: _propTypesDefault.default.array.isRequired
-  };
-  exports.default = DirectorView;
-  var _c;
-  $RefreshReg$(_c, "DirectorView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","prop-types":"4dfy5","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","./director-view.scss":"5RqqF","../../utils/partials/_view.scss":"552MA","react-router-dom":"1PMSK"}],"1tzTm":[function(require,module,exports) {
+},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","prop-types":"4dfy5","../../utils/partials/_view.scss":"552MA","react-router-dom":"1PMSK","./movie-view.scss":"74xbX","../../utils/helpers":"1nff4","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","react-redux":"7GDa4","../../actions/actions":"5S6cN"}],"552MA":[function() {},{}],"74xbX":[function() {},{}],"1tzTm":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -46865,7 +46397,7 @@ try {
         className: "related-attribute-card"
       }, /*#__PURE__*/_reactDefault.default.createElement("img", {
         src: image
-      }), description)
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Body, null, description))
     );
   };
   _c = RelatedAttributeCard;
@@ -46882,1261 +46414,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","react-bootstrap":"4n7hB","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./related-attribute-card.scss":"3D90e","prop-types":"4dfy5"}],"3D90e":[function() {},{}],"5RqqF":[function() {},{}],"552MA":[function() {},{}],"4kDeE":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactRouterDom = require('react-router-dom');
-  require('../../utils/partials/_view.scss');
-  require('./genre-view.scss');
-  var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
-  var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
-  const GenreView = ({selectedGenre, onBackClick, onItemClick, otherMovies}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "image-cover"
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "close-box"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        onClick: () => onBackClick(),
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-x"
-      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "18",
-        y1: "6",
-        x2: "6",
-        y2: "18"
-      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "6",
-        y1: "6",
-        x2: "18",
-        y2: "18"
-      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "main-content"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedGenre.name), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "description"
-      }, selectedGenre.description)), otherMovies.length > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "related-attributes"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Other ", selectedGenre.name, " Movies"), otherMovies.map((movie, i) => {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
-            key: i,
-            image: movie.image,
-            description: /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-              to: `/movies/${movie._id}`
-            }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-              onClick: () => onItemClick('selectedMovie', movie)
-            }, movie.name))
-          })
-        );
-      }))) : null)
-    );
-  };
-  _c = GenreView;
-  GenreView.propTypes = {
-    selectedGenre: _propTypesDefault.default.object.isRequired,
-    onBackClick: _propTypesDefault.default.func.isRequired,
-    onItemClick: _propTypesDefault.default.func,
-    otherMovies: _propTypesDefault.default.array.isRequired
-  };
-  exports.default = GenreView;
-  var _c;
-  $RefreshReg$(_c, "GenreView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","prop-types":"4dfy5","../../utils/partials/_view.scss":"552MA","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./genre-view.scss":"56Be2","react-router-dom":"1PMSK"}],"552MA":[function() {},{}],"56Be2":[function() {},{}],"7iKJS":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _axios = require('axios');
-  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactBootstrap = require('react-bootstrap');
-  var _UserListUserList = require('../UserList/UserList');
-  var _UserListUserListDefault = _parcelHelpers.interopDefault(_UserListUserList);
-  require('../../utils/partials/_form.scss');
-  require('./profile-view.scss');
-  var _s = $RefreshSig$();
-  const ProfileView = ({userId, logoutUser}) => {
-    _s();
-    const [birthDate, setBirthDate] = _react.useState('');
-    const [email, setEmail] = _react.useState('');
-    const [oldPassword, setOldPassword] = _react.useState('');
-    const [username, setUsername] = _react.useState('');
-    const [newPassword1, setNewPassword1] = _react.useState('');
-    const [newPassword2, setNewPassword2] = _react.useState('');
-    const [successfulUpdate, setSuccessfulUpdate] = _react.useState(false);
-    const [successfulRemoval, setSuccessfulRemoval] = _react.useState(false);
-    const [birthDateError, setBirthDateError] = _react.useState(false);
-    const [deleteUserError, setDeleteUserError] = _react.useState(false);
-    const [passwordMatchError, setPasswordMatchError] = _react.useState(false);
-    const [updateProfileError, setUpdateProfileError] = _react.useState(false);
-    const [usernameLengthError, setUsernameLengthError] = _react.useState(false);
-    const [usernameTypeError, setUsernameTypeError] = _react.useState(false);
-    const token = localStorage.getItem('token');
-    _react.useEffect(() => {
-      _axiosDefault.default.get(`https://my-flix-2021.herokuapp.com/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(response => {
-        // Make date appear in readable format (2021-05-01)
-        const date = new Date(response.data.birthDate);
-        const birthdate = `${date.getFullYear()}-${date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}-${date.getDate()}`;
-        setBirthDate(birthdate);
-        setEmail(response.data.email);
-        setOldPassword(response.data.password);
-        setUsername(response.data.username);
-      });
-    }, []);
-    const deleteUser = () => {
-      confirm('Are you sure you want to delete your account') ? _axiosDefault.default({
-        method: 'delete',
-        url: `https://my-flix-2021.herokuapp.com/users/${userId}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(() => {
-        setSuccessfulRemoval(true);
-        setTimeout(() => {
-          logoutUser();
-        }, 3000);
-      }).catch(() => {
-        setDeleteUserError(true);
-      }) : null;
-    };
-    const handleSubmit = e => {
-      e.preventDefault();
-      // Reset error values
-      setBirthDateError(false);
-      setPasswordMatchError(false);
-      const user = {
-        email,
-        password: oldPassword,
-        username
-      };
-      // Make sure passwords match
-      if ((newPassword1 !== '' || newPassword2 !== '') && newPassword1 !== newPassword2) {
-        setPasswordMatchError(false);
-        return;
-      } else if ((newPassword1 !== '' || newPassword2 !== '') && newPassword1 === newPassword2) user['password'] = newPassword1;
-      // Check if birthDate was entered and if it is valid
-      // if it is add it to user object
-      if (!validateBirthDate()) return;
-      user['birthDate'] = birthDate;
-      _axiosDefault.default({
-        method: 'patch',
-        url: `https://my-flix-2021.herokuapp.com/users/${userId}`,
-        data: user,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(() => {
-        if (newPassword1) {
-          logoutUser();
-          window.open('/', '_self');
-        }
-        setSuccessfulUpdate(true);
-        setTimeout(() => {
-          setSuccessfulUpdate(false);
-        }, 3000);
-      }, err => {
-        setUpdateProfileError(err);
-      });
-    };
-    const onChangeBirthDate = e => {
-      setBirthDate(e.target.value);
-      validateBirthDate(e.target.value);
-    };
-    const onChangeNewPassword1 = e => {
-      setNewPassword1(e.target.value);
-      setPasswordMatchError(false);
-      if (newPassword2 !== '' && e.target.value !== newPassword2) setPasswordMatchError(true);
-    };
-    const onChangeNewPassword2 = e => {
-      setNewPassword2(e.target.value);
-      setPasswordMatchError(false);
-      if (newPassword1 !== '' && newPassword1 !== e.target.value) setPasswordMatchError(true);
-    };
-    const onChangeUsername = e => {
-      const value = e.target.value;
-      setUsername(value);
-      setUsernameLengthError(false);
-      setUsernameTypeError(false);
-      if (value !== '') {
-        if (value.length < 6) setUsernameLengthError(true);
-        const nonAlphaCharacters = value.match(/\W/g);
-        // If there are non alphabetical characters
-        // make sure that they are only numbers
-        // Username should only contain alphanumeric characters
-        if (nonAlphaCharacters) {
-          for (let i = 0; i < nonAlphaCharacters.length; i++) {
-            if (!nonAlphaCharacters[i].match(/\d/)) setUsernameTypeError(true);
-            return;
-          }
-        }
-      }
-    };
-    const validateBirthDate = (birthdate = birthDate) => {
-      const regex = /\d\d\d\d-\d\d-\d\d/;
-      // valid date format
-      if (!birthdate.match(regex)) {
-        setBirthDateError(`${birthdate} is not a valid date. 
-                Please enter a date in this format: yyyy-mm-dd`);
-        return false;
-      } else if (birthdate && birthdate.match(regex)) {
-        setBirthDateError(null);
-        return true;
-      }
-    };
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Personal Info"))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
-        id: "edit-profile-form",
-        onSubmit: e => handleSubmit(e)
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Username"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "username",
-        type: "text",
-        placeholder: "Enter your username",
-        onChange: e => onChangeUsername(e),
-        value: username,
-        required: true
-      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Birthday"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "birth-date",
-        className: `input-container 
-                                    ${birthDateError ? 'error' : ''}`,
-        type: "text",
-        placeholder: "2021-05-10",
-        onChange: e => onChangeBirthDate(e),
-        value: birthDate
-      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Email"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "email",
-        type: "email",
-        placeholder: "me@gmail.com",
-        onChange: e => setEmail(e.target.value),
-        value: email,
-        required: true
-      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Old Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "oldPassword",
-        className: "input-container",
-        type: "password",
-        onChange: e => onChangeNewPassword1(e),
-        placeholder: "Enter your password",
-        value: oldPassword,
-        disabled: true
-      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "New Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "newPassword1",
-        type: "password",
-        className: `input-container ${passwordMatchError ? 'error' : ''}`,
-        onChange: e => onChangeNewPassword1(e),
-        placeholder: "Enter your password again",
-        value: newPassword1
-      }))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Repeat Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "newPassword2",
-        type: "password",
-        className: `input-container ${passwordMatchError ? 'error' : ''}`,
-        onChange: e => onChangeNewPassword2(e),
-        placeholder: "Enter your password again",
-        value: newPassword2
-      })))), usernameLengthError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "Username must be at least 6 characters long.") : null, usernameTypeError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "Username must only contain alphanumeric characters.") : null, birthDateError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, birthDateError) : null, passwordMatchError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "Passwords must match.") : null, updateProfileError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "There was an error updating your profile. Please try again.") : null, successfulUpdate ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "text-info"
-      }, "Your profile was updated successfully!") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "btn-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
-        type: "submit"
-      }, "Save Settings")))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
-        title: "Favorite Movies",
-        listType: "favorite-movies",
-        userId: userId,
-        itemIdType: "movie_id",
-        token: token
-      }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
-        title: "To Watch Movies",
-        listType: "to-watch-movies",
-        userId: userId,
-        itemIdType: "movie_id",
-        token: token
-      }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
-        title: "Favorite Actors",
-        listType: "favorite-actors",
-        userId: userId,
-        itemIdType: "actor_id",
-        token: token
-      }))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-end"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-        xs: 12,
-        sm: 4,
-        md: 5
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "delete-user-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        onClick: () => deleteUser(),
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-trash"
-      }, /*#__PURE__*/_reactDefault.default.createElement("polyline", {
-        points: "3 6 5 6 21 6"
-      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M19 6v14a2 2 0 0  1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2  2 0 0 1 2 2v2"
-      })), /*#__PURE__*/_reactDefault.default.createElement("span", null, "Delete Account")), successfulRemoval ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "text-info"
-      }, "Your account was successfully deleted!") : null, deleteUserError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "Your account could not be deleted. Please try again") : null)))
-    );
-  };
-  _s(ProfileView, "ZKN6uKoOFG7l8hPnalT1IDv/m7s=");
-  _c = ProfileView;
-  ProfileView.propTypes = {
-    logoutUser: _propTypesDefault.default.func.isRequired,
-    userId: _propTypesDefault.default.string.isRequired
-  };
-  exports.default = ProfileView;
-  var _c;
-  $RefreshReg$(_c, "ProfileView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-bootstrap":"4n7hB","../UserList/UserList":"7D85R","../../utils/partials/_form.scss":"5D0uY","./profile-view.scss":"aH745","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"7D85R":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _axios = require('axios');
-  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactRouterDom = require('react-router-dom');
-  var _utilsHelpers = require('../../utils/helpers');
-  require('./user-list.scss');
-  var _s = $RefreshSig$();
-  const UserList = ({title, listType, userId, token, itemIdType}) => {
-    _s();
-    const [list, setList] = _react.useState(null);
-    const [error, setError] = _react.useState(false);
-    _react.useEffect(() => {
-      _axiosDefault.default.get(`https://my-flix-2021.herokuapp.com/users/${userId}/${listType}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(response => {
-        setList(response.data);
-      });
-    }, []);
-    const addItemsToListLink = () => {
-      const listTypeString = listType.replace(/-/g, ' ');
-      if (listTypeString.match(/movies/i)) {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-            to: "/"
-          }, "movies"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
-            className: "list-type"
-          }, listTypeString), " list!")
-        );
-      } else if (listTypeString.match(/actors/i)) {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-            to: "/actors"
-          }, "actors"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
-            className: "list-type"
-          }, listTypeString), " list!")
-        );
-      }
-    };
-    const removeListItem = itemId => {
-      const data = {};
-      data[itemIdType] = itemId;
-      _axiosDefault.default({
-        method: 'delete',
-        url: `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}/${itemId}`,
-        data,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(() => {
-        const newList = list.filter(listItem => {
-          return listItem._id !== itemId;
-        });
-        setList(newList);
-      }).catch(err => {
-        setError(err);
-      });
-    };
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "user-list"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h4", {
-        className: "heading"
-      }, title), /*#__PURE__*/_reactDefault.default.createElement("ul", null, list && list.length > 0 ? list.map(item => {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement("li", {
-            className: "user-list-item",
-            key: item._id
-          }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-            className: "details"
-          }, /*#__PURE__*/_reactDefault.default.createElement("p", null, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-            to: `${listType.match(/movies/i) ? `/movies/${item._id}` : `/actors/${item._id}`}`
-          }, item.name)), /*#__PURE__*/_reactDefault.default.createElement("p", {
-            className: "description"
-          }, _utilsHelpers.createExcerpt(item.description), " …")), /*#__PURE__*/_reactDefault.default.createElement("svg", {
-            onClick: () => removeListItem(item._id),
-            xmlns: "http://www.w3.org/2000/svg",
-            width: "24",
-            height: "24",
-            viewBox: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            strokeWidth: "2",
-            strokeLinecap: "round",
-            strokeLinejoin: "round",
-            className: "feather feather-trash"
-          }, /*#__PURE__*/_reactDefault.default.createElement("polyline", {
-            points: "3 6 5 6 21 6"
-          }), /*#__PURE__*/_reactDefault.default.createElement("path", {
-            d: "M19 6v14a2 2 0 0  1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2  2 0 0 1 2 2v2"
-          })))
-        );
-      }) : addItemsToListLink()), error ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "There was an error removing that item from your", listType.replace(/-/g, ' '), " list.") : null)
-    );
-  };
-  _s(UserList, "wqZ8XUITYSmvxIIOXK3f7cJazjA=");
-  _c = UserList;
-  UserList.propTypes = {
-    title: _propTypesDefault.default.string.isRequired,
-    listType: _propTypesDefault.default.string.isRequired,
-    userId: _propTypesDefault.default.string.isRequired,
-    token: _propTypesDefault.default.string.isRequired,
-    itemIdType: _propTypesDefault.default.string.isRequired
-  };
-  exports.default = UserList;
-  var _c;
-  $RefreshReg$(_c, "UserList");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-router-dom":"1PMSK","../../utils/helpers":"1nff4","./user-list.scss":"3enCW","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"3enCW":[function() {},{}],"5D0uY":[function() {},{}],"aH745":[function() {},{}],"6h1DY":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _reactBootstrap = require('react-bootstrap');
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  require('./main-navbar.scss');
-  var _s = $RefreshSig$();
-  const MainNavbar = ({isUserLoggedIn, view}) => {
-    _s();
-    const [searchTerm, setSearchTerm] = _react.useState('');
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar, {
-        id: "main-navbar",
-        expand: "lg",
-        className: `${!isUserLoggedIn ? 'logged-out' : 'logged-in'}`
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Brand, {
-        href: "/",
-        className: `logo link ${!isUserLoggedIn ? 'logged-out' : 'logged-in'}`
-      }, "myFlix"), isUserLoggedIn ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Toggle, {
-        "aria-controls": "main-navbar-collapse"
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Collapse, {
-        id: "main-navbar-collapse"
-      }, view === 'MovieView' || view === 'MainView' ? /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
-        className: "mx-auto",
-        inline: true
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
-        className: "input-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Prepend, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, {
-        id: "search-bar"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: " http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather  feather-search"
-      }, /*#__PURE__*/_reactDefault.default.createElement("circle", {
-        cx: "11",
-        cy: "11",
-        r: "8"
-      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "21",
-        y1: "21",
-        x2: "16.65",
-        y2: "16.65"
-      })))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        placeholder: "Search …",
-        onChange: e => setSearchTerm(e.target.value),
-        value: searchTerm,
-        "aria-label": "Search …",
-        "aria-describedby": "search-bar"
-      }))) : null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav.Link, {
-        href: "/logout",
-        className: "link logout"
-      }, "Logout")), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav, {
-        className: "nav-links"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav.Link, {
-        href: "/profile",
-        className: `link ${window.location.pathname === '/profile' ? 'active' : ''}`
-      }, "Profile"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav.Link, {
-        href: "/",
-        className: `link ${window.location.pathname === '/' ? 'active' : ''}`
-      }, "Movies"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav.Link, {
-        href: "/about",
-        className: "link"
-      }, "About")))) : null)
-    );
-  };
-  _s(MainNavbar, "a1cMJ8t0eYFnsCEdGcHtaGJdbCM=");
-  _c = MainNavbar;
-  MainNavbar.propTypes = {
-    isUserLoggedIn: _propTypesDefault.default.bool.isRequired,
-    view: _propTypesDefault.default.string
-  };
-  exports.default = MainNavbar;
-  var _c;
-  $RefreshReg$(_c, "MainNavbar");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","react-bootstrap":"4n7hB","prop-types":"4dfy5","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./main-navbar.scss":"RFYh5"}],"RFYh5":[function() {},{}],"7panR":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-var _objectSpread = require('@babel/runtime/helpers/objectSpread2');
-function _interopDefaultLegacy(e) {
-  return e && typeof e === 'object' && ('default' in e) ? e : {
-    'default': e
-  };
-}
-var _objectSpread__default = /*#__PURE__*/_interopDefaultLegacy(_objectSpread);
-/**
-* Adapted from React: https://github.com/facebook/react/blob/master/packages/shared/formatProdErrorMessage.js
-*
-* Do not require this module directly! Use normal throw error calls. These messages will be replaced with error codes
-* during build.
-* @param {number} code
-*/
-function formatProdErrorMessage(code) {
-  return "Minified Redux error #" + code + "; visit https://redux.js.org/Errors?code=" + code + " for the full message or " + 'use the non-minified dev environment for full errors. ';
-}
-// Inlined version of the `symbol-observable` polyfill
-var $$observable = (function () {
-  return typeof Symbol === 'function' && Symbol.observable || '@@observable';
-})();
-/**
-* These are private action types reserved by Redux.
-* For any unknown actions, you must return the current state.
-* If the current state is undefined, you must return the initial state.
-* Do not reference these action types directly in your code.
-*/
-var randomString = function randomString() {
-  return Math.random().toString(36).substring(7).split('').join('.');
-};
-var ActionTypes = {
-  INIT: "@@redux/INIT" + randomString(),
-  REPLACE: "@@redux/REPLACE" + randomString(),
-  PROBE_UNKNOWN_ACTION: function PROBE_UNKNOWN_ACTION() {
-    return "@@redux/PROBE_UNKNOWN_ACTION" + randomString();
-  }
-};
-/**
-* @param {any} obj The object to inspect.
-* @returns {boolean} True if the argument appears to be a plain object.
-*/
-function isPlainObject(obj) {
-  if (typeof obj !== 'object' || obj === null) return false;
-  var proto = obj;
-  while (Object.getPrototypeOf(proto) !== null) {
-    proto = Object.getPrototypeOf(proto);
-  }
-  return Object.getPrototypeOf(obj) === proto;
-}
-function kindOf(val) {
-  var typeOfVal = typeof val;
-  if ("development" !== 'production') {
-    // Inlined / shortened version of `kindOf` from https://github.com/jonschlinkert/kind-of
-    function miniKindOf(val) {
-      if (val === void 0) return 'undefined';
-      if (val === null) return 'null';
-      var type = typeof val;
-      switch (type) {
-        case 'boolean':
-        case 'string':
-        case 'number':
-        case 'symbol':
-        case 'function':
-          {
-            return type;
-          }
-      }
-      if (Array.isArray(val)) return 'array';
-      if (isDate(val)) return 'date';
-      if (isError(val)) return 'error';
-      var constructorName = ctorName(val);
-      switch (constructorName) {
-        case 'Symbol':
-        case 'Promise':
-        case 'WeakMap':
-        case 'WeakSet':
-        case 'Map':
-        case 'Set':
-          return constructorName;
-      }
-      // other
-      return type.slice(8, -1).toLowerCase().replace(/\s/g, '');
-    }
-    function ctorName(val) {
-      return typeof val.constructor === 'function' ? val.constructor.name : null;
-    }
-    function isError(val) {
-      return val instanceof Error || typeof val.message === 'string' && val.constructor && typeof val.constructor.stackTraceLimit === 'number';
-    }
-    function isDate(val) {
-      if (val instanceof Date) return true;
-      return typeof val.toDateString === 'function' && typeof val.getDate === 'function' && typeof val.setDate === 'function';
-    }
-    typeOfVal = miniKindOf(val);
-  }
-  return typeOfVal;
-}
-/**
-* Creates a Redux store that holds the state tree.
-* The only way to change the data in the store is to call `dispatch()` on it.
-*
-* There should only be a single store in your app. To specify how different
-* parts of the state tree respond to actions, you may combine several reducers
-* into a single reducer function by using `combineReducers`.
-*
-* @param {Function} reducer A function that returns the next state tree, given
-* the current state tree and the action to handle.
-*
-* @param {any} [preloadedState] The initial state. You may optionally specify it
-* to hydrate the state from the server in universal apps, or to restore a
-* previously serialized user session.
-* If you use `combineReducers` to produce the root reducer function, this must be
-* an object with the same shape as `combineReducers` keys.
-*
-* @param {Function} [enhancer] The store enhancer. You may optionally specify it
-* to enhance the store with third-party capabilities such as middleware,
-* time travel, persistence, etc. The only store enhancer that ships with Redux
-* is `applyMiddleware()`.
-*
-* @returns {Store} A Redux store that lets you read the state, dispatch actions
-* and subscribe to changes.
-*/
-function createStore(reducer, preloadedState, enhancer) {
-  var _ref2;
-  if (typeof preloadedState === 'function' && typeof enhancer === 'function' || typeof enhancer === 'function' && typeof arguments[3] === 'function') {
-    throw new Error("development" === "production" ? formatProdErrorMessage(0) : 'It looks like you are passing several store enhancers to ' + 'createStore(). This is not supported. Instead, compose them ' + 'together to a single function. See https://redux.js.org/tutorials/fundamentals/part-4-store#creating-a-store-with-enhancers for an example.');
-  }
-  if (typeof preloadedState === 'function' && typeof enhancer === 'undefined') {
-    enhancer = preloadedState;
-    preloadedState = undefined;
-  }
-  if (typeof enhancer !== 'undefined') {
-    if (typeof enhancer !== 'function') {
-      throw new Error("development" === "production" ? formatProdErrorMessage(1) : "Expected the enhancer to be a function. Instead, received: '" + kindOf(enhancer) + "'");
-    }
-    return enhancer(createStore)(reducer, preloadedState);
-  }
-  if (typeof reducer !== 'function') {
-    throw new Error("development" === "production" ? formatProdErrorMessage(2) : "Expected the root reducer to be a function. Instead, received: '" + kindOf(reducer) + "'");
-  }
-  var currentReducer = reducer;
-  var currentState = preloadedState;
-  var currentListeners = [];
-  var nextListeners = currentListeners;
-  var isDispatching = false;
-  /**
-  * This makes a shallow copy of currentListeners so we can use
-  * nextListeners as a temporary list while dispatching.
-  *
-  * This prevents any bugs around consumers calling
-  * subscribe/unsubscribe in the middle of a dispatch.
-  */
-  function ensureCanMutateNextListeners() {
-    if (nextListeners === currentListeners) {
-      nextListeners = currentListeners.slice();
-    }
-  }
-  /**
-  * Reads the state tree managed by the store.
-  *
-  * @returns {any} The current state tree of your application.
-  */
-  function getState() {
-    if (isDispatching) {
-      throw new Error("development" === "production" ? formatProdErrorMessage(3) : 'You may not call store.getState() while the reducer is executing. ' + 'The reducer has already received the state as an argument. ' + 'Pass it down from the top reducer instead of reading it from the store.');
-    }
-    return currentState;
-  }
-  /**
-  * Adds a change listener. It will be called any time an action is dispatched,
-  * and some part of the state tree may potentially have changed. You may then
-  * call `getState()` to read the current state tree inside the callback.
-  *
-  * You may call `dispatch()` from a change listener, with the following
-  * caveats:
-  *
-  * 1. The subscriptions are snapshotted just before every `dispatch()` call.
-  * If you subscribe or unsubscribe while the listeners are being invoked, this
-  * will not have any effect on the `dispatch()` that is currently in progress.
-  * However, the next `dispatch()` call, whether nested or not, will use a more
-  * recent snapshot of the subscription list.
-  *
-  * 2. The listener should not expect to see all state changes, as the state
-  * might have been updated multiple times during a nested `dispatch()` before
-  * the listener is called. It is, however, guaranteed that all subscribers
-  * registered before the `dispatch()` started will be called with the latest
-  * state by the time it exits.
-  *
-  * @param {Function} listener A callback to be invoked on every dispatch.
-  * @returns {Function} A function to remove this change listener.
-  */
-  function subscribe(listener) {
-    if (typeof listener !== 'function') {
-      throw new Error("development" === "production" ? formatProdErrorMessage(4) : "Expected the listener to be a function. Instead, received: '" + kindOf(listener) + "'");
-    }
-    if (isDispatching) {
-      throw new Error("development" === "production" ? formatProdErrorMessage(5) : 'You may not call store.subscribe() while the reducer is executing. ' + 'If you would like to be notified after the store has been updated, subscribe from a ' + 'component and invoke store.getState() in the callback to access the latest state. ' + 'See https://redux.js.org/api/store#subscribelistener for more details.');
-    }
-    var isSubscribed = true;
-    ensureCanMutateNextListeners();
-    nextListeners.push(listener);
-    return function unsubscribe() {
-      if (!isSubscribed) {
-        return;
-      }
-      if (isDispatching) {
-        throw new Error("development" === "production" ? formatProdErrorMessage(6) : 'You may not unsubscribe from a store listener while the reducer is executing. ' + 'See https://redux.js.org/api/store#subscribelistener for more details.');
-      }
-      isSubscribed = false;
-      ensureCanMutateNextListeners();
-      var index = nextListeners.indexOf(listener);
-      nextListeners.splice(index, 1);
-      currentListeners = null;
-    };
-  }
-  /**
-  * Dispatches an action. It is the only way to trigger a state change.
-  *
-  * The `reducer` function, used to create the store, will be called with the
-  * current state tree and the given `action`. Its return value will
-  * be considered the **next** state of the tree, and the change listeners
-  * will be notified.
-  *
-  * The base implementation only supports plain object actions. If you want to
-  * dispatch a Promise, an Observable, a thunk, or something else, you need to
-  * wrap your store creating function into the corresponding middleware. For
-  * example, see the documentation for the `redux-thunk` package. Even the
-  * middleware will eventually dispatch plain object actions using this method.
-  *
-  * @param {Object} action A plain object representing “what changed”. It is
-  * a good idea to keep actions serializable so you can record and replay user
-  * sessions, or use the time travelling `redux-devtools`. An action must have
-  * a `type` property which may not be `undefined`. It is a good idea to use
-  * string constants for action types.
-  *
-  * @returns {Object} For convenience, the same action object you dispatched.
-  *
-  * Note that, if you use a custom middleware, it may wrap `dispatch()` to
-  * return something else (for example, a Promise you can await).
-  */
-  function dispatch(action) {
-    if (!isPlainObject(action)) {
-      throw new Error("development" === "production" ? formatProdErrorMessage(7) : "Actions must be plain objects. Instead, the actual type was: '" + kindOf(action) + "'. You may need to add middleware to your store setup to handle dispatching other values, such as 'redux-thunk' to handle dispatching functions. See https://redux.js.org/tutorials/fundamentals/part-4-store#middleware and https://redux.js.org/tutorials/fundamentals/part-6-async-logic#using-the-redux-thunk-middleware for examples.");
-    }
-    if (typeof action.type === 'undefined') {
-      throw new Error("development" === "production" ? formatProdErrorMessage(8) : 'Actions may not have an undefined "type" property. You may have misspelled an action type string constant.');
-    }
-    if (isDispatching) {
-      throw new Error("development" === "production" ? formatProdErrorMessage(9) : 'Reducers may not dispatch actions.');
-    }
-    try {
-      isDispatching = true;
-      currentState = currentReducer(currentState, action);
-    } finally {
-      isDispatching = false;
-    }
-    var listeners = currentListeners = nextListeners;
-    for (var i = 0; i < listeners.length; i++) {
-      var listener = listeners[i];
-      listener();
-    }
-    return action;
-  }
-  /**
-  * Replaces the reducer currently used by the store to calculate the state.
-  *
-  * You might need this if your app implements code splitting and you want to
-  * load some of the reducers dynamically. You might also need this if you
-  * implement a hot reloading mechanism for Redux.
-  *
-  * @param {Function} nextReducer The reducer for the store to use instead.
-  * @returns {void}
-  */
-  function replaceReducer(nextReducer) {
-    if (typeof nextReducer !== 'function') {
-      throw new Error("development" === "production" ? formatProdErrorMessage(10) : "Expected the nextReducer to be a function. Instead, received: '" + kindOf(nextReducer));
-    }
-    currentReducer = nextReducer;
-    // This action has a similiar effect to ActionTypes.INIT.
-    // Any reducers that existed in both the new and old rootReducer
-    // will receive the previous state. This effectively populates
-    // the new state tree with any relevant data from the old one.
-    dispatch({
-      type: ActionTypes.REPLACE
-    });
-  }
-  /**
-  * Interoperability point for observable/reactive libraries.
-  * @returns {observable} A minimal observable of state changes.
-  * For more information, see the observable proposal:
-  * https://github.com/tc39/proposal-observable
-  */
-  function observable() {
-    var _ref;
-    var outerSubscribe = subscribe;
-    return (_ref = {
-      /**
-      * The minimal observable subscription method.
-      * @param {Object} observer Any object that can be used as an observer.
-      * The observer object should have a `next` method.
-      * @returns {subscription} An object with an `unsubscribe` method that can
-      * be used to unsubscribe the observable from the store, and prevent further
-      * emission of values from the observable.
-      */
-      subscribe: function subscribe(observer) {
-        if (typeof observer !== 'object' || observer === null) {
-          throw new Error("development" === "production" ? formatProdErrorMessage(11) : "Expected the observer to be an object. Instead, received: '" + kindOf(observer) + "'");
-        }
-        function observeState() {
-          if (observer.next) {
-            observer.next(getState());
-          }
-        }
-        observeState();
-        var unsubscribe = outerSubscribe(observeState);
-        return {
-          unsubscribe: unsubscribe
-        };
-      }
-    }, _ref[$$observable] = function () {
-      return this;
-    }, _ref);
-  }
-  // When a store is created, an "INIT" action is dispatched so that every
-  // reducer returns their initial state. This effectively populates
-  // the initial state tree.
-  dispatch({
-    type: ActionTypes.INIT
-  });
-  return (_ref2 = {
-    dispatch: dispatch,
-    subscribe: subscribe,
-    getState: getState,
-    replaceReducer: replaceReducer
-  }, _ref2[$$observable] = observable, _ref2);
-}
-/**
-* Prints a warning in the console if it exists.
-*
-* @param {String} message The warning message.
-* @returns {void}
-*/
-function warning(message) {
-  /*eslint-disable no-console*/
-  if (typeof console !== 'undefined' && typeof console.error === 'function') {
-    console.error(message);
-  }
-  /*eslint-enable no-console*/
-  try {
-    // This error was thrown as a convenience so that if you enable
-    // "break on all exceptions" in your console,
-    // it would pause the execution at this line.
-    throw new Error(message);
-  } catch (e) {}
-}
-function getUnexpectedStateShapeWarningMessage(inputState, reducers, action, unexpectedKeyCache) {
-  var reducerKeys = Object.keys(reducers);
-  var argumentName = action && action.type === ActionTypes.INIT ? 'preloadedState argument passed to createStore' : 'previous state received by the reducer';
-  if (reducerKeys.length === 0) {
-    return 'Store does not have a valid reducer. Make sure the argument passed ' + 'to combineReducers is an object whose values are reducers.';
-  }
-  if (!isPlainObject(inputState)) {
-    return "The " + argumentName + " has unexpected type of \"" + kindOf(inputState) + "\". Expected argument to be an object with the following " + ("keys: \"" + reducerKeys.join('", "') + "\"");
-  }
-  var unexpectedKeys = Object.keys(inputState).filter(function (key) {
-    return !reducers.hasOwnProperty(key) && !unexpectedKeyCache[key];
-  });
-  unexpectedKeys.forEach(function (key) {
-    unexpectedKeyCache[key] = true;
-  });
-  if (action && action.type === ActionTypes.REPLACE) return;
-  if (unexpectedKeys.length > 0) {
-    return "Unexpected " + (unexpectedKeys.length > 1 ? 'keys' : 'key') + " " + ("\"" + unexpectedKeys.join('", "') + "\" found in " + argumentName + ". ") + "Expected to find one of the known reducer keys instead: " + ("\"" + reducerKeys.join('", "') + "\". Unexpected keys will be ignored.");
-  }
-}
-function assertReducerShape(reducers) {
-  Object.keys(reducers).forEach(function (key) {
-    var reducer = reducers[key];
-    var initialState = reducer(undefined, {
-      type: ActionTypes.INIT
-    });
-    if (typeof initialState === 'undefined') {
-      throw new Error("development" === "production" ? formatProdErrorMessage(12) : "The slice reducer for key \"" + key + "\" returned undefined during initialization. " + "If the state passed to the reducer is undefined, you must " + "explicitly return the initial state. The initial state may " + "not be undefined. If you don't want to set a value for this reducer, " + "you can use null instead of undefined.");
-    }
-    if (typeof reducer(undefined, {
-      type: ActionTypes.PROBE_UNKNOWN_ACTION()
-    }) === 'undefined') {
-      throw new Error("development" === "production" ? formatProdErrorMessage(13) : "The slice reducer for key \"" + key + "\" returned undefined when probed with a random type. " + ("Don't try to handle '" + ActionTypes.INIT + "' or other actions in \"redux/*\" ") + "namespace. They are considered private. Instead, you must return the " + "current state for any unknown actions, unless it is undefined, " + "in which case you must return the initial state, regardless of the " + "action type. The initial state may not be undefined, but can be null.");
-    }
-  });
-}
-/**
-* Turns an object whose values are different reducer functions, into a single
-* reducer function. It will call every child reducer, and gather their results
-* into a single state object, whose keys correspond to the keys of the passed
-* reducer functions.
-*
-* @param {Object} reducers An object whose values correspond to different
-* reducer functions that need to be combined into one. One handy way to obtain
-* it is to use ES6 `import * as reducers` syntax. The reducers may never return
-* undefined for any action. Instead, they should return their initial state
-* if the state passed to them was undefined, and the current state for any
-* unrecognized action.
-*
-* @returns {Function} A reducer function that invokes every reducer inside the
-* passed object, and builds a state object with the same shape.
-*/
-function combineReducers(reducers) {
-  var reducerKeys = Object.keys(reducers);
-  var finalReducers = {};
-  for (var i = 0; i < reducerKeys.length; i++) {
-    var key = reducerKeys[i];
-    if ("development" !== 'production') {
-      if (typeof reducers[key] === 'undefined') {
-        warning("No reducer provided for key \"" + key + "\"");
-      }
-    }
-    if (typeof reducers[key] === 'function') {
-      finalReducers[key] = reducers[key];
-    }
-  }
-  var finalReducerKeys = Object.keys(finalReducers);
-  // This is used to make sure we don't warn about the same
-  // keys multiple times.
-  var unexpectedKeyCache;
-  if ("development" !== 'production') {
-    unexpectedKeyCache = {};
-  }
-  var shapeAssertionError;
-  try {
-    assertReducerShape(finalReducers);
-  } catch (e) {
-    shapeAssertionError = e;
-  }
-  return function combination(state, action) {
-    if (state === void 0) {
-      state = {};
-    }
-    if (shapeAssertionError) {
-      throw shapeAssertionError;
-    }
-    if ("development" !== 'production') {
-      var warningMessage = getUnexpectedStateShapeWarningMessage(state, finalReducers, action, unexpectedKeyCache);
-      if (warningMessage) {
-        warning(warningMessage);
-      }
-    }
-    var hasChanged = false;
-    var nextState = {};
-    for (var _i = 0; _i < finalReducerKeys.length; _i++) {
-      var _key = finalReducerKeys[_i];
-      var reducer = finalReducers[_key];
-      var previousStateForKey = state[_key];
-      var nextStateForKey = reducer(previousStateForKey, action);
-      if (typeof nextStateForKey === 'undefined') {
-        var actionType = action && action.type;
-        throw new Error("development" === "production" ? formatProdErrorMessage(14) : "When called with an action of type " + (actionType ? "\"" + String(actionType) + "\"" : '(unknown type)') + ", the slice reducer for key \"" + _key + "\" returned undefined. " + "To ignore an action, you must explicitly return the previous state. " + "If you want this reducer to hold no value, you can return null instead of undefined.");
-      }
-      nextState[_key] = nextStateForKey;
-      hasChanged = hasChanged || nextStateForKey !== previousStateForKey;
-    }
-    hasChanged = hasChanged || finalReducerKeys.length !== Object.keys(state).length;
-    return hasChanged ? nextState : state;
-  };
-}
-function bindActionCreator(actionCreator, dispatch) {
-  return function () {
-    return dispatch(actionCreator.apply(this, arguments));
-  };
-}
-/**
-* Turns an object whose values are action creators, into an object with the
-* same keys, but with every function wrapped into a `dispatch` call so they
-* may be invoked directly. This is just a convenience method, as you can call
-* `store.dispatch(MyActionCreators.doSomething())` yourself just fine.
-*
-* For convenience, you can also pass an action creator as the first argument,
-* and get a dispatch wrapped function in return.
-*
-* @param {Function|Object} actionCreators An object whose values are action
-* creator functions. One handy way to obtain it is to use ES6 `import * as`
-* syntax. You may also pass a single function.
-*
-* @param {Function} dispatch The `dispatch` function available on your Redux
-* store.
-*
-* @returns {Function|Object} The object mimicking the original object, but with
-* every action creator wrapped into the `dispatch` call. If you passed a
-* function as `actionCreators`, the return value will also be a single
-* function.
-*/
-function bindActionCreators(actionCreators, dispatch) {
-  if (typeof actionCreators === 'function') {
-    return bindActionCreator(actionCreators, dispatch);
-  }
-  if (typeof actionCreators !== 'object' || actionCreators === null) {
-    throw new Error("development" === "production" ? formatProdErrorMessage(16) : "bindActionCreators expected an object or a function, but instead received: '" + kindOf(actionCreators) + "'. " + "Did you write \"import ActionCreators from\" instead of \"import * as ActionCreators from\"?");
-  }
-  var boundActionCreators = {};
-  for (var key in actionCreators) {
-    var actionCreator = actionCreators[key];
-    if (typeof actionCreator === 'function') {
-      boundActionCreators[key] = bindActionCreator(actionCreator, dispatch);
-    }
-  }
-  return boundActionCreators;
-}
-/**
-* Composes single-argument functions from right to left. The rightmost
-* function can take multiple arguments as it provides the signature for
-* the resulting composite function.
-*
-* @param {...Function} funcs The functions to compose.
-* @returns {Function} A function obtained by composing the argument functions
-* from right to left. For example, compose(f, g, h) is identical to doing
-* (...args) => f(g(h(...args))).
-*/
-function compose() {
-  for (var _len = arguments.length, funcs = new Array(_len), _key = 0; _key < _len; _key++) {
-    funcs[_key] = arguments[_key];
-  }
-  if (funcs.length === 0) {
-    return function (arg) {
-      return arg;
-    };
-  }
-  if (funcs.length === 1) {
-    return funcs[0];
-  }
-  return funcs.reduce(function (a, b) {
-    return function () {
-      return a(b.apply(void 0, arguments));
-    };
-  });
-}
-/**
-* Creates a store enhancer that applies middleware to the dispatch method
-* of the Redux store. This is handy for a variety of tasks, such as expressing
-* asynchronous actions in a concise manner, or logging every action payload.
-*
-* See `redux-thunk` package as an example of the Redux middleware.
-*
-* Because middleware is potentially asynchronous, this should be the first
-* store enhancer in the composition chain.
-*
-* Note that each middleware will be given the `dispatch` and `getState` functions
-* as named arguments.
-*
-* @param {...Function} middlewares The middleware chain to be applied.
-* @returns {Function} A store enhancer applying the middleware.
-*/
-function applyMiddleware() {
-  for (var _len = arguments.length, middlewares = new Array(_len), _key = 0; _key < _len; _key++) {
-    middlewares[_key] = arguments[_key];
-  }
-  return function (createStore) {
-    return function () {
-      var store = createStore.apply(void 0, arguments);
-      var _dispatch = function dispatch() {
-        throw new Error("development" === "production" ? formatProdErrorMessage(15) : 'Dispatching while constructing your middleware is not allowed. ' + 'Other middleware would not be applied to this dispatch.');
-      };
-      var middlewareAPI = {
-        getState: store.getState,
-        dispatch: function dispatch() {
-          return _dispatch.apply(void 0, arguments);
-        }
-      };
-      var chain = middlewares.map(function (middleware) {
-        return middleware(middlewareAPI);
-      });
-      _dispatch = compose.apply(void 0, chain)(store.dispatch);
-      return _objectSpread__default['default'](_objectSpread__default['default']({}, store), {}, {
-        dispatch: _dispatch
-      });
-    };
-  };
-}
-/*
-* This is a dummy function to check if the function name has been altered by minification.
-* If the function has been minified and NODE_ENV !== 'production', warn the user.
-*/
-function isCrushed() {}
-if ("development" !== 'production' && typeof isCrushed.name === 'string' && isCrushed.name !== 'isCrushed') {
-  warning('You are currently using minified code outside of NODE_ENV === "production". ' + 'This means that you are running a slower development build of Redux. ' + 'You can use loose-envify (https://github.com/zertosh/loose-envify) for browserify ' + 'or setting mode to production in webpack (https://webpack.js.org/concepts/mode/) ' + 'to ensure you have the correct code for your production build.');
-}
-exports.__DO_NOT_USE__ActionTypes = ActionTypes;
-exports.applyMiddleware = applyMiddleware;
-exports.bindActionCreators = bindActionCreators;
-exports.combineReducers = combineReducers;
-exports.compose = compose;
-exports.createStore = createStore;
-
-},{"@babel/runtime/helpers/objectSpread2":"3FdZf"}],"3FdZf":[function(require,module,exports) {
-var defineProperty = require("./defineProperty.js");
-
-function ownKeys(object, enumerableOnly) {
-  var keys = Object.keys(object);
-
-  if (Object.getOwnPropertySymbols) {
-    var symbols = Object.getOwnPropertySymbols(object);
-
-    if (enumerableOnly) {
-      symbols = symbols.filter(function (sym) {
-        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-      });
-    }
-
-    keys.push.apply(keys, symbols);
-  }
-
-  return keys;
-}
-
-function _objectSpread2(target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i] != null ? arguments[i] : {};
-
-    if (i % 2) {
-      ownKeys(Object(source), true).forEach(function (key) {
-        defineProperty(target, key, source[key]);
-      });
-    } else if (Object.getOwnPropertyDescriptors) {
-      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-    } else {
-      ownKeys(Object(source)).forEach(function (key) {
-        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-      });
-    }
-  }
-
-  return target;
-}
-
-module.exports = _objectSpread2;
-module.exports["default"] = module.exports, module.exports.__esModule = true;
-},{"./defineProperty.js":"5PI63"}],"5PI63":[function(require,module,exports) {
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-}
-
-module.exports = _defineProperty;
-module.exports["default"] = module.exports, module.exports.__esModule = true;
-},{}],"7GDa4":[function(require,module,exports) {
+},{"react":"3b2NM","react-bootstrap":"4n7hB","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./related-attribute-card.scss":"3D90e","prop-types":"4dfy5"}],"3D90e":[function() {},{}],"7GDa4":[function(require,module,exports) {
 "use strict";
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
@@ -49537,7 +47815,2092 @@ exports.unstable_batchedUpdates = void 0;
 var _reactDom = require("react-dom");
 
 exports.unstable_batchedUpdates = _reactDom.unstable_batchedUpdates;
-},{"react-dom":"2sg1U"}],"3vUkb":[function(require,module,exports) {
+},{"react-dom":"2sg1U"}],"5S6cN":[function(require,module,exports) {
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+_parcelHelpers.export(exports, "LOGOUT_USER", function () {
+  return LOGOUT_USER;
+});
+_parcelHelpers.export(exports, "SET_ACTORS_SORTING_FACTOR", function () {
+  return SET_ACTORS_SORTING_FACTOR;
+});
+_parcelHelpers.export(exports, "SET_ACTORS", function () {
+  return SET_ACTORS;
+});
+_parcelHelpers.export(exports, "SET_ACTORS_FILTER", function () {
+  return SET_ACTORS_FILTER;
+});
+_parcelHelpers.export(exports, "ADD_FAVORITED_MOVIE", function () {
+  return ADD_FAVORITED_MOVIE;
+});
+_parcelHelpers.export(exports, "SET_SELECTED_MOVIE", function () {
+  return SET_SELECTED_MOVIE;
+});
+_parcelHelpers.export(exports, "SET_FAVORITED_MOVIES", function () {
+  return SET_FAVORITED_MOVIES;
+});
+_parcelHelpers.export(exports, "SET_FEATURED_MOVIES", function () {
+  return SET_FEATURED_MOVIES;
+});
+_parcelHelpers.export(exports, "SET_MOVIES", function () {
+  return SET_MOVIES;
+});
+_parcelHelpers.export(exports, "SET_MOVIES_LIST_TYPE", function () {
+  return SET_MOVIES_LIST_TYPE;
+});
+_parcelHelpers.export(exports, "SET_MOVIES_FILTER", function () {
+  return SET_MOVIES_FILTER;
+});
+_parcelHelpers.export(exports, "SET_MOVIES_SORTING_FACTOR", function () {
+  return SET_MOVIES_SORTING_FACTOR;
+});
+_parcelHelpers.export(exports, "ADD_USER_FAVORITE_ACTOR", function () {
+  return ADD_USER_FAVORITE_ACTOR;
+});
+_parcelHelpers.export(exports, "ADD_USER_FAVORITE_MOVIE", function () {
+  return ADD_USER_FAVORITE_MOVIE;
+});
+_parcelHelpers.export(exports, "ADD_USER_TO_WATCH_MOVIE", function () {
+  return ADD_USER_TO_WATCH_MOVIE;
+});
+_parcelHelpers.export(exports, "SET_USER_INFO", function () {
+  return SET_USER_INFO;
+});
+_parcelHelpers.export(exports, "REMOVE_USER_FAVORITE_ACTOR", function () {
+  return REMOVE_USER_FAVORITE_ACTOR;
+});
+_parcelHelpers.export(exports, "REMOVE_USER_FAVORITE_MOVIE", function () {
+  return REMOVE_USER_FAVORITE_MOVIE;
+});
+_parcelHelpers.export(exports, "REMOVE_USER_TO_WATCH_MOVIE", function () {
+  return REMOVE_USER_TO_WATCH_MOVIE;
+});
+_parcelHelpers.export(exports, "setActors", function () {
+  return setActors;
+});
+_parcelHelpers.export(exports, "setActorsFilter", function () {
+  return setActorsFilter;
+});
+_parcelHelpers.export(exports, "setActorsSortingFactor", function () {
+  return setActorsSortingFactor;
+});
+_parcelHelpers.export(exports, "addFavoritedMovie", function () {
+  return addFavoritedMovie;
+});
+_parcelHelpers.export(exports, "setMovies", function () {
+  return setMovies;
+});
+_parcelHelpers.export(exports, "setFavoritedMovies", function () {
+  return setFavoritedMovies;
+});
+_parcelHelpers.export(exports, "setFeaturedMovies", function () {
+  return setFeaturedMovies;
+});
+_parcelHelpers.export(exports, "setMoviesListType", function () {
+  return setMoviesListType;
+});
+_parcelHelpers.export(exports, "setMoviesFilter", function () {
+  return setMoviesFilter;
+});
+_parcelHelpers.export(exports, "setMoviesSortingFactor", function () {
+  return setMoviesSortingFactor;
+});
+_parcelHelpers.export(exports, "setSelectedMovie", function () {
+  return setSelectedMovie;
+});
+_parcelHelpers.export(exports, "addUserFavoriteActor", function () {
+  return addUserFavoriteActor;
+});
+_parcelHelpers.export(exports, "addUserFavoriteMovie", function () {
+  return addUserFavoriteMovie;
+});
+_parcelHelpers.export(exports, "addUserToWatchMovie", function () {
+  return addUserToWatchMovie;
+});
+_parcelHelpers.export(exports, "logoutUser", function () {
+  return logoutUser;
+});
+_parcelHelpers.export(exports, "setUserInfo", function () {
+  return setUserInfo;
+});
+_parcelHelpers.export(exports, "removeUserFavoriteActor", function () {
+  return removeUserFavoriteActor;
+});
+_parcelHelpers.export(exports, "removeUserFavoriteMovie", function () {
+  return removeUserFavoriteMovie;
+});
+_parcelHelpers.export(exports, "removeUserToWatchMovie", function () {
+  return removeUserToWatchMovie;
+});
+const LOGOUT_USER = 'LOGOUT_USER';
+const SET_ACTORS_SORTING_FACTOR = 'SET_ACTORS_SORTING_FACTOR';
+const SET_ACTORS = 'SET_ACTORS';
+const SET_ACTORS_FILTER = 'SET_ACTORS_FILTER';
+const ADD_FAVORITED_MOVIE = 'ADD_FAVORITED_MOVIE';
+const SET_SELECTED_MOVIE = 'SET_SELECTED_MOVIE';
+const SET_FAVORITED_MOVIES = 'SET_FAVORITED_MOVIES';
+const SET_FEATURED_MOVIES = 'SET_FEATURED_MOVIES';
+const SET_MOVIES = 'SET_MOVIES';
+const SET_MOVIES_LIST_TYPE = 'SET_MOVIES_LIST_TYPE';
+const SET_MOVIES_FILTER = 'SET_MOVIES_FILTER';
+const SET_MOVIES_SORTING_FACTOR = 'SET_MOVIES_SORTING_FACTOR';
+const ADD_USER_FAVORITE_ACTOR = 'ADD_USER_FAVORITE_ACTOR';
+const ADD_USER_FAVORITE_MOVIE = 'ADD_USER_FAVORITE_MOVIE';
+const ADD_USER_TO_WATCH_MOVIE = 'ADD_USER_TO_WATCH_MOVIE';
+const SET_USER_INFO = 'SET_USER_INFO';
+const REMOVE_USER_FAVORITE_ACTOR = 'REMOVE_USER_FAVORITE_ACTOR';
+const REMOVE_USER_FAVORITE_MOVIE = 'REMOVE_USER_FAVORITE_MOVIE';
+const REMOVE_USER_TO_WATCH_MOVIE = 'REMOVE_USER_TO_WATCH_MOVIE';
+const setActors = actors => ({
+  type: SET_ACTORS,
+  actors
+});
+const setActorsFilter = filter => ({
+  type: SET_ACTORS_FILTER,
+  filter
+});
+const setActorsSortingFactor = sortingFactor => ({
+  type: SET_ACTORS_SORTING_FACTOR,
+  sortingFactor
+});
+const addFavoritedMovie = movieName => ({
+  type: ADD_FAVORITED_MOVIE,
+  movieName
+});
+const setMovies = movies => ({
+  type: SET_MOVIES,
+  movies
+});
+const setFavoritedMovies = movies => ({
+  type: SET_FAVORITED_MOVIES,
+  movies
+});
+const setFeaturedMovies = movies => ({
+  type: SET_FEATURED_MOVIES,
+  movies
+});
+const setMoviesListType = listType => ({
+  type: SET_MOVIES_LIST_TYPE,
+  listType
+});
+const setMoviesFilter = filter => ({
+  type: SET_MOVIES_FILTER,
+  filter
+});
+const setMoviesSortingFactor = sortingFactor => ({
+  type: SET_MOVIES_SORTING_FACTOR,
+  sortingFactor
+});
+const setSelectedMovie = movie => ({
+  type: SET_SELECTED_MOVIE,
+  movie
+});
+const addUserFavoriteActor = actorId => ({
+  type: ADD_USER_FAVORITE_ACTOR,
+  actorId
+});
+const addUserFavoriteMovie = movieId => ({
+  type: ADD_USER_FAVORITE_MOVIE,
+  movieId
+});
+const addUserToWatchMovie = movieId => ({
+  type: ADD_USER_TO_WATCH_MOVIE,
+  movieId
+});
+const logoutUser = () => ({
+  type: LOGOUT_USER
+});
+const setUserInfo = info => ({
+  type: SET_USER_INFO,
+  info
+});
+const removeUserFavoriteActor = actorId => ({
+  type: REMOVE_USER_FAVORITE_ACTOR,
+  actorId
+});
+const removeUserFavoriteMovie = movieId => ({
+  type: REMOVE_USER_FAVORITE_MOVIE,
+  movieId
+});
+const removeUserToWatchMovie = movieId => ({
+  type: REMOVE_USER_TO_WATCH_MOVIE,
+  movieId
+});
+
+},{"@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU"}],"4DfHF":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _axios = require('axios');
+  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
+  var _reactBootstrap = require('react-bootstrap');
+  var _utilsHelpers = require('../../utils/helpers');
+  require('../../utils/partials/_form.scss');
+  require('./registration-view.scss');
+  var _s = $RefreshSig$();
+  const RegistrationView = () => {
+    _s();
+    const [birthDate, setBirthDate] = _react.useState('');
+    const [birthDateError, setBirthDateError] = _react.useState(false);
+    const [email, setEmail] = _react.useState('');
+    const [password1, setPassword1] = _react.useState('');
+    const [password2, setPassword2] = _react.useState('');
+    const [passwordMatchError, setPasswordMatchError] = _react.useState(false);
+    const [usernameLengthError, setUsernameLengthError] = _react.useState(false);
+    const [usernameTypeError, setUsernameTypeError] = _react.useState(false);
+    const [registrationError, setRegistrationError] = _react.useState(false);
+    const [username, setUsername] = _react.useState('');
+    _react.useEffect(() => {
+      document.body.style.backgroundColor = '#0376E3';
+      return () => {
+        document.body.style.backgroundColor = '#1B1D24';
+      };
+    });
+    const handleSubmit = e => {
+      e.preventDefault();
+      // Reset error values
+      setBirthDateError(false);
+      setPasswordMatchError(false);
+      // Make sure passwords match
+      if (password1 !== password2) {
+        setPasswordMatchError(false);
+        return;
+      }
+      const user = {
+        password: password1,
+        email,
+        username
+      };
+      // Check if birthDate was entered and if it is valid
+      // if it is add it to user object
+      if (!validateBirthDate()) return;
+      user['birthDate'] = birthDate;
+      _axiosDefault.default.post('https://my-flix-2021.herokuapp.com/users', user).then(() => {
+        window.open('/', '_self');
+      }, err => {
+        setRegistrationError(err);
+      });
+    };
+    const onChangeBirthDate = e => {
+      setBirthDate(e.target.value);
+      validateBirthDate(e.target.value);
+    };
+    const onChangePassword1 = e => {
+      const value = e.target.value;
+      setPassword1(value);
+      setPasswordMatchError(false);
+      setUsernameLengthError(false);
+      setUsernameTypeError(false);
+      if (password2 !== '' && value !== password2) setPasswordMatchError(true);
+    };
+    const onChangePassword2 = e => {
+      setPassword2(e.target.value);
+      setPasswordMatchError(false);
+      if (password1 !== '' && password1 !== e.target.value) setPasswordMatchError(true);
+    };
+    const onChangeUsername = e => {
+      const value = e.target.value;
+      setUsername(value);
+      setUsernameLengthError(false);
+      setUsernameTypeError(false);
+      if (value !== '') {
+        if (value.length < 6) setUsernameLengthError(true);
+        const nonAlphaCharacters = value.match(/\W/g);
+        // If there are non alphabetical characters
+        // make sure that they are only numbers
+        // Username should only contain alphanumeric characters
+        if (nonAlphaCharacters) {
+          for (let i = 0; i < nonAlphaCharacters.length; i++) {
+            if (!nonAlphaCharacters[i].match(/\d/)) setUsernameTypeError(true);
+            return;
+          }
+        }
+      }
+    };
+    const validateBirthDate = (birthdate = birthDate) => {
+      if (birthdate === '') return true;
+      const regex = /\d\d\d\d-\d\d-\d\d/;
+      // valid date format
+      if (!birthdate.match(regex)) {
+        setBirthDateError(`${birthdate} is not a valid date. 
+                Please enter a date in this format: yyyy-mm-dd`);
+        return false;
+      } else if (birthdate && birthdate.match(regex)) {
+        setBirthDateError(null);
+        return true;
+      }
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
+        id: "registration-form",
+        onSubmit: e => handleSubmit(e)
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Great to Meet you!"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Text, {
+        className: "label"
+      }, "Create an account"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "username"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Username*"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        type: "text",
+        placeholder: "Enter your username",
+        onBlur: e => _utilsHelpers.removeFocusedClass(e),
+        onFocus: e => _utilsHelpers.addFocusedClass(e),
+        onChange: e => onChangeUsername(e),
+        value: username,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-user"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M20 21v-2a4 4 0 0 0-4-4H8a4  4 0 0 0-4 4v2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("circle", {
+        cx: "12",
+        cy: "7",
+        r: "4"
+      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "birth-date"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Birthday"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
+        className: `input-container 
+                        ${birthDateError ? 'error' : ''}`
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        type: "text",
+        placeholder: "2021-05-10",
+        onBlur: e => _utilsHelpers.removeFocusedClass(e),
+        onFocus: e => _utilsHelpers.addFocusedClass(e),
+        onChange: e => onChangeBirthDate(e),
+        value: birthDate
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-calendar"
+      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
+        x: "3",
+        y: "4",
+        width: "18",
+        height: "18",
+        rx: "2",
+        ry: "2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "16",
+        y1: "2",
+        x2: "16",
+        y2: "6"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "8",
+        y1: "2",
+        x2: "8",
+        y2: "6"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "3",
+        y1: "10",
+        x2: "21",
+        y2: "10"
+      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Email*"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "email",
+        type: "email",
+        placeholder: "me@gmail.com",
+        onBlur: e => _utilsHelpers.removeFocusedClass(e),
+        onFocus: e => _utilsHelpers.addFocusedClass(e),
+        onChange: e => setEmail(e.target.value),
+        value: email,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-mail"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+      }), /*#__PURE__*/_reactDefault.default.createElement("polyline", {
+        points: "22,6 12,13 2,6"
+      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "password1"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Password*"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
+        className: `input-container ${passwordMatchError ? 'error' : ''}`
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        type: "password",
+        onBlur: e => _utilsHelpers.removeFocusedClass(e),
+        onFocus: e => _utilsHelpers.addFocusedClass(e),
+        onChange: e => onChangePassword1(e),
+        placeholder: "Enter your password",
+        value: password1,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-lock"
+      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
+        x: "3",
+        y: "11",
+        width: "18",
+        height: "11",
+        rx: "2",
+        ry: "2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M7 11V7a5 5 0 0 1 10 0v4"
+      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "password2"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Password*"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
+        className: `input-container ${passwordMatchError ? 'error' : ''}`
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        type: "password",
+        onBlur: e => _utilsHelpers.removeFocusedClass(e),
+        onFocus: e => _utilsHelpers.addFocusedClass(e),
+        onChange: e => onChangePassword2(e),
+        placeholder: "Enter your password again",
+        value: password2,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-lock"
+      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
+        x: "3",
+        y: "11",
+        width: "18",
+        height: "11",
+        rx: "2",
+        ry: "2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M7 11V7a5 5 0 0 1 10 0v4"
+      })))))), birthDateError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, birthDateError) : null, usernameLengthError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Username must be at least 6 characters long.") : null, usernameTypeError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Username must only contain alphanumeric characters.") : null, passwordMatchError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Passwords must match") : null, registrationError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "There was an error. Please try again.") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "btn-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
+        type: "submit"
+      }, "Register")))
+    );
+  };
+  _s(RegistrationView, "cahSAmDsOijZ8eQRo23iYptsRg4=");
+  _c = RegistrationView;
+  exports.default = RegistrationView;
+  var _c;
+  $RefreshReg$(_c, "RegistrationView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./registration-view.scss":"4BDo8","../../utils/partials/_form.scss":"5D0uY","react-bootstrap":"4n7hB","../../utils/helpers":"1nff4","axios":"7rA65"}],"4BDo8":[function() {},{}],"5D0uY":[function() {},{}],"1zhWx":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _axios = require('axios');
+  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
+  var _reactRouterDom = require('react-router-dom');
+  var _reactBootstrap = require('react-bootstrap');
+  var _utilsHelpers = require('../../utils/helpers');
+  require('../../utils/partials/_form.scss');
+  require('./login-view.scss');
+  var _s = $RefreshSig$();
+  const LoginView = ({onLoggedIn}) => {
+    _s();
+    const [username, setUsername] = _react.useState('');
+    const [loginError, setLoginError] = _react.useState(false);
+    const [password, setPassword] = _react.useState('');
+    const handleSubmit = e => {
+      e.preventDefault();
+      _axiosDefault.default.post('https://my-flix-2021.herokuapp.com/login', {
+        username,
+        password
+      }).then(response => {
+        onLoggedIn(response.data);
+      }, err => {
+        setLoginError(err);
+      });
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
+        id: "login-form",
+        onSubmit: e => handleSubmit(e)
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Great to Meet you!"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Text, {
+        className: "label"
+      }, "Login to your account"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "email"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Username"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        type: "text",
+        placeholder: "Enter your username",
+        onBlur: e => _utilsHelpers.removeFocusedClass(e),
+        onFocus: e => _utilsHelpers.addFocusedClass(e),
+        onChange: e => setUsername(e.target.value),
+        value: username,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-user"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("circle", {
+        cx: "12",
+        cy: "7",
+        r: "4"
+      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "password",
+        className: "form-group"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        type: "password",
+        onBlur: e => _utilsHelpers.removeFocusedClass(e),
+        onFocus: e => _utilsHelpers.addFocusedClass(e),
+        onChange: e => setPassword(e.target.value),
+        placeholder: "Enter your password",
+        value: password,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-lock"
+      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
+        x: "3",
+        y: "11",
+        width: "18",
+        height: "11",
+        rx: "2",
+        ry: "2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M7 11V7a5 5 0 0 1 10 0v4"
+      })))))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "btn-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
+        type: "submit"
+      }, "Login"))), loginError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "There was an error. Please try again.") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "btn-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/register"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
+        type: "button"
+      }, "Register"))))
+    );
+  };
+  _s(LoginView, "Q0DOD4fIQaMtcr0yrRc4JqEd3vg=");
+  _c = LoginView;
+  LoginView.propTypes = {
+    onLoggedIn: _propTypesDefault.default.func.isRequired
+  };
+  exports.default = LoginView;
+  var _c;
+  $RefreshReg$(_c, "LoginView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./login-view.scss":"2Muu9","prop-types":"4dfy5","react-bootstrap":"4n7hB","../../utils/partials/_form.scss":"5D0uY","../../utils/helpers":"1nff4","axios":"7rA65","react-router-dom":"1PMSK"}],"2Muu9":[function() {},{}],"5D0uY":[function() {},{}],"3JwwG":[function() {},{}],"7nJwh":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRouterDom = require('react-router-dom');
+  require('../../utils/partials/_view.scss');
+  require('./director-view.scss');
+  var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
+  var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
+  const DirectorView = ({selectedDirector, onBackClick, onItemClick, otherMovies}) => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "image-cover"
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "close-box"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => onBackClick('selectedDirector'),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-x"
+      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "18",
+        y1: "6",
+        x2: "6",
+        y2: "18"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "6",
+        y1: "6",
+        x2: "18",
+        y2: "18"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "main-content"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedDirector.name), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Biography"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, selectedDirector.bio)), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attributes"
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attribute"
+      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Birth Year"), /*#__PURE__*/_reactDefault.default.createElement("p", null, selectedDirector.birthYear)), selectedDirector.deathYear ? /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attribute"
+      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Death Year"), /*#__PURE__*/_reactDefault.default.createElement("p", null, selectedDirector.deathYear)) : null), otherMovies.length > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Other ", selectedDirector.name, " Movies"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "related-attributes"
+      }, otherMovies.map((movie, i) => /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
+        key: i,
+        image: movie.image,
+        description: /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+          to: `/movies/${movie._id}`
+        }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+          onClick: () => onItemClick('selectedMovie', movie)
+        }, movie.name))
+      })))) : null)
+    );
+  };
+  _c = DirectorView;
+  DirectorView.propTypes = {
+    selectedDirector: _propTypesDefault.default.shape({
+      bio: _propTypesDefault.default.string.isRequired,
+      birthYear: _propTypesDefault.default.number.isRequired,
+      deathYear: _propTypesDefault.default.number,
+      name: _propTypesDefault.default.string.isRequired
+    }).isRequired,
+    onBackClick: _propTypesDefault.default.func.isRequired,
+    onItemClick: _propTypesDefault.default.func,
+    otherMovies: _propTypesDefault.default.array.isRequired
+  };
+  exports.default = DirectorView;
+  var _c;
+  $RefreshReg$(_c, "DirectorView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","prop-types":"4dfy5","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","./director-view.scss":"5RqqF","../../utils/partials/_view.scss":"552MA","react-router-dom":"1PMSK"}],"5RqqF":[function() {},{}],"552MA":[function() {},{}],"4kDeE":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRouterDom = require('react-router-dom');
+  require('../../utils/partials/_view.scss');
+  require('./genre-view.scss');
+  var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
+  var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
+  const GenreView = ({selectedGenre, onBackClick, onItemClick, otherMovies}) => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "image-cover"
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "close-box"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => onBackClick(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-x"
+      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "18",
+        y1: "6",
+        x2: "6",
+        y2: "18"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "6",
+        y1: "6",
+        x2: "18",
+        y2: "18"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "main-content"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedGenre.name), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, selectedGenre.description)), otherMovies.length > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "related-attributes"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Other ", selectedGenre.name, " Movies"), otherMovies.map((movie, i) => {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
+            key: i,
+            image: movie.image,
+            description: /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+              to: `/movies/${movie._id}`
+            }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+              onClick: () => onItemClick('selectedMovie', movie)
+            }, movie.name))
+          })
+        );
+      }))) : null)
+    );
+  };
+  _c = GenreView;
+  GenreView.propTypes = {
+    selectedGenre: _propTypesDefault.default.object.isRequired,
+    onBackClick: _propTypesDefault.default.func.isRequired,
+    onItemClick: _propTypesDefault.default.func,
+    otherMovies: _propTypesDefault.default.array.isRequired
+  };
+  exports.default = GenreView;
+  var _c;
+  $RefreshReg$(_c, "GenreView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","prop-types":"4dfy5","../../utils/partials/_view.scss":"552MA","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./genre-view.scss":"56Be2","react-router-dom":"1PMSK"}],"552MA":[function() {},{}],"56Be2":[function() {},{}],"7iKJS":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _axios = require('axios');
+  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
+  var _UserListUserList = require('../UserList/UserList');
+  var _UserListUserListDefault = _parcelHelpers.interopDefault(_UserListUserList);
+  require('../../utils/partials/_form.scss');
+  require('./profile-view.scss');
+  var _s = $RefreshSig$();
+  const ProfileView = ({onLogout, user}) => {
+    _s();
+    // Make date appear in readable format (2021-05-01)
+    // const date = new Date(response.data.birthDate);
+    // const birthdate = `${
+    // date.getFullYear()}-${
+    // date.getMonth() < 10
+    // ? `0${date.getMonth()+1}`
+    // : date.getMonth()+1}-${date.getDate()}`;
+    const [birthDate, setBirthDate] = _react.useState(user.birthDate ? user.birthDate : '');
+    const [email, setEmail] = _react.useState(user.email);
+    const oldPassword = user.password;
+    const [username, setUsername] = _react.useState(user.username);
+    const [newPassword1, setNewPassword1] = _react.useState('');
+    const [newPassword2, setNewPassword2] = _react.useState('');
+    const [successfulUpdate, setSuccessfulUpdate] = _react.useState(false);
+    const [successfulRemoval, setSuccessfulRemoval] = _react.useState(false);
+    const [birthDateError, setBirthDateError] = _react.useState(false);
+    const [deleteUserError, setDeleteUserError] = _react.useState(false);
+    const [passwordMatchError, setPasswordMatchError] = _react.useState(false);
+    const [updateProfileError, setUpdateProfileError] = _react.useState(false);
+    const [usernameLengthError, setUsernameLengthError] = _react.useState(false);
+    const [usernameTypeError, setUsernameTypeError] = _react.useState(false);
+    const token = localStorage.getItem('token');
+    const deleteUser = () => {
+      confirm('Are you sure you want to delete your account') ? _axiosDefault.default({
+        method: 'delete',
+        url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(() => {
+        setSuccessfulRemoval(true);
+        setTimeout(() => {
+          onLogout();
+        }, 3000);
+      }).catch(() => {
+        setDeleteUserError(true);
+      }) : null;
+    };
+    const handleSubmit = e => {
+      e.preventDefault();
+      // Reset error values
+      setBirthDateError(false);
+      setPasswordMatchError(false);
+      const updatedUser = {
+        email,
+        password: oldPassword,
+        username
+      };
+      // Make sure passwords match
+      if ((newPassword1 !== '' || newPassword2 !== '') && newPassword1 !== newPassword2) {
+        setPasswordMatchError(false);
+        return;
+      } else if ((newPassword1 !== '' || newPassword2 !== '') && newPassword1 === newPassword2) updatedUser['password'] = newPassword1;
+      // Check if birthDate was entered and if it is valid
+      // if it is add it to user object
+      if (!validateBirthDate()) return;
+      updatedUser['birthDate'] = birthDate;
+      _axiosDefault.default({
+        method: 'patch',
+        url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
+        data: updatedUser,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(() => {
+        _actionsActions.setUserInfo(updatedUser);
+        if (newPassword1) {
+          _actionsActions.logoutUser();
+          window.open('/', '_self');
+        }
+        setSuccessfulUpdate(true);
+        setTimeout(() => {
+          setSuccessfulUpdate(false);
+        }, 3000);
+      }, err => {
+        setUpdateProfileError(err);
+      });
+    };
+    const onChangeBirthDate = e => {
+      setBirthDate(e.target.value);
+      validateBirthDate(e.target.value);
+    };
+    const onChangeNewPassword1 = e => {
+      setNewPassword1(e.target.value);
+      setPasswordMatchError(false);
+      if (newPassword2 !== '' && e.target.value !== newPassword2) setPasswordMatchError(true);
+    };
+    const onChangeNewPassword2 = e => {
+      setNewPassword2(e.target.value);
+      setPasswordMatchError(false);
+      if (newPassword1 !== '' && newPassword1 !== e.target.value) setPasswordMatchError(true);
+    };
+    const onChangeUsername = e => {
+      const value = e.target.value;
+      setUsername(value);
+      setUsernameLengthError(false);
+      setUsernameTypeError(false);
+      if (value !== '') {
+        if (value.length < 6) setUsernameLengthError(true);
+        const nonAlphaCharacters = value.match(/\W/g);
+        // If there are non alphabetical characters
+        // make sure that they are only numbers
+        // Username should only contain alphanumeric characters
+        if (nonAlphaCharacters) {
+          for (let i = 0; i < nonAlphaCharacters.length; i++) {
+            if (!nonAlphaCharacters[i].match(/\d/)) setUsernameTypeError(true);
+            return;
+          }
+        }
+      }
+    };
+    const validateBirthDate = (birthdate = birthDate) => {
+      const regex = /\d\d\d\d-\d\d-\d\d/;
+      // valid date format
+      if (!birthdate.match(regex)) {
+        setBirthDateError(`${birthdate} is not a valid date. 
+                Please enter a date in this format: yyyy-mm-dd`);
+        return false;
+      } else if (birthdate && birthdate.match(regex)) {
+        setBirthDateError(null);
+        return true;
+      }
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Personal Info"))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
+        id: "edit-profile-form",
+        onSubmit: e => handleSubmit(e)
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Username"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "username",
+        type: "text",
+        placeholder: "Enter your username",
+        onChange: e => onChangeUsername(e),
+        value: username,
+        required: true
+      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Birthday"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "birth-date",
+        className: `input-container 
+                                    ${birthDateError ? 'error' : ''}`,
+        type: "text",
+        placeholder: "2021-05-10",
+        onChange: e => onChangeBirthDate(e),
+        value: birthDate
+      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Email"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "email",
+        type: "email",
+        placeholder: "me@gmail.com",
+        onChange: e => setEmail(e.target.value),
+        value: email,
+        required: true
+      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Old Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "oldPassword",
+        className: "input-container",
+        type: "password",
+        onChange: e => onChangeNewPassword1(e),
+        placeholder: "Enter your password",
+        value: oldPassword,
+        disabled: true
+      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "New Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "newPassword1",
+        type: "password",
+        className: `input-container ${passwordMatchError ? 'error' : ''}`,
+        onChange: e => onChangeNewPassword1(e),
+        placeholder: "Enter your password again",
+        value: newPassword1
+      }))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Repeat Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "newPassword2",
+        type: "password",
+        className: `input-container ${passwordMatchError ? 'error' : ''}`,
+        onChange: e => onChangeNewPassword2(e),
+        placeholder: "Enter your password again",
+        value: newPassword2
+      })))), usernameLengthError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Username must be at least 6 characters long.") : null, usernameTypeError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Username must only contain alphanumeric characters.") : null, birthDateError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, birthDateError) : null, passwordMatchError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Passwords must match.") : null, updateProfileError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "There was an error updating your profile. Please try again.") : null, successfulUpdate ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "text-info"
+      }, "Your profile was updated successfully!") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "btn-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
+        type: "submit"
+      }, "Save Settings")))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
+        title: "Favorite Movies",
+        listType: "favorite-movies",
+        listTypeJS: "favoriteMovies",
+        userId: user.id,
+        itemIdType: "movie_id",
+        token: token
+      }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
+        title: "To Watch Movies",
+        listType: "to-watch-movies",
+        listTypeJS: "toWatchMovies",
+        userId: user.id,
+        itemIdType: "movie_id",
+        token: token
+      }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
+        title: "Favorite Actors",
+        listType: "favorite-actors",
+        listTypeJS: "favoriteActors",
+        userId: user.id,
+        itemIdType: "actor_id",
+        token: token
+      }))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+        className: "justify-content-end"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+        xs: 12,
+        sm: 4,
+        md: 5
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "delete-user-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => deleteUser(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-trash"
+      }, /*#__PURE__*/_reactDefault.default.createElement("polyline", {
+        points: "3 6 5 6 21 6"
+      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M19 6v14a2 2 0 0  1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2  2 0 0 1 2 2v2"
+      })), /*#__PURE__*/_reactDefault.default.createElement("span", null, "Delete Account")), successfulRemoval ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "text-info"
+      }, "Your account was successfully deleted!") : null, deleteUserError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Your account could not be deleted. Please try again") : null)))
+    );
+  };
+  _s(ProfileView, "2+N52NXXkjIdNJKljSLKLJgCwFg=");
+  _c = ProfileView;
+  ProfileView.propTypes = {
+    onLogout: _propTypesDefault.default.func.isRequired,
+    user: _propTypesDefault.default.shape({
+      id: _propTypesDefault.default.string.isRequired,
+      birthDate: _propTypesDefault.default.string,
+      email: _propTypesDefault.default.string,
+      password: _propTypesDefault.default.string.isRequired,
+      username: _propTypesDefault.default.string.isRequired
+    })
+  };
+  const mapStateToProps = state => {
+    return {
+      user: state.user
+    };
+  };
+  exports.default = _reactRedux.connect(mapStateToProps, {
+    logoutUser: _actionsActions.logoutUser,
+    setUserInfo: _actionsActions.setUserInfo
+  })(ProfileView);
+  var _c;
+  $RefreshReg$(_c, "ProfileView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-bootstrap":"4n7hB","../UserList/UserList":"7D85R","../../utils/partials/_form.scss":"5D0uY","./profile-view.scss":"aH745","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","react-redux":"7GDa4","../../actions/actions":"5S6cN"}],"7D85R":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _axios = require('axios');
+  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRouterDom = require('react-router-dom');
+  var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
+  var _utilsHelpers = require('../../utils/helpers');
+  require('./user-list.scss');
+  var _s = $RefreshSig$();
+  const UserList = ({actors, favoritedMovies, title, listType, listTypeJS, movies, token, itemIdType, setFavoritedMovies, user}) => {
+    _s();
+    const [list, setList] = _react.useState(null);
+    const [error, setError] = _react.useState(false);
+    _react.useEffect(() => {
+      if (listTypeJS.match(/movies/i)) {
+        setList(user[listTypeJS].map(movieId => {
+          const matchingMovie = movies.find(movie => {
+            return movie._id === movieId;
+          });
+          return {
+            id: matchingMovie._id,
+            description: matchingMovie.description,
+            image: matchingMovie.image,
+            name: matchingMovie.name
+          };
+        }));
+      } else if (listTypeJS.match(/actors/i)) {
+        setList(user[listTypeJS].map(actor => {
+          const matchingActor = actors.find(actorId => {
+            return actor._id === actorId;
+          });
+          return {
+            id: matchingActor._id,
+            bio: matchingActor.bio,
+            image: matchingActor.image,
+            name: matchingActor.name
+          };
+        }));
+      }
+    }, []);
+    const addItemsToListLink = () => {
+      const listTypeString = listType.replace(/-/g, ' ');
+      if (listTypeString.match(/movies/i)) {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+            to: "/"
+          }, "movies"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
+            className: "list-type"
+          }, listTypeString), " list!")
+        );
+      } else if (listTypeString.match(/actors/i)) {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+            to: "/actors"
+          }, "actors"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
+            className: "list-type"
+          }, listTypeString), " list!")
+        );
+      }
+    };
+    const removeListItem = (itemId, itemName) => {
+      const data = {};
+      data[itemIdType] = itemId;
+      _axiosDefault.default({
+        method: 'delete',
+        url: `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}/${itemId}`,
+        data,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(() => {
+        const newList = list.filter(listItem => {
+          return listItem._id !== itemId;
+        });
+        setList(newList);
+        if (listTypeJS === 'favoriteMovies') {
+          _actionsActions.removeUserFavoriteMovie(itemId);
+          setFavoritedMovies(favoritedMovies.map(movie => {
+            if (movie.name === itemName) {
+              return {
+                ...movie,
+                usersFavorited: movie.usersFavorited--
+              };
+            }
+            return movie;
+          }));
+        }
+        if (listTypeJS === 'favoriteActors') _actionsActions.removeUserFavoriteActor(itemId);
+        if (listTypeJS === 'toWatchMovies') _actionsActions.removeUserToWatchMovie(itemId);
+      }).catch(err => {
+        setError(err);
+      });
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "user-list"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h4", {
+        className: "heading"
+      }, title), /*#__PURE__*/_reactDefault.default.createElement("ul", null, list && list.length > 0 ? list.map(item => {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement("li", {
+            className: "user-list-item",
+            key: item.id
+          }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+            className: "details"
+          }, /*#__PURE__*/_reactDefault.default.createElement("p", null, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+            to: `${listType.match(/movies/i) ? `/movies/${item.id}` : `/actors/${item.id}`}`
+          }, item.name)), /*#__PURE__*/_reactDefault.default.createElement("p", {
+            className: "description"
+          }, _utilsHelpers.createExcerpt(item.description ? item.description : item.bio), " …")), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+            onClick: () => removeListItem(item.id, item.name),
+            xmlns: "http://www.w3.org/2000/svg",
+            width: "24",
+            height: "24",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            className: "feather feather-trash"
+          }, /*#__PURE__*/_reactDefault.default.createElement("polyline", {
+            points: "3 6 5 6 21 6"
+          }), /*#__PURE__*/_reactDefault.default.createElement("path", {
+            d: "M19 6v14a2 2 0 0  1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2  2 0 0 1 2 2v2"
+          })))
+        );
+      }) : addItemsToListLink()), error ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "There was an error removing that item from your", listType.replace(/-/g, ' '), " list.") : null)
+    );
+  };
+  _s(UserList, "wqZ8XUITYSmvxIIOXK3f7cJazjA=");
+  _c = UserList;
+  UserList.propTypes = {
+    actors: _propTypesDefault.default.array.isRequired,
+    favoritedMovies: _propTypesDefault.default.array.isRequired,
+    movies: _propTypesDefault.default.array.isRequired,
+    title: _propTypesDefault.default.string.isRequired,
+    listType: _propTypesDefault.default.string.isRequired,
+    listTypeJS: _propTypesDefault.default.string,
+    setFavoritedMovies: _propTypesDefault.default.func.isRequired,
+    user: _propTypesDefault.default.shape({
+      id: _propTypesDefault.default.string.isRequired
+    }),
+    userId: _propTypesDefault.default.string.isRequired,
+    token: _propTypesDefault.default.string.isRequired,
+    itemIdType: _propTypesDefault.default.string.isRequired
+  };
+  const mapToStateProps = state => ({
+    actors: state.actors,
+    favoritedMovies: state.favoritedMovies,
+    movies: state.movies,
+    user: state.user
+  });
+  exports.default = _reactRedux.connect(mapToStateProps, {
+    removeUserFavoriteActor: _actionsActions.removeUserFavoriteActor,
+    removeUserFavoriteMovie: _actionsActions.removeUserFavoriteMovie,
+    removeUserToWatchMovie: _actionsActions.removeUserToWatchMovie,
+    setFavoritedMovies: _actionsActions.setFavoritedMovies
+  })(UserList);
+  var _c;
+  $RefreshReg$(_c, "UserList");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-router-dom":"1PMSK","../../utils/helpers":"1nff4","./user-list.scss":"3enCW","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","react-redux":"7GDa4","../../actions/actions":"5S6cN"}],"3enCW":[function() {},{}],"5D0uY":[function() {},{}],"aH745":[function() {},{}],"6h1DY":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _reactBootstrap = require('react-bootstrap');
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRouterDom = require('react-router-dom');
+  var _reactRedux = require('react-redux');
+  require('./main-navbar.scss');
+  var _s = $RefreshSig$();
+  const MainNavbar = () => {
+    _s();
+    const [searchTerm, setSearchTerm] = _react.useState('');
+    const isUserLoggedIn = localStorage.getItem('token') ? true : false;
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar, {
+        id: "main-navbar",
+        expand: "lg",
+        className: `${!isUserLoggedIn ? 'logged-out' : 'logged-in'}`
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Brand, {
+        to: "/",
+        className: `logo link ${!isUserLoggedIn ? 'logged-out' : 'logged-in'}`
+      }, "myFlix"), isUserLoggedIn ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Toggle, {
+        "aria-controls": "main-navbar-collapse"
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Collapse, {
+        id: "main-navbar-collapse"
+      }, window.location.pathname === '/' ? /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
+        className: "mx-auto",
+        inline: true
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Prepend, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, {
+        id: "search-bar"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: " http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather  feather-search"
+      }, /*#__PURE__*/_reactDefault.default.createElement("circle", {
+        cx: "11",
+        cy: "11",
+        r: "8"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "21",
+        y1: "21",
+        x2: "16.65",
+        y2: "16.65"
+      })))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        placeholder: "Search …",
+        onChange: e => setSearchTerm(e.target.value),
+        value: searchTerm,
+        "aria-label": "Search …",
+        "aria-describedby": "search-bar"
+      }))) : null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav, null, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/logout",
+        className: "link nav-link logout"
+      }, "Logout")), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav, {
+        className: "nav-links"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/profile",
+        className: `link nav-link ${window.location.pathname === '/profile' ? 'active' : ''}`
+      }, "Profile"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/",
+        className: `link nav-link ${window.location.pathname === '/' ? 'active' : ''}`
+      }, "Movies"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/about",
+        className: "link nav-link"
+      }, "About")))) : null)
+    );
+  };
+  _s(MainNavbar, "a1cMJ8t0eYFnsCEdGcHtaGJdbCM=");
+  _c = MainNavbar;
+  MainNavbar.propTypes = {
+    user: _propTypesDefault.default.object.isRequired
+  };
+  const mapStateToProps = state => {
+    return {
+      user: state.user
+    };
+  };
+  exports.default = _reactRedux.connect(mapStateToProps)(MainNavbar);
+  var _c;
+  $RefreshReg$(_c, "MainNavbar");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","react-bootstrap":"4n7hB","prop-types":"4dfy5","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./main-navbar.scss":"RFYh5","react-redux":"7GDa4","react-router-dom":"1PMSK"}],"RFYh5":[function() {},{}],"7panR":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+var _objectSpread = require('@babel/runtime/helpers/objectSpread2');
+function _interopDefaultLegacy(e) {
+  return e && typeof e === 'object' && ('default' in e) ? e : {
+    'default': e
+  };
+}
+var _objectSpread__default = /*#__PURE__*/_interopDefaultLegacy(_objectSpread);
+/**
+* Adapted from React: https://github.com/facebook/react/blob/master/packages/shared/formatProdErrorMessage.js
+*
+* Do not require this module directly! Use normal throw error calls. These messages will be replaced with error codes
+* during build.
+* @param {number} code
+*/
+function formatProdErrorMessage(code) {
+  return "Minified Redux error #" + code + "; visit https://redux.js.org/Errors?code=" + code + " for the full message or " + 'use the non-minified dev environment for full errors. ';
+}
+// Inlined version of the `symbol-observable` polyfill
+var $$observable = (function () {
+  return typeof Symbol === 'function' && Symbol.observable || '@@observable';
+})();
+/**
+* These are private action types reserved by Redux.
+* For any unknown actions, you must return the current state.
+* If the current state is undefined, you must return the initial state.
+* Do not reference these action types directly in your code.
+*/
+var randomString = function randomString() {
+  return Math.random().toString(36).substring(7).split('').join('.');
+};
+var ActionTypes = {
+  INIT: "@@redux/INIT" + randomString(),
+  REPLACE: "@@redux/REPLACE" + randomString(),
+  PROBE_UNKNOWN_ACTION: function PROBE_UNKNOWN_ACTION() {
+    return "@@redux/PROBE_UNKNOWN_ACTION" + randomString();
+  }
+};
+/**
+* @param {any} obj The object to inspect.
+* @returns {boolean} True if the argument appears to be a plain object.
+*/
+function isPlainObject(obj) {
+  if (typeof obj !== 'object' || obj === null) return false;
+  var proto = obj;
+  while (Object.getPrototypeOf(proto) !== null) {
+    proto = Object.getPrototypeOf(proto);
+  }
+  return Object.getPrototypeOf(obj) === proto;
+}
+function kindOf(val) {
+  var typeOfVal = typeof val;
+  if ("development" !== 'production') {
+    // Inlined / shortened version of `kindOf` from https://github.com/jonschlinkert/kind-of
+    function miniKindOf(val) {
+      if (val === void 0) return 'undefined';
+      if (val === null) return 'null';
+      var type = typeof val;
+      switch (type) {
+        case 'boolean':
+        case 'string':
+        case 'number':
+        case 'symbol':
+        case 'function':
+          {
+            return type;
+          }
+      }
+      if (Array.isArray(val)) return 'array';
+      if (isDate(val)) return 'date';
+      if (isError(val)) return 'error';
+      var constructorName = ctorName(val);
+      switch (constructorName) {
+        case 'Symbol':
+        case 'Promise':
+        case 'WeakMap':
+        case 'WeakSet':
+        case 'Map':
+        case 'Set':
+          return constructorName;
+      }
+      // other
+      return type.slice(8, -1).toLowerCase().replace(/\s/g, '');
+    }
+    function ctorName(val) {
+      return typeof val.constructor === 'function' ? val.constructor.name : null;
+    }
+    function isError(val) {
+      return val instanceof Error || typeof val.message === 'string' && val.constructor && typeof val.constructor.stackTraceLimit === 'number';
+    }
+    function isDate(val) {
+      if (val instanceof Date) return true;
+      return typeof val.toDateString === 'function' && typeof val.getDate === 'function' && typeof val.setDate === 'function';
+    }
+    typeOfVal = miniKindOf(val);
+  }
+  return typeOfVal;
+}
+/**
+* Creates a Redux store that holds the state tree.
+* The only way to change the data in the store is to call `dispatch()` on it.
+*
+* There should only be a single store in your app. To specify how different
+* parts of the state tree respond to actions, you may combine several reducers
+* into a single reducer function by using `combineReducers`.
+*
+* @param {Function} reducer A function that returns the next state tree, given
+* the current state tree and the action to handle.
+*
+* @param {any} [preloadedState] The initial state. You may optionally specify it
+* to hydrate the state from the server in universal apps, or to restore a
+* previously serialized user session.
+* If you use `combineReducers` to produce the root reducer function, this must be
+* an object with the same shape as `combineReducers` keys.
+*
+* @param {Function} [enhancer] The store enhancer. You may optionally specify it
+* to enhance the store with third-party capabilities such as middleware,
+* time travel, persistence, etc. The only store enhancer that ships with Redux
+* is `applyMiddleware()`.
+*
+* @returns {Store} A Redux store that lets you read the state, dispatch actions
+* and subscribe to changes.
+*/
+function createStore(reducer, preloadedState, enhancer) {
+  var _ref2;
+  if (typeof preloadedState === 'function' && typeof enhancer === 'function' || typeof enhancer === 'function' && typeof arguments[3] === 'function') {
+    throw new Error("development" === "production" ? formatProdErrorMessage(0) : 'It looks like you are passing several store enhancers to ' + 'createStore(). This is not supported. Instead, compose them ' + 'together to a single function. See https://redux.js.org/tutorials/fundamentals/part-4-store#creating-a-store-with-enhancers for an example.');
+  }
+  if (typeof preloadedState === 'function' && typeof enhancer === 'undefined') {
+    enhancer = preloadedState;
+    preloadedState = undefined;
+  }
+  if (typeof enhancer !== 'undefined') {
+    if (typeof enhancer !== 'function') {
+      throw new Error("development" === "production" ? formatProdErrorMessage(1) : "Expected the enhancer to be a function. Instead, received: '" + kindOf(enhancer) + "'");
+    }
+    return enhancer(createStore)(reducer, preloadedState);
+  }
+  if (typeof reducer !== 'function') {
+    throw new Error("development" === "production" ? formatProdErrorMessage(2) : "Expected the root reducer to be a function. Instead, received: '" + kindOf(reducer) + "'");
+  }
+  var currentReducer = reducer;
+  var currentState = preloadedState;
+  var currentListeners = [];
+  var nextListeners = currentListeners;
+  var isDispatching = false;
+  /**
+  * This makes a shallow copy of currentListeners so we can use
+  * nextListeners as a temporary list while dispatching.
+  *
+  * This prevents any bugs around consumers calling
+  * subscribe/unsubscribe in the middle of a dispatch.
+  */
+  function ensureCanMutateNextListeners() {
+    if (nextListeners === currentListeners) {
+      nextListeners = currentListeners.slice();
+    }
+  }
+  /**
+  * Reads the state tree managed by the store.
+  *
+  * @returns {any} The current state tree of your application.
+  */
+  function getState() {
+    if (isDispatching) {
+      throw new Error("development" === "production" ? formatProdErrorMessage(3) : 'You may not call store.getState() while the reducer is executing. ' + 'The reducer has already received the state as an argument. ' + 'Pass it down from the top reducer instead of reading it from the store.');
+    }
+    return currentState;
+  }
+  /**
+  * Adds a change listener. It will be called any time an action is dispatched,
+  * and some part of the state tree may potentially have changed. You may then
+  * call `getState()` to read the current state tree inside the callback.
+  *
+  * You may call `dispatch()` from a change listener, with the following
+  * caveats:
+  *
+  * 1. The subscriptions are snapshotted just before every `dispatch()` call.
+  * If you subscribe or unsubscribe while the listeners are being invoked, this
+  * will not have any effect on the `dispatch()` that is currently in progress.
+  * However, the next `dispatch()` call, whether nested or not, will use a more
+  * recent snapshot of the subscription list.
+  *
+  * 2. The listener should not expect to see all state changes, as the state
+  * might have been updated multiple times during a nested `dispatch()` before
+  * the listener is called. It is, however, guaranteed that all subscribers
+  * registered before the `dispatch()` started will be called with the latest
+  * state by the time it exits.
+  *
+  * @param {Function} listener A callback to be invoked on every dispatch.
+  * @returns {Function} A function to remove this change listener.
+  */
+  function subscribe(listener) {
+    if (typeof listener !== 'function') {
+      throw new Error("development" === "production" ? formatProdErrorMessage(4) : "Expected the listener to be a function. Instead, received: '" + kindOf(listener) + "'");
+    }
+    if (isDispatching) {
+      throw new Error("development" === "production" ? formatProdErrorMessage(5) : 'You may not call store.subscribe() while the reducer is executing. ' + 'If you would like to be notified after the store has been updated, subscribe from a ' + 'component and invoke store.getState() in the callback to access the latest state. ' + 'See https://redux.js.org/api/store#subscribelistener for more details.');
+    }
+    var isSubscribed = true;
+    ensureCanMutateNextListeners();
+    nextListeners.push(listener);
+    return function unsubscribe() {
+      if (!isSubscribed) {
+        return;
+      }
+      if (isDispatching) {
+        throw new Error("development" === "production" ? formatProdErrorMessage(6) : 'You may not unsubscribe from a store listener while the reducer is executing. ' + 'See https://redux.js.org/api/store#subscribelistener for more details.');
+      }
+      isSubscribed = false;
+      ensureCanMutateNextListeners();
+      var index = nextListeners.indexOf(listener);
+      nextListeners.splice(index, 1);
+      currentListeners = null;
+    };
+  }
+  /**
+  * Dispatches an action. It is the only way to trigger a state change.
+  *
+  * The `reducer` function, used to create the store, will be called with the
+  * current state tree and the given `action`. Its return value will
+  * be considered the **next** state of the tree, and the change listeners
+  * will be notified.
+  *
+  * The base implementation only supports plain object actions. If you want to
+  * dispatch a Promise, an Observable, a thunk, or something else, you need to
+  * wrap your store creating function into the corresponding middleware. For
+  * example, see the documentation for the `redux-thunk` package. Even the
+  * middleware will eventually dispatch plain object actions using this method.
+  *
+  * @param {Object} action A plain object representing “what changed”. It is
+  * a good idea to keep actions serializable so you can record and replay user
+  * sessions, or use the time travelling `redux-devtools`. An action must have
+  * a `type` property which may not be `undefined`. It is a good idea to use
+  * string constants for action types.
+  *
+  * @returns {Object} For convenience, the same action object you dispatched.
+  *
+  * Note that, if you use a custom middleware, it may wrap `dispatch()` to
+  * return something else (for example, a Promise you can await).
+  */
+  function dispatch(action) {
+    if (!isPlainObject(action)) {
+      throw new Error("development" === "production" ? formatProdErrorMessage(7) : "Actions must be plain objects. Instead, the actual type was: '" + kindOf(action) + "'. You may need to add middleware to your store setup to handle dispatching other values, such as 'redux-thunk' to handle dispatching functions. See https://redux.js.org/tutorials/fundamentals/part-4-store#middleware and https://redux.js.org/tutorials/fundamentals/part-6-async-logic#using-the-redux-thunk-middleware for examples.");
+    }
+    if (typeof action.type === 'undefined') {
+      throw new Error("development" === "production" ? formatProdErrorMessage(8) : 'Actions may not have an undefined "type" property. You may have misspelled an action type string constant.');
+    }
+    if (isDispatching) {
+      throw new Error("development" === "production" ? formatProdErrorMessage(9) : 'Reducers may not dispatch actions.');
+    }
+    try {
+      isDispatching = true;
+      currentState = currentReducer(currentState, action);
+    } finally {
+      isDispatching = false;
+    }
+    var listeners = currentListeners = nextListeners;
+    for (var i = 0; i < listeners.length; i++) {
+      var listener = listeners[i];
+      listener();
+    }
+    return action;
+  }
+  /**
+  * Replaces the reducer currently used by the store to calculate the state.
+  *
+  * You might need this if your app implements code splitting and you want to
+  * load some of the reducers dynamically. You might also need this if you
+  * implement a hot reloading mechanism for Redux.
+  *
+  * @param {Function} nextReducer The reducer for the store to use instead.
+  * @returns {void}
+  */
+  function replaceReducer(nextReducer) {
+    if (typeof nextReducer !== 'function') {
+      throw new Error("development" === "production" ? formatProdErrorMessage(10) : "Expected the nextReducer to be a function. Instead, received: '" + kindOf(nextReducer));
+    }
+    currentReducer = nextReducer;
+    // This action has a similiar effect to ActionTypes.INIT.
+    // Any reducers that existed in both the new and old rootReducer
+    // will receive the previous state. This effectively populates
+    // the new state tree with any relevant data from the old one.
+    dispatch({
+      type: ActionTypes.REPLACE
+    });
+  }
+  /**
+  * Interoperability point for observable/reactive libraries.
+  * @returns {observable} A minimal observable of state changes.
+  * For more information, see the observable proposal:
+  * https://github.com/tc39/proposal-observable
+  */
+  function observable() {
+    var _ref;
+    var outerSubscribe = subscribe;
+    return (_ref = {
+      /**
+      * The minimal observable subscription method.
+      * @param {Object} observer Any object that can be used as an observer.
+      * The observer object should have a `next` method.
+      * @returns {subscription} An object with an `unsubscribe` method that can
+      * be used to unsubscribe the observable from the store, and prevent further
+      * emission of values from the observable.
+      */
+      subscribe: function subscribe(observer) {
+        if (typeof observer !== 'object' || observer === null) {
+          throw new Error("development" === "production" ? formatProdErrorMessage(11) : "Expected the observer to be an object. Instead, received: '" + kindOf(observer) + "'");
+        }
+        function observeState() {
+          if (observer.next) {
+            observer.next(getState());
+          }
+        }
+        observeState();
+        var unsubscribe = outerSubscribe(observeState);
+        return {
+          unsubscribe: unsubscribe
+        };
+      }
+    }, _ref[$$observable] = function () {
+      return this;
+    }, _ref);
+  }
+  // When a store is created, an "INIT" action is dispatched so that every
+  // reducer returns their initial state. This effectively populates
+  // the initial state tree.
+  dispatch({
+    type: ActionTypes.INIT
+  });
+  return (_ref2 = {
+    dispatch: dispatch,
+    subscribe: subscribe,
+    getState: getState,
+    replaceReducer: replaceReducer
+  }, _ref2[$$observable] = observable, _ref2);
+}
+/**
+* Prints a warning in the console if it exists.
+*
+* @param {String} message The warning message.
+* @returns {void}
+*/
+function warning(message) {
+  /*eslint-disable no-console*/
+  if (typeof console !== 'undefined' && typeof console.error === 'function') {
+    console.error(message);
+  }
+  /*eslint-enable no-console*/
+  try {
+    // This error was thrown as a convenience so that if you enable
+    // "break on all exceptions" in your console,
+    // it would pause the execution at this line.
+    throw new Error(message);
+  } catch (e) {}
+}
+function getUnexpectedStateShapeWarningMessage(inputState, reducers, action, unexpectedKeyCache) {
+  var reducerKeys = Object.keys(reducers);
+  var argumentName = action && action.type === ActionTypes.INIT ? 'preloadedState argument passed to createStore' : 'previous state received by the reducer';
+  if (reducerKeys.length === 0) {
+    return 'Store does not have a valid reducer. Make sure the argument passed ' + 'to combineReducers is an object whose values are reducers.';
+  }
+  if (!isPlainObject(inputState)) {
+    return "The " + argumentName + " has unexpected type of \"" + kindOf(inputState) + "\". Expected argument to be an object with the following " + ("keys: \"" + reducerKeys.join('", "') + "\"");
+  }
+  var unexpectedKeys = Object.keys(inputState).filter(function (key) {
+    return !reducers.hasOwnProperty(key) && !unexpectedKeyCache[key];
+  });
+  unexpectedKeys.forEach(function (key) {
+    unexpectedKeyCache[key] = true;
+  });
+  if (action && action.type === ActionTypes.REPLACE) return;
+  if (unexpectedKeys.length > 0) {
+    return "Unexpected " + (unexpectedKeys.length > 1 ? 'keys' : 'key') + " " + ("\"" + unexpectedKeys.join('", "') + "\" found in " + argumentName + ". ") + "Expected to find one of the known reducer keys instead: " + ("\"" + reducerKeys.join('", "') + "\". Unexpected keys will be ignored.");
+  }
+}
+function assertReducerShape(reducers) {
+  Object.keys(reducers).forEach(function (key) {
+    var reducer = reducers[key];
+    var initialState = reducer(undefined, {
+      type: ActionTypes.INIT
+    });
+    if (typeof initialState === 'undefined') {
+      throw new Error("development" === "production" ? formatProdErrorMessage(12) : "The slice reducer for key \"" + key + "\" returned undefined during initialization. " + "If the state passed to the reducer is undefined, you must " + "explicitly return the initial state. The initial state may " + "not be undefined. If you don't want to set a value for this reducer, " + "you can use null instead of undefined.");
+    }
+    if (typeof reducer(undefined, {
+      type: ActionTypes.PROBE_UNKNOWN_ACTION()
+    }) === 'undefined') {
+      throw new Error("development" === "production" ? formatProdErrorMessage(13) : "The slice reducer for key \"" + key + "\" returned undefined when probed with a random type. " + ("Don't try to handle '" + ActionTypes.INIT + "' or other actions in \"redux/*\" ") + "namespace. They are considered private. Instead, you must return the " + "current state for any unknown actions, unless it is undefined, " + "in which case you must return the initial state, regardless of the " + "action type. The initial state may not be undefined, but can be null.");
+    }
+  });
+}
+/**
+* Turns an object whose values are different reducer functions, into a single
+* reducer function. It will call every child reducer, and gather their results
+* into a single state object, whose keys correspond to the keys of the passed
+* reducer functions.
+*
+* @param {Object} reducers An object whose values correspond to different
+* reducer functions that need to be combined into one. One handy way to obtain
+* it is to use ES6 `import * as reducers` syntax. The reducers may never return
+* undefined for any action. Instead, they should return their initial state
+* if the state passed to them was undefined, and the current state for any
+* unrecognized action.
+*
+* @returns {Function} A reducer function that invokes every reducer inside the
+* passed object, and builds a state object with the same shape.
+*/
+function combineReducers(reducers) {
+  var reducerKeys = Object.keys(reducers);
+  var finalReducers = {};
+  for (var i = 0; i < reducerKeys.length; i++) {
+    var key = reducerKeys[i];
+    if ("development" !== 'production') {
+      if (typeof reducers[key] === 'undefined') {
+        warning("No reducer provided for key \"" + key + "\"");
+      }
+    }
+    if (typeof reducers[key] === 'function') {
+      finalReducers[key] = reducers[key];
+    }
+  }
+  var finalReducerKeys = Object.keys(finalReducers);
+  // This is used to make sure we don't warn about the same
+  // keys multiple times.
+  var unexpectedKeyCache;
+  if ("development" !== 'production') {
+    unexpectedKeyCache = {};
+  }
+  var shapeAssertionError;
+  try {
+    assertReducerShape(finalReducers);
+  } catch (e) {
+    shapeAssertionError = e;
+  }
+  return function combination(state, action) {
+    if (state === void 0) {
+      state = {};
+    }
+    if (shapeAssertionError) {
+      throw shapeAssertionError;
+    }
+    if ("development" !== 'production') {
+      var warningMessage = getUnexpectedStateShapeWarningMessage(state, finalReducers, action, unexpectedKeyCache);
+      if (warningMessage) {
+        warning(warningMessage);
+      }
+    }
+    var hasChanged = false;
+    var nextState = {};
+    for (var _i = 0; _i < finalReducerKeys.length; _i++) {
+      var _key = finalReducerKeys[_i];
+      var reducer = finalReducers[_key];
+      var previousStateForKey = state[_key];
+      var nextStateForKey = reducer(previousStateForKey, action);
+      if (typeof nextStateForKey === 'undefined') {
+        var actionType = action && action.type;
+        throw new Error("development" === "production" ? formatProdErrorMessage(14) : "When called with an action of type " + (actionType ? "\"" + String(actionType) + "\"" : '(unknown type)') + ", the slice reducer for key \"" + _key + "\" returned undefined. " + "To ignore an action, you must explicitly return the previous state. " + "If you want this reducer to hold no value, you can return null instead of undefined.");
+      }
+      nextState[_key] = nextStateForKey;
+      hasChanged = hasChanged || nextStateForKey !== previousStateForKey;
+    }
+    hasChanged = hasChanged || finalReducerKeys.length !== Object.keys(state).length;
+    return hasChanged ? nextState : state;
+  };
+}
+function bindActionCreator(actionCreator, dispatch) {
+  return function () {
+    return dispatch(actionCreator.apply(this, arguments));
+  };
+}
+/**
+* Turns an object whose values are action creators, into an object with the
+* same keys, but with every function wrapped into a `dispatch` call so they
+* may be invoked directly. This is just a convenience method, as you can call
+* `store.dispatch(MyActionCreators.doSomething())` yourself just fine.
+*
+* For convenience, you can also pass an action creator as the first argument,
+* and get a dispatch wrapped function in return.
+*
+* @param {Function|Object} actionCreators An object whose values are action
+* creator functions. One handy way to obtain it is to use ES6 `import * as`
+* syntax. You may also pass a single function.
+*
+* @param {Function} dispatch The `dispatch` function available on your Redux
+* store.
+*
+* @returns {Function|Object} The object mimicking the original object, but with
+* every action creator wrapped into the `dispatch` call. If you passed a
+* function as `actionCreators`, the return value will also be a single
+* function.
+*/
+function bindActionCreators(actionCreators, dispatch) {
+  if (typeof actionCreators === 'function') {
+    return bindActionCreator(actionCreators, dispatch);
+  }
+  if (typeof actionCreators !== 'object' || actionCreators === null) {
+    throw new Error("development" === "production" ? formatProdErrorMessage(16) : "bindActionCreators expected an object or a function, but instead received: '" + kindOf(actionCreators) + "'. " + "Did you write \"import ActionCreators from\" instead of \"import * as ActionCreators from\"?");
+  }
+  var boundActionCreators = {};
+  for (var key in actionCreators) {
+    var actionCreator = actionCreators[key];
+    if (typeof actionCreator === 'function') {
+      boundActionCreators[key] = bindActionCreator(actionCreator, dispatch);
+    }
+  }
+  return boundActionCreators;
+}
+/**
+* Composes single-argument functions from right to left. The rightmost
+* function can take multiple arguments as it provides the signature for
+* the resulting composite function.
+*
+* @param {...Function} funcs The functions to compose.
+* @returns {Function} A function obtained by composing the argument functions
+* from right to left. For example, compose(f, g, h) is identical to doing
+* (...args) => f(g(h(...args))).
+*/
+function compose() {
+  for (var _len = arguments.length, funcs = new Array(_len), _key = 0; _key < _len; _key++) {
+    funcs[_key] = arguments[_key];
+  }
+  if (funcs.length === 0) {
+    return function (arg) {
+      return arg;
+    };
+  }
+  if (funcs.length === 1) {
+    return funcs[0];
+  }
+  return funcs.reduce(function (a, b) {
+    return function () {
+      return a(b.apply(void 0, arguments));
+    };
+  });
+}
+/**
+* Creates a store enhancer that applies middleware to the dispatch method
+* of the Redux store. This is handy for a variety of tasks, such as expressing
+* asynchronous actions in a concise manner, or logging every action payload.
+*
+* See `redux-thunk` package as an example of the Redux middleware.
+*
+* Because middleware is potentially asynchronous, this should be the first
+* store enhancer in the composition chain.
+*
+* Note that each middleware will be given the `dispatch` and `getState` functions
+* as named arguments.
+*
+* @param {...Function} middlewares The middleware chain to be applied.
+* @returns {Function} A store enhancer applying the middleware.
+*/
+function applyMiddleware() {
+  for (var _len = arguments.length, middlewares = new Array(_len), _key = 0; _key < _len; _key++) {
+    middlewares[_key] = arguments[_key];
+  }
+  return function (createStore) {
+    return function () {
+      var store = createStore.apply(void 0, arguments);
+      var _dispatch = function dispatch() {
+        throw new Error("development" === "production" ? formatProdErrorMessage(15) : 'Dispatching while constructing your middleware is not allowed. ' + 'Other middleware would not be applied to this dispatch.');
+      };
+      var middlewareAPI = {
+        getState: store.getState,
+        dispatch: function dispatch() {
+          return _dispatch.apply(void 0, arguments);
+        }
+      };
+      var chain = middlewares.map(function (middleware) {
+        return middleware(middlewareAPI);
+      });
+      _dispatch = compose.apply(void 0, chain)(store.dispatch);
+      return _objectSpread__default['default'](_objectSpread__default['default']({}, store), {}, {
+        dispatch: _dispatch
+      });
+    };
+  };
+}
+/*
+* This is a dummy function to check if the function name has been altered by minification.
+* If the function has been minified and NODE_ENV !== 'production', warn the user.
+*/
+function isCrushed() {}
+if ("development" !== 'production' && typeof isCrushed.name === 'string' && isCrushed.name !== 'isCrushed') {
+  warning('You are currently using minified code outside of NODE_ENV === "production". ' + 'This means that you are running a slower development build of Redux. ' + 'You can use loose-envify (https://github.com/zertosh/loose-envify) for browserify ' + 'or setting mode to production in webpack (https://webpack.js.org/concepts/mode/) ' + 'to ensure you have the correct code for your production build.');
+}
+exports.__DO_NOT_USE__ActionTypes = ActionTypes;
+exports.applyMiddleware = applyMiddleware;
+exports.bindActionCreators = bindActionCreators;
+exports.combineReducers = combineReducers;
+exports.compose = compose;
+exports.createStore = createStore;
+
+},{"@babel/runtime/helpers/objectSpread2":"3FdZf"}],"3FdZf":[function(require,module,exports) {
+var defineProperty = require("./defineProperty.js");
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+
+    if (enumerableOnly) {
+      symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      });
+    }
+
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
+}
+
+module.exports = _objectSpread2;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+},{"./defineProperty.js":"5PI63"}],"5PI63":[function(require,module,exports) {
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+module.exports = _defineProperty;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+},{}],"3vUkb":[function(require,module,exports) {
 'use strict';
 
 var compose = require('redux').compose;
@@ -49566,6 +49929,51 @@ var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 var _redux = require('redux');
 var _actionsActions = require('../actions/actions');
+/************* Reducers ************/
+/************* -Actor Reducers *************/
+function actors(state = [], action) {
+  switch (action.type) {
+    case _actionsActions.SET_ACTORS:
+      return action.actors;
+    default:
+      return state;
+  }
+}
+function actorsFilter(state = '', action) {
+  switch (action.type) {
+    case _actionsActions.SET_ACTORS_FILTER:
+      return action.filter;
+    default:
+      return state;
+  }
+}
+function actorsSortingFactor(state = '', action) {
+  switch (action.type) {
+    case _actionsActions.SET_ACTORS_SORTING_FACTOR:
+      return action.sortingFactor;
+    default:
+      return state;
+  }
+}
+/************* -Movie Reducers ************/
+function favoritedMovies(state = [], action) {
+  switch (action.type) {
+    case _actionsActions.ADD_FAVORITED_MOVIE:
+      return [...state, action.movieName];
+    case _actionsActions.SET_FAVORITED_MOVIES:
+      return action.movies;
+    default:
+      return state;
+  }
+}
+function featuredMovies(state = [], action) {
+  switch (action.type) {
+    case _actionsActions.SET_FEATURED_MOVIES:
+      return action.movies;
+    default:
+      return state;
+  }
+}
 function movies(state = [], action) {
   switch (action.type) {
     case _actionsActions.SET_MOVIES:
@@ -49574,92 +49982,112 @@ function movies(state = [], action) {
       return state;
   }
 }
+function moviesFilter(state = '', action) {
+  switch (action.type) {
+    case _actionsActions.SET_MOVIES_FILTER:
+      return action.filter;
+    default:
+      return state;
+  }
+}
+function moviesListType(state = '', action) {
+  switch (action.type) {
+    case _actionsActions.SET_MOVIES_LIST_TYPE:
+      return action.listType;
+    default:
+      return state;
+  }
+}
+function moviesSortingFactor(state = '', action) {
+  switch (action.type) {
+    case _actionsActions.SET_MOVIES_SORTING_FACTOR:
+      return action.sortingFactor;
+    default:
+      return state;
+  }
+}
+function selectedMovie(state = {}, action) {
+  switch (action.type) {
+    case _actionsActions.SET_SELECTED_MOVIE:
+      return action.movie;
+    default:
+      return state;
+  }
+}
+/************* -User Reducers ************/
+function user(state = {}, action) {
+  switch (action.type) {
+    case _actionsActions.ADD_USER_FAVORITE_ACTOR:
+      return {
+        ...state,
+        favoriteActors: [...state.favoriteActors, action.actorId]
+      };
+    case _actionsActions.ADD_USER_FAVORITE_MOVIE:
+      return {
+        ...state,
+        favoriteMovies: [...state.favoriteMovies, action.movieId]
+      };
+    case _actionsActions.ADD_USER_TO_WATCH_MOVIE:
+      return {
+        ...state,
+        toWatchMovies: [...state.toWatchMovies, action.movieId]
+      };
+    case _actionsActions.LOGOUT_USER:
+      return {};
+    case _actionsActions.SET_USER_INFO:
+      {
+        const newState = {
+          ...state
+        };
+        Object.keys(action.info).forEach(property => newState[property] = action.info[property]);
+        return newState;
+      }
+    case _actionsActions.REMOVE_USER_FAVORITE_ACTOR:
+      {
+        let favoriteActors = state.favoriteActors;
+        favoriteActors = favoriteActors.filter(actorId => actorId === action.actorId);
+        return {
+          ...state,
+          favoriteActors
+        };
+      }
+    case _actionsActions.REMOVE_USER_FAVORITE_MOVIE:
+      {
+        let favoriteMovies = state.favoriteMovies;
+        favoriteMovies = favoriteMovies.filter(movieId => movieId === action.movieId);
+        return {
+          ...state,
+          favoriteMovies
+        };
+      }
+    case _actionsActions.REMOVE_USER_TO_WATCH_MOVIE:
+      {
+        let toWatchMovies = [...state.toWatchMovies];
+        toWatchMovies = toWatchMovies.filter(movieId => movieId !== action.movieId);
+        return {
+          ...state,
+          toWatchMovies
+        };
+      }
+    default:
+      return state;
+  }
+}
 const myFlixApp = _redux.combineReducers({
-  movies
+  actors,
+  actorsFilter,
+  actorsSortingFactor,
+  favoritedMovies,
+  featuredMovies,
+  movies,
+  moviesFilter,
+  moviesListType,
+  moviesSortingFactor,
+  selectedMovie,
+  user
 });
 exports.default = myFlixApp;
 
-},{"redux":"7panR","../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU"}],"5S6cN":[function(require,module,exports) {
-var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-_parcelHelpers.defineInteropFlag(exports);
-_parcelHelpers.export(exports, "SET_MOVIES", function () {
-  return SET_MOVIES;
-});
-_parcelHelpers.export(exports, "SET_FEATURED_MOVIES", function () {
-  return SET_FEATURED_MOVIES;
-});
-_parcelHelpers.export(exports, "SET_MOVIES_LIST_TYPE", function () {
-  return SET_MOVIES_LIST_TYPE;
-});
-_parcelHelpers.export(exports, "SET_MOVIES_FILTER", function () {
-  return SET_MOVIES_FILTER;
-});
-_parcelHelpers.export(exports, "SET_ACTORS_SORTING_FACTOR", function () {
-  return SET_ACTORS_SORTING_FACTOR;
-});
-_parcelHelpers.export(exports, "SET_MOVIES_SORTING_FACTOR", function () {
-  return SET_MOVIES_SORTING_FACTOR;
-});
-_parcelHelpers.export(exports, "SET_ACTORS_FILTER", function () {
-  return SET_ACTORS_FILTER;
-});
-_parcelHelpers.export(exports, "setMovies", function () {
-  return setMovies;
-});
-_parcelHelpers.export(exports, "setFeaturedMovies", function () {
-  return setFeaturedMovies;
-});
-_parcelHelpers.export(exports, "setMoviesListType", function () {
-  return setMoviesListType;
-});
-_parcelHelpers.export(exports, "setActorsFilter", function () {
-  return setActorsFilter;
-});
-_parcelHelpers.export(exports, "setMoviesFilter", function () {
-  return setMoviesFilter;
-});
-_parcelHelpers.export(exports, "setActorsSortingFactor", function () {
-  return setActorsSortingFactor;
-});
-_parcelHelpers.export(exports, "setMoviesSortingFactor", function () {
-  return setMoviesSortingFactor;
-});
-const SET_MOVIES = 'SET_MOVIES';
-const SET_FEATURED_MOVIES = 'SET_FEATURED_MOVIES';
-const SET_MOVIES_LIST_TYPE = 'SET_MOVIES_LIST_TYPE';
-const SET_MOVIES_FILTER = 'SET_MOVIES_FILTER';
-const SET_ACTORS_SORTING_FACTOR = 'SET_MOVIES_SORTING_FACTOR';
-const SET_MOVIES_SORTING_FACTOR = 'SET_MOVIES_SORTING_FACTOR';
-const SET_ACTORS_FILTER = 'SET_MOVIES_FILTER';
-const setMovies = movies => ({
-  type: SET_MOVIES,
-  movies
-});
-const setFeaturedMovies = movies => ({
-  type: SET_FEATURED_MOVIES,
-  movies
-});
-const setMoviesListType = listType => ({
-  type: SET_MOVIES_LIST_TYPE,
-  listType
-});
-const setActorsFilter = filter => ({
-  type: SET_ACTORS_FILTER,
-  filter
-});
-const setMoviesFilter = filter => ({
-  type: SET_MOVIES_FILTER,
-  filter
-});
-const setActorsSortingFactor = sortingFactor => ({
-  type: SET_ACTORS_SORTING_FACTOR,
-  sortingFactor
-});
-const setMoviesSortingFactor = sortingFactor => ({
-  type: SET_MOVIES_SORTING_FACTOR,
-  sortingFactor
-});
-
-},{"@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU"}]},["1j6wU","68WUB","1DVjT"], "1DVjT", "parcelRequire279c")
+},{"redux":"7panR","../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU"}]},["1j6wU","68WUB","1DVjT"], "1DVjT", "parcelRequire279c")
 
 //# sourceMappingURL=index.02675e63.js.map

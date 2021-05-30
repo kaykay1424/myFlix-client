@@ -101,7 +101,8 @@ const RegistrationView = () => {
         }
     };
 
-    const validateBirthDate = (birthdate=birthDate) => {        
+    const validateBirthDate = (birthdate=birthDate) => {   
+        if (birthdate === '') return true;     
         const regex = /\d\d\d\d-\d\d-\d\d/; // valid date format
         if (!birthdate.match(regex)) {            
             setBirthDateError(`${birthdate} is not a valid date. 
@@ -128,7 +129,6 @@ const RegistrationView = () => {
                 <InputGroup 
                     className="input-container"> 
                     <FormControl
-                        id="username"
                         type="text" 
                         placeholder="Enter your username" 
                         onBlur={
@@ -175,7 +175,6 @@ const RegistrationView = () => {
                     }
                 >
                     <FormControl
-                        id="birth-date"
                         type="text" 
                         placeholder="2021-05-10"
                         onBlur={
@@ -272,7 +271,6 @@ const RegistrationView = () => {
                     }
                 >
                     <FormControl 
-                        id="password1"
                         type="password" 
                         onBlur={
                             (e) => removeFocusedClass(e)
@@ -328,7 +326,6 @@ const RegistrationView = () => {
                     } 
                 >
                     <FormControl 
-                        id="password2"
                         type="password" 
                         onBlur={
                             (e) => removeFocusedClass(e)

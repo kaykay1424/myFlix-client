@@ -6,7 +6,7 @@ const RelatedAttributeCard = ({description, image}) => {
     return (
         <Card className="related-attribute-card">
             <img src={image} />
-            {description}
+            <Card.Body>{description}</Card.Body>
         </Card>
     );
 };

@@ -6,7 +6,7 @@ import {Link} from 'react-router-dom';
 import {createExcerpt} from '../../utils/helpers';
 import './movie-card.scss';
 
-const MovieCard = ({movie, onItemClick}) => {
+const MovieCard = ({movie}) => {
     return (
         <Card className="movie-card">
             <Card.Body>            
@@ -33,8 +33,8 @@ const MovieCard = ({movie, onItemClick}) => {
                     </svg>
                     <Link to={`/movies/${movie._id}`} 
                         className="read-more-link" 
-                        onClick={() => 
-                            onItemClick('selectedMovie', movie)}
+                        // onClick={() => 
+                        //     setSelectedMovie(movie)}
                     >
                         Read More
                     </Link>
@@ -50,8 +50,7 @@ MovieCard.propTypes = {
         description: PropTypes.string.isRequired,
         image: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired
-    }).isRequired,
-    onItemClick: PropTypes.func.isRequired
+    }).isRequired
 };
 
 export default MovieCard;

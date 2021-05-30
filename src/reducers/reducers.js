@@ -15,7 +15,8 @@ import {
     ADD_USER_FAVORITE_ACTOR,
     ADD_USER_FAVORITE_MOVIE,
     ADD_USER_TO_WATCH_MOVIE,
-    EDIT_USER_INFO,
+    LOGOUT_USER,
+    SET_USER_INFO,
     REMOVE_USER_FAVORITE_ACTOR,
     REMOVE_USER_FAVORITE_MOVIE,
     REMOVE_USER_TO_WATCH_MOVIE,
@@ -34,7 +35,7 @@ function actors(state = [], action) {
     }
 }
 
-function actorsFilter(state = [], action) {
+function actorsFilter(state = '', action) {
     switch(action.type) {
         case SET_ACTORS_FILTER:
             return action.filter;
@@ -43,7 +44,7 @@ function actorsFilter(state = [], action) {
     }    
 }
 
-function actorsSortingFactor(state = [], action) {
+function actorsSortingFactor(state = '', action) {
     switch(action.type) {
         case SET_ACTORS_SORTING_FACTOR:
             return action.sortingFactor;
@@ -83,7 +84,7 @@ function movies(state = [], action) {
     }
 }
 
-function moviesFilter(state = [], action) {
+function moviesFilter(state = '', action) {
     switch(action.type) {
         case SET_MOVIES_FILTER:
             return action.filter;
@@ -92,7 +93,7 @@ function moviesFilter(state = [], action) {
     }    
 }
 
-function moviesListType(state = [], action) {
+function moviesListType(state = '', action) {
     switch(action.type) {
         case SET_MOVIES_LIST_TYPE:
             return action.listType;
@@ -101,7 +102,7 @@ function moviesListType(state = [], action) {
     }    
 }
 
-function moviesSortingFactor(state = [], action) {
+function moviesSortingFactor(state = '', action) {
     switch(action.type) {
         case SET_MOVIES_SORTING_FACTOR:
             return action.sortingFactor;
@@ -110,10 +111,10 @@ function moviesSortingFactor(state = [], action) {
     }    
 }
 
-function selectedMovie(state = [], action) {
+function selectedMovie(state = {}, action) {
     switch(action.type) {
         case SET_SELECTED_MOVIE:
-            return action.selectedMovie;
+            return action.movie;
         default:
             return state;
     }    
@@ -121,19 +122,30 @@ function selectedMovie(state = [], action) {
 
 /************* -User Reducers ************/
 
-function user(state={}, action) {
+function user(state = {}, action) {
     switch(action.type) {
         case ADD_USER_FAVORITE_ACTOR:
-            return [...state.favoriteActors, action.actorId];
+            return {
+                ...state,
+                favoriteActors: [...state.favoriteActors, action.actorId]
+            };
         case ADD_USER_FAVORITE_MOVIE:
-            return [...state.favoriteMovies, action.movieId];
+            return {
+                ...state,
+                favoriteMovies: [...state.favoriteMovies, action.movieId]
+            };
         case ADD_USER_TO_WATCH_MOVIE:
-            return [...state.toWatchMovies, action.movieId];
-        case EDIT_USER_INFO: {
+            return {
+                ...state,
+                toWatchMovies: [...state.toWatchMovies, action.movieId]
+            };
+        case LOGOUT_USER:
+            return {};    
+        case SET_USER_INFO: {
             const newState = {...state};
             Object.keys(action.info).forEach(property =>
                 (newState[property] = action.info[property]));
-            
+
             return newState;
         }
         case REMOVE_USER_FAVORITE_ACTOR: {

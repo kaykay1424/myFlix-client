@@ -8,7 +8,7 @@ import {addFocusedClass, removeFocusedClass} from '../../utils/helpers';
 import '../../utils/partials/_form.scss';
 import './login-view.scss';
 
-const LoginView = ({setUser}) => {
+const LoginView = ({onLoggedIn}) => {
     const [username, setUsername] = useState('');
     const [loginError, setLoginError] = useState(false);
     const [password, setPassword] = useState('');
@@ -20,7 +20,7 @@ const LoginView = ({setUser}) => {
             password
         })
             .then(response => {
-                setUser(response.data);                
+                onLoggedIn(response.data);                
             }, (err) => {
                 setLoginError(err);
             });
@@ -159,7 +159,7 @@ const LoginView = ({setUser}) => {
 };
 
 LoginView.propTypes = {
-    setUser: PropTypes.func.isRequired
+    onLoggedIn: PropTypes.func.isRequired
 };
 
 export default LoginView;

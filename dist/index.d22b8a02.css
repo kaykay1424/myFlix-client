@@ -69,7 +69,6 @@ button {
 .view {
   background-color: #1e2127;
   color: #fff;
-  height: 90vh;
   padding: 0;
 }
 .view .attribute {
@@ -125,7 +124,6 @@ button {
 #movie-view {
   background-color: #1e2127;
   color: #fff;
-  height: 90vh;
   padding: 0;
 }
 #movie-view h1 {
@@ -179,6 +177,16 @@ button {
   margin-top: 4em;
   padding-left: 10%;
   padding-right: 10%;
+}
+#movie-view .related-attributes-card-container {
+  display: flex;
+}
+.related-attribute-card.card {
+  background-color: #1e2127;
+  margin: 1em 2em 1em 0;
+}
+.related-attribute-card.card img {
+  margin-bottom: 1em;
 }
 #registration-form button {
   width: 124px;
@@ -271,13 +279,6 @@ form svg {
 .movies-container {
   color: #fff;
   grid-row-gap: 2em;
-}
-.related-attribute-card.card {
-  background-color: #1e2127;
-  margin: 1em 2em 1em 0;
-}
-.related-attribute-card.card img {
-  margin-bottom: 1em;
 }
 #director-view .image-cover {
   height: auto;

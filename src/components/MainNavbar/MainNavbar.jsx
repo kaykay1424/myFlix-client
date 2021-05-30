@@ -1,10 +1,13 @@
 import React, {useState} from 'react';
 import {Form, FormControl,  InputGroup, Nav,Navbar} from 'react-bootstrap';
 import PropTypes from 'prop-types';
+import {Link} from 'react-router-dom';
+import {connect} from 'react-redux';
 import './main-navbar.scss';
 
-const MainNavbar = ({isUserLoggedIn, view}) => {
+const MainNavbar = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const isUserLoggedIn = localStorage.getItem('token') ? true : false;
 
     return (
         <Navbar 
@@ -12,7 +15,7 @@ const MainNavbar = ({isUserLoggedIn, view}) => {
             expand="lg" 
             className={`${!isUserLoggedIn ? 'logged-out': 'logged-in'}`}
         >
-            <Navbar.Brand href="/" 
+            <Navbar.Brand to="/" 
                 className={`logo link ${!isUserLoggedIn 
                     ? 'logged-out'
                     : 'logged-in'
@@ -31,7 +34,7 @@ const MainNavbar = ({isUserLoggedIn, view}) => {
                 
                 
              
-                        {view === 'MovieView' || view === 'MainView'
+                        {window.location.pathname === '/' 
                             ?                                  
                             <Form className="mx-auto" inline>
                                 <InputGroup className="input-container">
@@ -81,34 +84,34 @@ const MainNavbar = ({isUserLoggedIn, view}) => {
                             : null
                         }
                         <Nav> 
-                            <Nav.Link 
-                                href="/logout" 
-                                className="link logout"
+                            <Link 
+                                to="/logout" 
+                                className="link nav-link logout"
                             >
                                 Logout
-                            </Nav.Link>
+                            </Link>
                         </Nav>
                         <Nav className="nav-links">
-                            <Nav.Link 
-                                href="/profile" 
+                            <Link 
+                                to="/profile" 
                                 className={
-                                    `link ${window.location.pathname === '/profile' 
+                                    `link nav-link ${window.location.pathname === '/profile' 
                                         ? 'active': ''}`}
                             >
                             Profile
-                            </Nav.Link>
-                            <Nav.Link href="/" className={
-                                `link ${window.location.pathname === '/' 
+                            </Link>
+                            <Link to="/" className={
+                                `link nav-link ${window.location.pathname === '/' 
                                     ? 'active': ''}`}
                             >
                             Movies
-                            </Nav.Link>
-                            <Nav.Link 
-                                href="/about" 
-                                className="link"
+                            </Link>
+                            <Link 
+                                to="/about" 
+                                className="link nav-link"
                             >
                                 About
-                            </Nav.Link>
+                            </Link>
                         </Nav>
                    
                     </Navbar.Collapse>
@@ -120,8 +123,13 @@ const MainNavbar = ({isUserLoggedIn, view}) => {
 };
 
 MainNavbar.propTypes = {
-    isUserLoggedIn: PropTypes.bool.isRequired,
-    view: PropTypes.string
+    user: PropTypes.object.isRequired
 };
 
-export default MainNavbar;
+const mapStateToProps = state => {
+    return {
+        user: state.user
+    };
+};
+
+export default connect(mapStateToProps)(MainNavbar);

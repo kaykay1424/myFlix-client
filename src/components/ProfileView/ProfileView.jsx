@@ -1,17 +1,33 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import {Button, Col, Form, FormControl, Row} from 'react-bootstrap';
+import {connect} from 'react-redux';
+
+import {
+    logoutUser,
+    setUserInfo
+} from '../../actions/actions';
 
 import UserList from '../UserList/UserList';
 import '../../utils/partials/_form.scss';
 import './profile-view.scss';
 
-const ProfileView = ({userId, logoutUser}) => {
-    const [birthDate, setBirthDate] = useState('');    
-    const [email, setEmail] = useState('');
-    const [oldPassword, setOldPassword] = useState('');
-    const [username, setUsername] = useState('');
+const ProfileView = ({onLogout, user}) => {
+
+    // Make date appear in readable format (2021-05-01)
+    // const date = new Date(response.data.birthDate);
+    // const birthdate = `${
+    //     date.getFullYear()}-${
+    //     date.getMonth() < 10 
+    //         ? `0${date.getMonth()+1}`
+    //         : date.getMonth()+1}-${date.getDate()}`;
+
+    const [birthDate, setBirthDate] = useState(
+        user.birthDate ? user.birthDate : '');    
+    const [email, setEmail] = useState(user.email);
+    const oldPassword = user.password;
+    const [username, setUsername] = useState(user.username);
     const [newPassword1, setNewPassword1] = useState('');
     const [newPassword2, setNewPassword2] = useState('');
     const [successfulUpdate, setSuccessfulUpdate] = useState(false);
@@ -26,35 +42,17 @@ const ProfileView = ({userId, logoutUser}) => {
 
     const token = localStorage.getItem('token');
 
-    useEffect(() => {
-        axios.get(`https://my-flix-2021.herokuapp.com/users/${userId}`,{
-            headers: {Authorization: `Bearer ${token}`}
-        }).then(response => {
-            // Make date appear in readable format (2021-05-01)
-            const date = new Date(response.data.birthDate);
-            const birthdate = `${
-                date.getFullYear()}-${
-                date.getMonth() < 10 
-                    ? `0${date.getMonth()+1}`
-                    : date.getMonth()+1}-${date.getDate()}`;
-            setBirthDate(birthdate);
-            setEmail(response.data.email);
-            setOldPassword(response.data.password);
-            setUsername(response.data.username);
-        });
-    },[]);
-
     const deleteUser = () => {
         confirm('Are you sure you want to delete your account')
             ?
             axios({
                 method: 'delete',
-                url: `https://my-flix-2021.herokuapp.com/users/${userId}`,
+                url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
                 headers:  {Authorization: `Bearer ${token}`}
             }).then(() => {
                 setSuccessfulRemoval(true);
                 setTimeout(() => {
-                    logoutUser();
+                    onLogout();
                 }, 3000);
             }).catch(() => {
                 setDeleteUserError(true);
@@ -68,7 +66,7 @@ const ProfileView = ({userId, logoutUser}) => {
         setBirthDateError(false);
         setPasswordMatchError(false);
 
-        const user = {
+        const updatedUser = {
             email,
             password: oldPassword,
             username            
@@ -81,20 +79,21 @@ const ProfileView = ({userId, logoutUser}) => {
             return;
         } else if ((newPassword1 !== '' || newPassword2 !== '') 
             && (newPassword1 === newPassword2))
-            user['password'] = newPassword1;
+            updatedUser['password'] = newPassword1;
 
         // Check if birthDate was entered and if it is valid
         // if it is add it to user object       
         if (!validateBirthDate()) return;
-        user['birthDate'] = birthDate;
+        updatedUser['birthDate'] = birthDate;
 
         axios({
             method: 'patch',
-            url: `https://my-flix-2021.herokuapp.com/users/${userId}`,
-            data: user,
+            url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
+            data: updatedUser,
             headers:  {Authorization: `Bearer ${token}`}
         })
             .then(() => {
+                setUserInfo(updatedUser);
                 if (newPassword1) {
                     logoutUser();
                     window.open('/', '_self');                
@@ -332,22 +331,25 @@ const ProfileView = ({userId, logoutUser}) => {
                 <Col>
                     <UserList 
                         title="Favorite Movies" 
-                        listType='favorite-movies' 
-                        userId={userId} 
+                        listType='favorite-movies'
+                        listTypeJS='favoriteMovies' 
+                        userId={user.id} 
                         itemIdType="movie_id" 
                         token={token} 
                     />
                     <UserList 
                         title="To Watch Movies" 
                         listType='to-watch-movies' 
-                        userId={userId} 
+                        listTypeJS='toWatchMovies'
+                        userId={user.id} 
                         itemIdType="movie_id" 
                         token={token} 
                     />
                     <UserList 
                         title="Favorite Actors" 
                         listType='favorite-actors' 
-                        userId={userId} 
+                        listTypeJS='favoriteActors'
+                        userId={user.id} 
                         itemIdType="actor_id" 
                         token={token} 
                     />
@@ -401,8 +403,23 @@ const ProfileView = ({userId, logoutUser}) => {
 };
 
 ProfileView.propTypes = {
-    logoutUser: PropTypes.func.isRequired,
-    userId: PropTypes.string.isRequired
+    onLogout: PropTypes.func.isRequired,
+    user: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        birthDate: PropTypes.string,
+        email: PropTypes.string,
+        password: PropTypes.string.isRequired,
+        username: PropTypes.string.isRequired
+    })
 };
 
-export default ProfileView;
+const mapStateToProps = state => {
+    return {
+        user: state.user
+    };
+};
+
+export default connect(mapStateToProps, {
+    logoutUser,
+    setUserInfo
+})(ProfileView);

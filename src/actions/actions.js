@@ -2,6 +2,7 @@
 
 /*********** -Actor Action Types **************/
 
+export const LOGOUT_USER = 'LOGOUT_USER';
 export const SET_ACTORS_SORTING_FACTOR = 'SET_ACTORS_SORTING_FACTOR';
 export const SET_ACTORS = 'SET_ACTORS';
 export const SET_ACTORS_FILTER = 'SET_ACTORS_FILTER';
@@ -22,7 +23,7 @@ export const SET_MOVIES_SORTING_FACTOR = 'SET_MOVIES_SORTING_FACTOR';
 export const ADD_USER_FAVORITE_ACTOR = 'ADD_USER_FAVORITE_ACTOR';
 export const ADD_USER_FAVORITE_MOVIE = 'ADD_USER_FAVORITE_MOVIE';
 export const ADD_USER_TO_WATCH_MOVIE = 'ADD_USER_TO_WATCH_MOVIE';
-export const EDIT_USER_INFO = 'EDIT_USER_INFO';
+export const SET_USER_INFO = 'SET_USER_INFO';
 export const REMOVE_USER_FAVORITE_ACTOR = 'REMOVE_USER_FAVORITE_ACTOR';
 export const REMOVE_USER_FAVORITE_MOVIE = 'REMOVE_USER_FAVORITE_MOVIE';
 export const REMOVE_USER_TO_WATCH_MOVIE = 'REMOVE_USER_TO_WATCH_MOVIE';
@@ -105,8 +106,12 @@ export const addUserToWatchMovie = movieId => ({
     movieId
 });
 
-export const editUserInfo = info => ({
-    type: EDIT_USER_INFO,
+export const logoutUser = () => ({
+    type: LOGOUT_USER
+});
+
+export const setUserInfo = info => ({
+    type: SET_USER_INFO,
     info
 });
 

@@ -1,7 +1,7 @@
 /********** Modules **********/
+
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Container} from 'react-bootstrap';
 
 /*********** -Redux ************/
 
@@ -20,35 +20,14 @@ import './index.scss';
 const store = createStore(myFlixApp, devToolsEnhancer());
 
 // Main component (will eventually use all the others)
-class MyFlixApplication extends React.Component {  
-    state = {
-        isUserLoggedIn: false,
-        view: ''
-    }
-    
-    setNavbar = (loggedIn, view='') => {
-        loggedIn 
-            ? this.setState({
-                isUserLoggedIn: true
-            }) 
-            : this.setState({
-                isUserLoggedIn: false
-            });
-        this.setState({
-            view: view
-        });
-    }
-    
+class MyFlixApplication extends React.Component {      
     render() {
         return (
             <Provider store={store}>
-                <MainNavbar 
-                    isUserLoggedIn={this.state.isUserLoggedIn} 
-                    view={this.state.view}
-                />
-                <Container className="my-flix" fluid>
-                    <MainView setNavbar={this.setNavbar} />
-                </Container>
+                
+                
+                <MainView />
+                
             </Provider>
         );
     }

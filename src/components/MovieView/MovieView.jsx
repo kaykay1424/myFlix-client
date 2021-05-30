@@ -1,32 +1,63 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
+import {connect} from 'react-redux';
 
+import {
+    addUserToWatchMovie, 
+    addUserFavoriteMovie,
+    setFavoritedMovies, 
+    setSelectedMovie
+} from '../../actions/actions';
+import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
 import {addToList} from '../../utils/helpers';
 import '../../utils/partials/_view.scss';
 import './movie-view.scss';
 
-const MovieView = ({selectedMovie, onBackClick, onItemClick, userId}) => {   
+const MovieView = ({
+    addUserFavoriteMovie,
+    addUserToWatchMovie,
+    favoritedMovies,
+    movieActors, 
+    movie, 
+    setSelectedMovie, 
+    onBackClick, 
+    user}) => {   
     const [favorited, setFavorited] = useState(false);
     const [willWatch, setWillWatch] = useState(false);
 
+    useEffect(() => {
+        setSelectedMovie(movie); 
+    },[]);
+    
     const addToFavoritesList = () => {
         addToList(
-            userId, 
+            user.id, 
             'favorite-movies', 
-            selectedMovie._id, 
+            movie._id, 
             'movie_id').then(() => {
             setFavorited(true);
+            addUserFavoriteMovie(movie._id);
+            setFavoritedMovies(favoritedMovies.map(favoritedMovie => {
+                if (favoritedMovie.name === movie.name) {
+                    return {
+                        ...movie,
+                        usersFavorited: favoritedMovie.usersFavorited++
+                    };
+                }
+                return movie;
+            }));
         });
     };
 
     const addToWatchList = () => {
         addToList(
-            userId, 
+            user.id, 
             'to-watch-movies', 
-            selectedMovie._id, 
+            movie._id, 
             'movie_id').then(() => {
             setWillWatch(true);
+            addUserToWatchMovie(movie._id);
         });
     };
 
@@ -36,7 +67,7 @@ const MovieView = ({selectedMovie, onBackClick, onItemClick, userId}) => {
                 className="image-cover" 
                 style={
                     {
-                        backgroundImage: `url(${selectedMovie.image})`
+                        backgroundImage: `url(${movie.image})`
                     }
                 }
             >
@@ -63,7 +94,7 @@ const MovieView = ({selectedMovie, onBackClick, onItemClick, userId}) => {
             </div>
             <div className="main-content">
                 <h1>
-                    {selectedMovie.name}
+                    {movie.name}
                     <div className="user-list-icons">
                         <svg 
                             onClick={() => addToFavoritesList()}
@@ -77,7 +108,10 @@ const MovieView = ({selectedMovie, onBackClick, onItemClick, userId}) => {
                             strokeLinecap="round" 
                             strokeLinejoin="round" 
                             className={`feather feather-heart 
-                            ${favorited ? 'added-to-list': ''}`}
+                            ${favorited 
+                                || (user.favoriteMovies && user.favoriteMovies.indexOf(movie._id) > -1) 
+                                ? 'added-to-list': ''}`
+                            }
                             title="Add this movie to your Favorite Movies list"
                         >
                             <path 
@@ -103,7 +137,12 @@ const MovieView = ({selectedMovie, onBackClick, onItemClick, userId}) => {
                             strokeLinecap="round" 
                             strokeLinejoin="round" 
                             className={`feather feather-bookmark 
-                            ${willWatch ? 'added-to-list': ''}`}
+                            ${willWatch 
+                                || (user.toWatchMovies 
+                                    && 
+                                    user.toWatchMovies.indexOf(movie._id) > -1) 
+                                ? 'added-to-list': ''}`
+                            }
                             title="Add this movie to your To Watch Movies list"
                         >
                             <path 
@@ -116,39 +155,82 @@ const MovieView = ({selectedMovie, onBackClick, onItemClick, userId}) => {
                     </div>
                 </h1>
                 <p className="label">Description</p>
-                <p className="description">{selectedMovie.description}</p>
+                <p className="description">{movie.description}</p>
+                <p className="label">Release Year</p>
+                <p className="description">{movie.releaseYear}</p>
+                <p className="label">Rating</p>
+                <p className="description">{movie.rating}</p>
             </div>                      
             <div className="attributes">
                 <div className="attribute">
                     <p className="label">Director</p>
                     <Link 
-                        to={`/directors/${selectedMovie.director.name}`} 
-                        onClick={
-                            () => onItemClick(
-                                'selectedDirector', selectedMovie.director
-                            )}
-                    >
-                        {selectedMovie.director.name}
+                        to={`/directors/${movie.director.name}`}>
+                        {movie.director.name}
                     </Link>
                 </div>
                 <div className="attribute">
                     <p className="label">Genre</p>
-                    <Link to={`/genres/${selectedMovie.genre.name}`} 
-                        onClick={
-                            () => onItemClick(
-                                'selectedGenre', selectedMovie.genre
-                            )}
-                    >
-                        {selectedMovie.genre.name}
+                    <Link to={`/genres/${movie.genre.name}`}>
+                        {movie.genre.name}
                     </Link>
                 </div>
             </div> 
+            {movie.stars.length > 0
+                ? (<>
+                    <div className="related-attributes">
+                        <h3>Stars of <i>{movie.name}</i> </h3>
+                        <div className="related-attributes-card-container">
+
+                        
+                            {
+                                movieActors.map((actor, i) => 
+                                    
+                                {
+                                    return <RelatedAttributeCard 
+                                        key={i}
+                                        image={actor.image} 
+                                        description={
+                                            <>
+                                                <p className="label">
+                                                    <b>Actor: </b> <br/>
+                                                    <span 
+                                                        className="description"
+                                                    >
+                                                        <Link 
+                                                            to={`/actors/
+                                                            ${actor._id}`}
+                                                        > 
+                                                            {actor.actor}
+                                                        </Link>
+                                                    </span>
+                                                </p>
+                                                <p className="label">
+                                                    <b>Character: </b> <br/>
+                                                    <span 
+                                                        className="description"
+                                                    >
+                                                        {actor.character}
+                                                    </span>
+                                                </p>
+                                            </>
+                                        } 
+                                    />;})  
+                            }
+                        </div>
+                    </div>
+                </>)
+                : null
+            }
         </>              
     );
 };
 
 MovieView.propTypes = {
-    selectedMovie: PropTypes.shape({
+    addUserFavoriteMovie: PropTypes.func.isRequired,
+    addUserToWatchMovie: PropTypes.func.isRequired,
+    favoritedMovies: PropTypes.array.isRequired,
+    movie: PropTypes.shape({
         _id: PropTypes.string.isRequired,
         description: PropTypes.string.isRequired,
         director: PropTypes.shape({
@@ -158,11 +240,31 @@ MovieView.propTypes = {
             name: PropTypes.string.isRequired
         }).isRequired,
         image: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired
+        name: PropTypes.string.isRequired,
+        rating: PropTypes.number,
+        releaseYear: PropTypes.number,
+        stars: PropTypes.array
     }).isRequired,
+    movieActors: PropTypes.array.isRequired,
     onBackClick: PropTypes.func.isRequired,
     onItemClick: PropTypes.func.isRequired,
-    userId: PropTypes.string.isRequired
+    setSelectedMovie: PropTypes.func.isRequired,
+    setFavoritedMovies: PropTypes.func.isRequired,
+    user: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        favoriteMovies: PropTypes.array.isRequired,
+        toWatchMovies: PropTypes.array.isRequired
+    })
 };
 
-export default MovieView;
+const mapStateToProps = state => ({
+    favoritedMovies: state.favoritedMovies,
+    user: state.user
+});
+
+export default connect(mapStateToProps, {
+    addUserFavoriteMovie, 
+    addUserToWatchMovie,
+    setFavoritedMovies,
+    setSelectedMovie})(MovieView);
+

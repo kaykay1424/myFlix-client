@@ -1,271 +1,374 @@
 /************ Modules **************/
 
-import React from 'react';
+import React, {useState} from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import {Col, Row} from 'react-bootstrap';
-import {BrowserRouter as Router, Redirect, Route} from 'react-router-dom';
+import {Col, Container, Row} from 'react-bootstrap';
+import {
+    BrowserRouter as Router, 
+    Redirect, 
+    Route
+} from 'react-router-dom';
+import {connect} from 'react-redux';
 
 /************ Components ************/
 
 import GenreView from '../GenreView/GenreView';
 import DirectorView from '../DirectorView/DirectorView';
+import MainNavbar from '../MainNavbar/MainNavbar';
 import MovieCard from '../MovieCard/MovieCard';
 import MovieView from '../MovieView/MovieView';
 import LoginView from '../LoginView/LoginView';
 import ProfileView from '../ProfileView/ProfileView';
 import RegistrationView from '../RegistrationView/RegistrationView';
 
+import {
+    logoutUser,
+    setActors, 
+    setMovies, 
+    setFavoritedMovies,
+    setFeaturedMovies,
+    setSelectedMovie, 
+    setUserInfo
+} from '../../actions/actions';
 import './main-view.scss';
 
-class MainView extends React.Component {
-    state = {
-        registration: false,
-        error: null,
-        movies: [],
-        selectedDirector: null,
-        selectedGenre: null,
-        selectedMovie: null,
-        user: null  
-    }
+const MainView = ({
+    actors, 
+    movies, 
+    selectedMovie, 
+    logoutUser,
+    setActors, 
+    setMovies, 
+    setFavoritedMovies,
+    setFeaturedMovies,
+    setUserInfo}) => {
+    
+    const token = localStorage.getItem('token');
 
-    componentDidMount() {
-        if (window.location.pathname === '/logout')
-            return this.logoutUser();
-        
-        const token = localStorage.getItem('token');
-        if (token) {        
-            this.setState({
-                user: localStorage.getItem('user')
+    const [error, setError] = useState(false);
+
+    const getActors = (token) => {
+        axios.get('https://my-flix-2021.herokuapp.com/actors',{
+            headers: {Authorization: `Bearer ${token}`}
+        })
+            .then(response => {
+                setActors(response.data);
+            })
+            .catch(error => {
+                setError(error);
             });
-            this.setNavbarAttributes(true);
-            this.getMovies(localStorage.getItem('token'));
-        } else {
-            this.setNavbarAttributes(false);
-        }
-    }
+    };
 
-    getMovies = (token) => {
+    const getFavoritedMovies = (token) => {
+        axios.get('https://my-flix-2021.herokuapp.com/favorite-movies',{
+            headers: {Authorization: `Bearer ${token}`}
+        }).then(response => {
+            setFavoritedMovies(response.data);
+        }).catch(error => {
+            setError(error);
+        });
+    };
+
+    const getMovies = (token) => {
         axios.get('https://my-flix-2021.herokuapp.com/movies',{
             headers: {Authorization: `Bearer ${token}`}
         })
             .then(response => {
-                this.setState({
-                    movies: response.data
-                });
+                const movies = response.data;
+                setMovies(movies);
+                setFeaturedMovies(movies.filter(movie =>
+                    (movie.featured)));
             })
             .catch(error => {
-                this.setError(error);
+                setError(error);
             });
-    }
-    
-    handleBackClick = (selected) => {
-        this.setState({
-            [selected]: null
-        });
-    }
-    
-    handleItemClick = (typeOfItem, itemSelected) => {
-        this.setState({
-            [typeOfItem]: itemSelected
-        });
-    }
+    };
 
-    logoutUser = () => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        this.setState({
-            user: null
+    const onLoggedIn = ({token, user}) => {   
+        setUserInfo({
+            birthDate: user.birthDate,
+            favoriteActors: user.favoriteActors,
+            favoriteMovies: user.favoriteMovies,
+            email: user.email,
+            id: user._id,
+            password: user.password,
+            toWatchMovies: user.toWatchMovies,
+            username: user.username
         });
-        this.setNavbarAttributes(false);
-        window.open('/', '_self');
-    }
-   
-    setError = (error) => {
-        this.setState({
-            error
-        });
-    }
-
-    setNavbarAttributes = (isUserLoggedIn) => {        
-        if (isUserLoggedIn) {
-            this.props.setNavbar(true, 'MovieView');
-        } else {
-            this.props.setNavbar(false);
-        }
-    }
-
-    setUser = ({token, user}) => { 
-        this.setState({
-            user: user._id
-        });   
         localStorage.setItem('token', token);
         localStorage.setItem('user', user._id);
-        this.setNavbarAttributes(true);
-        this.getMovies(token);    
-    }
+        getActors(token);
+        getMovies(token);
+        getFavoritedMovies(token);    
+    };
 
-    render() {
-        const {
-            error, 
-            movies, 
-            selectedDirector, 
-            selectedGenre,
-            selectedMovie, 
-            user
-        } = this.state;
+    const onLogout = () => {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        logoutUser();
+        window.open('/', '_self');
+    };
 
-        const showLogin = () => {
-            return (
+   
+
+  
+    const showLogin = (path) => {
+        if (path == 'logout')
+            onLogout();
+        return (
+            <>
+                    
                 <Row className="justify-content-md-center">
                     <Col className="form-container" md={5}>
                         <LoginView 
-                            setUser={this.setUser} 
+                            onLoggedIn={onLoggedIn} 
                         />
                     </Col>
                 </Row>
-            );
-        };
+            </>
+        );
+    };
         
-        return (
-            <Router>                
+    return (
+        <Router>
+            <MainNavbar /> 
+            <Container className="my-flix" fluid>             
                 <Route exact path="/" render={() => {
                     // If user is not logged in, show login view
-                    if (!user) return showLogin();
+                    if (!token) return showLogin();
                     // if there is an error loading the movies
                     if (error) {
                         return (
-                            <Row className="justify-content-md-center">
-                                <Col md="5"> 
-                                    <div>
-                                        An error has occurred. 
-                                        Please try again.
-                                    </div>
-                                </Col>
-                            </Row>
+                            <>
+                                    
+                                <Row className="justify-content-md-center">
+                                    <Col md="5"> 
+                                        <div>
+                                            An error has occurred. 
+                                            Please try again.
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </>
                         );
                     }     
 
                     // If there are no movies to display    
                     if (movies.length === 0) 
-                        return <div className="movies-container" />;
+                        return (
+                            <>
+                                    
+                                <div className="movies-container" />
+                            </>
+                        );
 
-                    return <Row 
-                        className="movies-container justify-content-md-center"
-                    >
-                        {movies.map((movie) => {
-                            return (
-                                <Col key={movie._id}  md={4}>
-                                    <MovieCard 
-                                        movie={movie} 
-                                        onItemClick={this.handleItemClick}  
-                                    />
-                                </Col>
-                            );
-                        })};
-                    </Row>;
+                    return (
+                        <>
+                                
+                            <Row 
+                                className="movies-container 
+                                justify-content-md-center"
+                            >
+                                {movies.map((movie) => {
+                                    return (
+                                        <Col key={movie._id}  md={4}>
+                                            <MovieCard 
+                                                movie={movie} 
+                                                
+                                            />
+                                        </Col>
+                                    );
+                                })};
+                            </Row>;
+                        </>
+                    );
                 }} />
                              
                 <Route path="/movies/:id" render={({history, match}) => {
                     // If user is not logged in, show login view
-                    if (!user) return showLogin();
-                    return <Row className="justify-content-md-center">
-                        <Col id="movie-view" className="view" md={6}>    
-                            <MovieView 
-                                selectedMovie={movies.find(
-                                    movie => {
-                                        return movie._id === match.params.id;
-                                    })      
-                                }  
-                                onItemClick={this.handleItemClick}
-                                onBackClick={() => history.goBack()} 
-                                userId={user}
-                            />
-                        </Col>
-                    </Row>;
+                    if (!token) return showLogin();
+                    const movie = movies.find(
+                        
+                        movie => {
+                            // console.log(movie)
+                            return movie._id === match.params.id;
+                        }); 
+
+                    const movieActors = movie.stars.map((star) => {
+                        const matchingActor = actors.find((actor) => {
+                            return star.actor === actor.name;
+                        });
+                        
+                        
+                        return {
+                            ...star,
+                            id: matchingActor._id,
+                            image: matchingActor.image
+                        };
+                    });
+
+                    return (
+                        <>
+                                
+                            <Row className="justify-content-md-center">
+                                <Col 
+                                    id="movie-view" 
+                                    className="view" md={6}>    
+                                    <MovieView 
+                                        movie={movie} 
+                                        movieActors={movieActors} 
+                                        onBackClick={() => history.goBack()} 
+                                    />
+                                </Col>
+                            </Row>
+                        </>
+                    );
                 }} />
 
                 <Route path="/genres/:name" render={({history, match}) => {
                     // If user is not logged in, show login view
-                    if (!user) return showLogin();
-                    return <Row className="justify-content-md-center">
-                        <Col id="genre-view" className="view" md={6}>    
-                            <GenreView 
-                                onItemClick={this.handleItemClick}
-                                selectedGenre={movies.find(
-                                    ({genre}) => {
-                                        return genre.name 
-                                            === match.params.name;
-                                    }).genre
-                                } 
-                                otherMovies={movies.filter((movie) => {
-                                    return movie.name !== selectedMovie.name 
+                    if (!token) return showLogin();
+                    const selectedGenre = movies.find(
+                        ({genre}) => {
+                            return genre.name 
+                                === match.params.name;
+                        }).genre;
+                    return (
+                        <>
+                                
+                            <Row className="justify-content-md-center">
+                                <Col 
+                                    id="genre-view" 
+                                    className="view" 
+                                    md={6}
+                                >    
+                                    <GenreView 
+                                        onItemClick={this.handleItemClick}
+                                        selectedGenre={selectedGenre} 
+                                        otherMovies={movies.filter((movie) => {
+                                            return movie.name 
+                                            !== selectedMovie.name 
                                         && movie.genre.name === 
                                             selectedGenre.name;
-                                })}
-                                onBackClick={() => history.goBack()} 
-                            />
-                        </Col>
-                    </Row>;
+                                        })}
+                                        onBackClick={() => history.goBack()} 
+                                    />
+                                </Col>
+                            </Row>
+                        </>
+                    );
                 }} />
 
                 <Route path="/directors/:name" render={({history, match}) => {
                     // If user is not logged in, show login view
-                    if (!user) return showLogin();
-                    return <Row className="justify-content-md-center">
-                        <Col id="director-view" className="view" md={6}>    
-                            <DirectorView
-                                onItemClick={this.handleItemClick} 
-                                selectedDirector={movies.find(
-                                    ({director}) => 
-                                        director.name 
-                                        === match.params.name).director
-                                } 
-                                otherMovies={movies.filter((movie) => {
-                                    return movie.name !== selectedMovie.name 
+                    if (!token) return showLogin();
+                    const selectedDirector = movies.find(
+                        ({director}) => 
+                            director.name === match.params.name).director;
+                    
+                    return (
+                        <>
+                            <Row className="justify-content-md-center">
+                                <Col 
+                                    id="director-view" 
+                                    className="view" 
+                                    md={6}
+                                >    
+                                    <DirectorView
+                                        onItemClick={this.handleItemClick} 
+                                        selectedDirector={selectedDirector} 
+                                        otherMovies={movies.filter((movie) => {
+                                            return movie.name 
+                                            !== selectedMovie.name 
                                         && movie.director.name === 
                                             selectedDirector.name;
-                                })}
-                                onBackClick={() => history.goBack()} 
-                            />
-                        </Col>
-                    </Row>;
+                                        })}
+                                        onBackClick={() => history.goBack()} 
+                                    />
+                                </Col>
+                            </Row>;
+                        </>
+                    );
                 }} />     
 
                 <Route path="/register" render={() => {
                     // if user is already logged in redirect to home page
-                    if (user) return <Redirect to="/" />;
-                    return <Row className="justify-content-md-center">
-                        <Col className="form-container" md={5}>
-                            <RegistrationView />
-                        </Col>                    
-                    </Row>;
+                    if (token) 
+                        return <Redirect to="/" />;
+
+                    return (
+                        <>
+                                
+                            <Row className="justify-content-md-center">
+                                <Col className="form-container" md={5}>
+                                    <RegistrationView />
+                                </Col>                    
+                            </Row>
+                        </>
+                    );
                 }} />
 
                 <Route path="/profile" render={() => {
                     // If user is not logged in, show login view
-                    if (!user) return showLogin();
-                    return <Row className="justify-content-md-center">
-                        <Col 
-                            id="profile-view" 
-                            className="form-container" 
-                            md={8}
-                        >
-                            <ProfileView 
-                                userId={user} 
-                                logoutUser={this.logoutUser} 
-                            />
-                        </Col>
-                    </Row>;
+                    if (!token) return showLogin();
+                    return (
+                        <>
+                                
+                            <Row className="justify-content-md-center">
+                                <Col 
+                                    id="profile-view" 
+                                    className="form-container" 
+                                    md={8}
+                                >
+                                    <ProfileView 
+                                        onLogout={onLogout} 
+                                    />
+                                </Col>
+                            </Row>
+                        </>
+                    );
                 }} />
-
-            </Router>
-        );               
-    }   
-}
-
-MainView.propTypes = {
-    setNavbar: PropTypes.func.isRequired
+                <Route path="/logout" render={() => {
+                    showLogin('logout');
+                }} />
+            </Container>
+        </Router>
+            
+    );               
+       
 };
 
-export default MainView;
+MainView.propTypes = {
+    actors: PropTypes.array.isRequired,
+    logoutUser: PropTypes.func.isRequired,
+    movies: PropTypes.array.isRequired,
+    selectedMovie: PropTypes.object.isRequired,
+    setActors: PropTypes.func.isRequired,
+    setFavoritedMovies: PropTypes.func.isRequired,
+    setFeaturedMovies: PropTypes.func.isRequired,
+    setMovies: PropTypes.func.isRequired,
+    setUserInfo: PropTypes.func.isRequired,
+    user: PropTypes.object.isRequired
+};
+
+const mapStateToProps = state => {
+    return {
+        actors: state.actors,
+        favoritedMovies: state.favoritedMovies,
+        featuredMovies: state.featuredMovies,
+        movies: state.movies,
+        selectedMovie: state.selectedMovie,
+        user: state.user
+    };
+};
+
+export default connect(mapStateToProps, {
+    setFavoritedMovies,    
+    setFeaturedMovies,
+    logoutUser,
+    setActors, 
+    setMovies, 
+    setSelectedMovie,
+    setUserInfo
+})(MainView);

@@ -3,20 +3,75 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
 
+import {connect} from 'react-redux';
+
+import {
+    removeUserFavoriteActor,
+    removeUserFavoriteMovie,
+    removeUserToWatchMovie,
+    setFavoritedMovies
+} from '../../actions/actions';
 import {createExcerpt} from '../../utils/helpers';
 import './user-list.scss';
-const UserList = ({title, listType, userId, token, itemIdType}) => {
+const UserList = ({
+    actors,
+    favoritedMovies,
+    title, 
+    listType, 
+    listTypeJS, 
+    movies,
+    token, 
+    itemIdType, 
+    setFavoritedMovies,
+    user}) => {
     const [list, setList] = useState(null);
     const [error, setError] = useState(false);
 
     useEffect(() => {
-        axios.get(
-            `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}`,
-            {
-                headers: {Authorization: `Bearer ${token}`}
-            }).then(response => {
-            setList(response.data);
-        });
+        
+        if (listTypeJS.match(/movies/i)) {
+            setList(user[listTypeJS].map((movieId) => {
+                
+                const matchingMovie = movies.find((movie) => {
+                    
+                    return movie._id === movieId;
+                });
+                        
+                        
+                return {
+                    
+                    id: matchingMovie._id,
+                    description: matchingMovie.description,
+                    image: matchingMovie.image,
+                    name: matchingMovie.name
+                };
+            }));
+        } else if (listTypeJS.match(/actors/i)) {
+            setList(user[listTypeJS].map((actor) => {
+                
+                const matchingActor = actors.find((actorId) => {
+                    
+                    return actor._id === actorId;
+                });
+                        
+                        
+                return {
+                    
+                    id: matchingActor._id,
+                    bio: matchingActor.bio,
+                    image: matchingActor.image,
+                    name: matchingActor.name
+                };
+            }));
+        }
+        
+        // axios.get(
+        //     `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}`,
+        //     {
+        //         headers: {Authorization: `Bearer ${token}`}
+        //     }).then(response => {
+        //     setList(response.data);
+        // });
     },[]);
 
     const addItemsToListLink = () => {
@@ -37,7 +92,7 @@ const UserList = ({title, listType, userId, token, itemIdType}) => {
         }
     };
 
-    const removeListItem = (itemId) => {
+    const removeListItem = (itemId, itemName) => {
         const data = {};
         data[itemIdType] = itemId;
         axios({
@@ -50,6 +105,23 @@ const UserList = ({title, listType, userId, token, itemIdType}) => {
                 return listItem._id !== itemId;
             });
             setList(newList);
+            if (listTypeJS === 'favoriteMovies') {
+                removeUserFavoriteMovie(itemId);
+                setFavoritedMovies(favoritedMovies.map(movie => {
+                    if (movie.name === itemName) {
+                        return {
+                            ...movie,
+                            usersFavorited: movie.usersFavorited--
+                        };
+                    }
+                    return movie;
+                }));
+            }
+            if (listTypeJS === 'favoriteActors')
+                removeUserFavoriteActor(itemId);
+            if (listTypeJS === 'toWatchMovies')
+                removeUserToWatchMovie(itemId);
+                
         }).catch(err => {
             setError(err);
         });
@@ -59,26 +131,28 @@ const UserList = ({title, listType, userId, token, itemIdType}) => {
         <div className="user-list">
             <h4 className="heading">{title}</h4>
             <ul>
-                {list && list.length > 0 ? list.map((item) => {
+                {list && (list.length > 0) ? list.map((item) => {
                     return (
-                        <li className="user-list-item" key={item._id}>
+                        <li className="user-list-item" key={item.id}>
                             <div className="details">
                                 <p>
                                     <Link to={`${
                                         listType.match(/movies/i) 
-                                            ? `/movies/${item._id}` 
-                                            : `/actors/${item._id}`}`}
+                                            ? `/movies/${item.id}` 
+                                            : `/actors/${item.id}`}`}
                                     >
                                         {item.name}
                                     </Link>
                                 </p>
                                 <p className="description">{
                                     createExcerpt(
-                                        item.description)} &hellip;
+                                        item.description 
+                                        ? item.description: item.bio)} &hellip;
                                 </p>
                             </div>
                             <svg 
-                                onClick={() => removeListItem(item._id)}
+                                onClick={() => removeListItem(
+                                    item.id, item.name)}
                                 xmlns="http://www.w3.org/2000/svg" 
                                 width="24" 
                                 height="24" 
@@ -119,11 +193,31 @@ const UserList = ({title, listType, userId, token, itemIdType}) => {
 };
 
 UserList.propTypes = {
+    actors: PropTypes.array.isRequired,
+    favoritedMovies: PropTypes.array.isRequired,
+    movies: PropTypes.array.isRequired,
     title: PropTypes.string.isRequired, 
     listType: PropTypes.string.isRequired, 
+    listTypeJS: PropTypes.string,
+    setFavoritedMovies: PropTypes.func.isRequired,
+    user: PropTypes.shape({
+        id: PropTypes.string.isRequired
+    }),
     userId: PropTypes.string.isRequired, 
     token: PropTypes.string.isRequired, 
     itemIdType: PropTypes.string.isRequired
 };
 
-export default UserList;
+const mapToStateProps = state => ({
+    actors: state.actors,
+    favoritedMovies: state.favoritedMovies,
+    movies: state.movies,
+    user: state.user
+});
+
+export default connect(mapToStateProps, {
+    removeUserFavoriteActor,
+    removeUserFavoriteMovie,
+    removeUserToWatchMovie,
+    setFavoritedMovies
+})(UserList);
