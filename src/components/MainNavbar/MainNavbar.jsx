@@ -3,11 +3,18 @@ import {Form, FormControl,  InputGroup, Nav,Navbar} from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
 import {connect} from 'react-redux';
+
+import {setMoviesFilter} from '../../actions/actions';
 import './main-navbar.scss';
 
-const MainNavbar = () => {
+const MainNavbar = ({setMoviesFilter}) => {
     const [searchTerm, setSearchTerm] = useState('');
     const isUserLoggedIn = localStorage.getItem('token') ? true : false;
+
+    const onChangeSearchTerm = (value) => {
+        setSearchTerm(value);
+        setMoviesFilter(value);
+    };
 
     return (
         <Navbar 
@@ -72,9 +79,7 @@ const MainNavbar = () => {
                                     </InputGroup.Prepend>
                                     <FormControl
                                         placeholder="Search &hellip;" 
-                                        onChange={(e) => setSearchTerm(
-                                            e.target.value)
-                                        } 
+                                        onChange={(e) => onChangeSearchTerm(e.target.value)} 
                                         value={searchTerm} 
                                         aria-label="Search &hellip;"
                                         aria-describedby="search-bar"
@@ -132,4 +137,4 @@ const mapStateToProps = state => {
     };
 };
 
-export default connect(mapStateToProps)(MainNavbar);
+export default connect(mapStateToProps, {setMoviesFilter})(MainNavbar);

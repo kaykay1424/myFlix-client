@@ -26493,6 +26493,8 @@ try {
   var _GenreViewGenreViewDefault = _parcelHelpers.interopDefault(_GenreViewGenreView);
   var _DirectorViewDirectorView = require('../DirectorView/DirectorView');
   var _DirectorViewDirectorViewDefault = _parcelHelpers.interopDefault(_DirectorViewDirectorView);
+  var _ListTypeSelectListTypeSelect = require('../ListTypeSelect/ListTypeSelect');
+  var _ListTypeSelectListTypeSelectDefault = _parcelHelpers.interopDefault(_ListTypeSelectListTypeSelect);
   var _MainNavbarMainNavbar = require('../MainNavbar/MainNavbar');
   var _MainNavbarMainNavbarDefault = _parcelHelpers.interopDefault(_MainNavbarMainNavbar);
   var _MovieCardMovieCard = require('../MovieCard/MovieCard');
@@ -26505,11 +26507,20 @@ try {
   var _ProfileViewProfileViewDefault = _parcelHelpers.interopDefault(_ProfileViewProfileView);
   var _RegistrationViewRegistrationView = require('../RegistrationView/RegistrationView');
   var _RegistrationViewRegistrationViewDefault = _parcelHelpers.interopDefault(_RegistrationViewRegistrationView);
+  var _SortingFactorSelectSortingFactorSelect = require('../SortingFactorSelect/SortingFactorSelect');
+  var _SortingFactorSelectSortingFactorSelectDefault = _parcelHelpers.interopDefault(_SortingFactorSelectSortingFactorSelect);
   var _actionsActions = require('../../actions/actions');
   require('./main-view.scss');
   var _s = $RefreshSig$();
-  const MainView = ({actors, movies, selectedMovie, logoutUser, setActors, setMovies, setFavoritedMovies, setFeaturedMovies, setUserInfo}) => {
+  const MainView = ({actors, favoritedMovies, featuredMovies, movies, moviesFilter, moviesListType, moviesSortingFactor, selectedMovie, logoutUser, setActors, setMovies, setFavoritedMovies, setFeaturedMovies, setUserInfo}) => {
     _s();
+    _react.useEffect(() => {
+      if (token && movies.length === 0) {
+        getActors(token);
+        getMovies(token);
+        getFavoritedMovies(token);
+      }
+    }, [moviesFilter]);
     const token = localStorage.getItem('token');
     const [error, setError] = _react.useState(false);
     const getActors = token => {
@@ -26570,6 +26581,22 @@ try {
       logoutUser();
       window.open('/', '_self');
     };
+    let selectedMovies;
+    if (moviesListType === 'all') selectedMovies = movies;
+    if (moviesListType === 'featured') selectedMovies = featuredMovies;
+    if (moviesListType === 'favorited') selectedMovies = favoritedMovies;
+    if (moviesSortingFactor === 'rating') selectedMovies.sort((movie1, movie2) => {
+      return movie2.rating - movie1.rating;
+    });
+    if (moviesSortingFactor === 'releaseYear') selectedMovies.sort((movie1, movie2) => {
+      return movie2.rating - movie1.rating;
+    });
+    if (moviesFilter !== '') {
+      selectedMovies = selectedMovies.filter(movie => {
+        const regExp = new RegExp(moviesFilter, 'i');
+        return movie.name.match(regExp);
+      });
+    }
     const showLogin = path => {
       if (path == 'logout') onLogout();
       return (
@@ -26604,7 +26631,7 @@ try {
             );
           }
           // If there are no movies to display
-          if (movies.length === 0) return (
+          if (selectedMovies.length === 0) return (
             /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
               className: "movies-container"
             }))
@@ -26612,7 +26639,30 @@ try {
           return (
             /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
               className: "movies-container  justify-content-md-center"
-            }, movies.map(movie => {
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+              md: 6
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, null, /*#__PURE__*/_reactDefault.default.createElement(_ListTypeSelectListTypeSelectDefault.default, null), /*#__PURE__*/_reactDefault.default.createElement(_SortingFactorSelectSortingFactorSelectDefault.default, {
+              options: [{
+                text: 'None',
+                value: 'none',
+                selected: true
+              }, {
+                text: 'Rating',
+                value: 'rating',
+                selected: false
+              }, {
+                text: 'Release year',
+                value: 'releaseYear',
+                selected: false
+              }],
+              type: "movies"
+            })))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, selectedMovies.map(movie => {
+              if (moviesListType === 'favorited') {
+                const fullMovie = movies.find(currentMovie => {
+                  return movie.name === currentMovie.name;
+                });
+                movie = fullMovie;
+              }
               return (
                 /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
                   key: movie._id,
@@ -26748,12 +26798,17 @@ try {
       })))
     );
   };
-  _s(MainView, "AvrsuJm02Cqlq6/LWpvA21zDecQ=");
+  _s(MainView, "yCNc0izcyUmqTqIUA3XqPmTNoeo=");
   _c = MainView;
   MainView.propTypes = {
     actors: _propTypesDefault.default.array.isRequired,
+    favoritedMovies: _propTypesDefault.default.array.isRequired,
+    featuredMovies: _propTypesDefault.default.array.isRequired,
     logoutUser: _propTypesDefault.default.func.isRequired,
     movies: _propTypesDefault.default.array.isRequired,
+    moviesFilter: _propTypesDefault.default.string,
+    moviesListType: _propTypesDefault.default.string.isRequired,
+    moviesSortingFactor: _propTypesDefault.default.string.isRequired,
     selectedMovie: _propTypesDefault.default.object.isRequired,
     setActors: _propTypesDefault.default.func.isRequired,
     setFavoritedMovies: _propTypesDefault.default.func.isRequired,
@@ -26768,6 +26823,9 @@ try {
       favoritedMovies: state.favoritedMovies,
       featuredMovies: state.featuredMovies,
       movies: state.movies,
+      moviesFilter: state.moviesFilter,
+      moviesListType: state.moviesListType,
+      moviesSortingFactor: state.moviesSortingFactor,
       selectedMovie: state.selectedMovie,
       user: state.user
     };
@@ -26778,6 +26836,7 @@ try {
     logoutUser: _actionsActions.logoutUser,
     setActors: _actionsActions.setActors,
     setMovies: _actionsActions.setMovies,
+    setMoviesFilter: _actionsActions.setMoviesFilter,
     setSelectedMovie: _actionsActions.setSelectedMovie,
     setUserInfo: _actionsActions.setUserInfo
   })(MainView);
@@ -26789,7 +26848,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../MovieCard/MovieCard":"7csoe","../MovieView/MovieView":"6fxIo","axios":"7rA65","../RegistrationView/RegistrationView":"4DfHF","../LoginView/LoginView":"1zhWx","./main-view.scss":"3JwwG","prop-types":"4dfy5","react-bootstrap":"4n7hB","../DirectorView/DirectorView":"7nJwh","../GenreView/GenreView":"4kDeE","react-router-dom":"1PMSK","../ProfileView/ProfileView":"7iKJS","react-redux":"7GDa4","../../actions/actions":"5S6cN","../MainNavbar/MainNavbar":"6h1DY"}],"7csoe":[function(require,module,exports) {
+},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../MovieCard/MovieCard":"7csoe","../MovieView/MovieView":"6fxIo","axios":"7rA65","../RegistrationView/RegistrationView":"4DfHF","../LoginView/LoginView":"1zhWx","./main-view.scss":"3JwwG","prop-types":"4dfy5","react-bootstrap":"4n7hB","../DirectorView/DirectorView":"7nJwh","../GenreView/GenreView":"4kDeE","react-router-dom":"1PMSK","../ProfileView/ProfileView":"7iKJS","react-redux":"7GDa4","../../actions/actions":"5S6cN","../MainNavbar/MainNavbar":"6h1DY","../ListTypeSelect/ListTypeSelect":"2FsjQ","../SortingFactorSelect/SortingFactorSelect":"6zJdJ"}],"7csoe":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -49155,12 +49214,17 @@ try {
   var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
   var _reactRouterDom = require('react-router-dom');
   var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
   require('./main-navbar.scss');
   var _s = $RefreshSig$();
-  const MainNavbar = () => {
+  const MainNavbar = ({setMoviesFilter}) => {
     _s();
     const [searchTerm, setSearchTerm] = _react.useState('');
     const isUserLoggedIn = localStorage.getItem('token') ? true : false;
+    const onChangeSearchTerm = value => {
+      setSearchTerm(value);
+      setMoviesFilter(value);
+    };
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar, {
         id: "main-navbar",
@@ -49202,7 +49266,7 @@ try {
         y2: "16.65"
       })))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
         placeholder: "Search …",
-        onChange: e => setSearchTerm(e.target.value),
+        onChange: e => onChangeSearchTerm(e.target.value),
         value: searchTerm,
         "aria-label": "Search …",
         "aria-describedby": "search-bar"
@@ -49233,7 +49297,9 @@ try {
       user: state.user
     };
   };
-  exports.default = _reactRedux.connect(mapStateToProps)(MainNavbar);
+  exports.default = _reactRedux.connect(mapStateToProps, {
+    setMoviesFilter: _actionsActions.setMoviesFilter
+  })(MainNavbar);
   var _c;
   $RefreshReg$(_c, "MainNavbar");
   helpers.postlude(module);
@@ -49242,7 +49308,102 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","react-bootstrap":"4n7hB","prop-types":"4dfy5","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./main-navbar.scss":"RFYh5","react-redux":"7GDa4","react-router-dom":"1PMSK"}],"RFYh5":[function() {},{}],"7panR":[function(require,module,exports) {
+},{"react":"3b2NM","react-bootstrap":"4n7hB","prop-types":"4dfy5","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./main-navbar.scss":"RFYh5","react-redux":"7GDa4","react-router-dom":"1PMSK","../../actions/actions":"5S6cN"}],"RFYh5":[function() {},{}],"2FsjQ":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
+  const ListTypeSelect = ({setMoviesListType}) => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "list-type-select"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Select type of movies"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Control, {
+        as: "select",
+        onChange: e => setMoviesListType(e.target.value)
+      }, /*#__PURE__*/_reactDefault.default.createElement("option", {
+        value: "all"
+      }, "All movies"), /*#__PURE__*/_reactDefault.default.createElement("option", {
+        value: "featured"
+      }, "Featured movies"), /*#__PURE__*/_reactDefault.default.createElement("option", {
+        value: "favorited"
+      }, "Favorited movies")))
+    );
+  };
+  _c = ListTypeSelect;
+  exports.default = _reactRedux.connect(null, {
+    setMoviesListType: _actionsActions.setMoviesListType
+  })(ListTypeSelect);
+  var _c;
+  $RefreshReg$(_c, "ListTypeSelect");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"6zJdJ":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
+  const SortingFactorSelect = ({setActorsSortingFactor, setMoviesSortingFactor, options, type}) => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "list-type-select"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Sort by:"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Control, {
+        as: "select",
+        onChange: e => {
+          type === 'movies' ? setMoviesSortingFactor(e.target.value) : setActorsSortingFactor(e.target.value);
+        }
+      }, options.map(option => {
+        const selected = option.selected ? true : false;
+        if (selected) {
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement("option", {
+              value: option.value,
+              selected: true
+            }, option.text)
+          );
+        } else {
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement("option", {
+              value: option.value
+            }, option.text)
+          );
+        }
+      })))
+    );
+  };
+  _c = SortingFactorSelect;
+  exports.default = _reactRedux.connect(null, {
+    setActorsSortingFactor: _actionsActions.setActorsSortingFactor,
+    setMoviesSortingFactor: _actionsActions.setMoviesSortingFactor
+  })(SortingFactorSelect);
+  var _c;
+  $RefreshReg$(_c, "SortingFactorSelect");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"7panR":[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, '__esModule', {
   value: true
@@ -49990,7 +50151,7 @@ function moviesFilter(state = '', action) {
       return state;
   }
 }
-function moviesListType(state = '', action) {
+function moviesListType(state = 'all', action) {
   switch (action.type) {
     case _actionsActions.SET_MOVIES_LIST_TYPE:
       return action.listType;
@@ -49998,7 +50159,7 @@ function moviesListType(state = '', action) {
       return state;
   }
 }
-function moviesSortingFactor(state = '', action) {
+function moviesSortingFactor(state = 'none', action) {
   switch (action.type) {
     case _actionsActions.SET_MOVIES_SORTING_FACTOR:
       return action.sortingFactor;

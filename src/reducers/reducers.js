@@ -84,7 +84,7 @@ function movies(state = [], action) {
     }
 }
 
-function moviesFilter(state = '', action) {
+function moviesFilter(state = '', action) {    
     switch(action.type) {
         case SET_MOVIES_FILTER:
             return action.filter;
@@ -93,7 +93,7 @@ function moviesFilter(state = '', action) {
     }    
 }
 
-function moviesListType(state = '', action) {
+function moviesListType(state = 'all', action) {
     switch(action.type) {
         case SET_MOVIES_LIST_TYPE:
             return action.listType;
@@ -102,7 +102,7 @@ function moviesListType(state = '', action) {
     }    
 }
 
-function moviesSortingFactor(state = '', action) {
+function moviesSortingFactor(state = 'none', action) {
     switch(action.type) {
         case SET_MOVIES_SORTING_FACTOR:
             return action.sortingFactor;

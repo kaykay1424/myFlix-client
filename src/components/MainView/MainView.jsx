@@ -1,9 +1,9 @@
 /************ Modules **************/
 
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import {Col, Container, Row} from 'react-bootstrap';
+import {Col, Container, Form, Row} from 'react-bootstrap';
 import {
     BrowserRouter as Router, 
     Redirect, 
@@ -15,17 +15,20 @@ import {connect} from 'react-redux';
 
 import GenreView from '../GenreView/GenreView';
 import DirectorView from '../DirectorView/DirectorView';
+import ListTypeSelect from '../ListTypeSelect/ListTypeSelect';
 import MainNavbar from '../MainNavbar/MainNavbar';
 import MovieCard from '../MovieCard/MovieCard';
 import MovieView from '../MovieView/MovieView';
 import LoginView from '../LoginView/LoginView';
 import ProfileView from '../ProfileView/ProfileView';
 import RegistrationView from '../RegistrationView/RegistrationView';
+import SortingFactorSelect from '../SortingFactorSelect/SortingFactorSelect';
 
 import {
     logoutUser,
     setActors, 
     setMovies, 
+    setMoviesFilter,
     setFavoritedMovies,
     setFeaturedMovies,
     setSelectedMovie, 
@@ -35,7 +38,12 @@ import './main-view.scss';
 
 const MainView = ({
     actors, 
+    favoritedMovies,
+    featuredMovies,
     movies, 
+    moviesFilter,
+    moviesListType,
+    moviesSortingFactor,
     selectedMovie, 
     logoutUser,
     setActors, 
@@ -43,6 +51,14 @@ const MainView = ({
     setFavoritedMovies,
     setFeaturedMovies,
     setUserInfo}) => {
+
+    useEffect(() => {
+        if (token && movies.length === 0) {
+            getActors(token);
+            getMovies(token);
+            getFavoritedMovies(token);
+        }
+    },[moviesFilter]);
     
     const token = localStorage.getItem('token');
 
@@ -110,9 +126,6 @@ const MainView = ({
         window.open('/', '_self');
     };
 
-   
-
-  
     const showLogin = (path) => {
         if (path == 'logout')
             onLogout();
@@ -152,10 +165,37 @@ const MainView = ({
                                 </Row>
                             </>
                         );
-                    }     
+                    } 
+                    
+                    let selectedMovies;
+                    if (moviesListType === 'all') 
+                        selectedMovies = movies;
+                    if (moviesListType === 'featured') 
+                        selectedMovies = featuredMovies;
+                    if (moviesListType === 'favorited') 
+                        selectedMovies = favoritedMovies;
+    
+                    if (moviesSortingFactor === 'rating') 
+                        selectedMovies.sort((movie1, movie2) => {
+                            return movie2.rating - movie1.rating;
+                        });
+                    if (moviesSortingFactor === 'releaseYear')
+                        selectedMovies.sort((movie1, movie2) => {
+                            return movie2.rating - movie1.rating;
+                        });
+
+        
+       
+                    if (moviesFilter !== '') {
+                        selectedMovies = selectedMovies.filter(movie => {
+                            const regExp = new RegExp(moviesFilter, 'i');
+                            return movie.name.match(regExp);
+                        });
+                    }
+
 
                     // If there are no movies to display    
-                    if (movies.length === 0) 
+                    if (selectedMovies.length === 0) 
                         return (
                             <>
                                     
@@ -170,7 +210,43 @@ const MainView = ({
                                 className="movies-container 
                                 justify-content-md-center"
                             >
-                                {movies.map((movie) => {
+                                <Col md={6}>
+                                    <Form>
+                                        <ListTypeSelect />
+                                        <SortingFactorSelect 
+                                            options={
+                                                [
+                                                    {
+                                                        text: 'None',
+                                                        value: 'none',
+                                                        selected: true
+                                                    },
+                                                    {
+                                                        text: 'Rating',
+                                                        value: 'rating',
+                                                        selected: false
+                                                    },
+                                                    {
+                                                        text: 'Release year',
+                                                        value: 'releaseYear',
+                                                        selected: false
+                                                    }
+                                                ]
+                                            }
+                                            type="movies"
+                                        />
+                                    </Form>
+                                    
+                                </Col>
+                            </Row>
+                            <Row>
+                                {selectedMovies.map((movie) => {
+                                    if (moviesListType === 'favorited') {
+                                        const fullMovie = movies.find(currentMovie => {
+                                            return movie.name === currentMovie.name;
+                                        });
+                                        movie = fullMovie;
+                                    }
                                     return (
                                         <Col key={movie._id}  md={4}>
                                             <MovieCard 
@@ -341,8 +417,13 @@ const MainView = ({
 
 MainView.propTypes = {
     actors: PropTypes.array.isRequired,
+    favoritedMovies: PropTypes.array.isRequired,
+    featuredMovies: PropTypes.array.isRequired,
     logoutUser: PropTypes.func.isRequired,
     movies: PropTypes.array.isRequired,
+    moviesFilter: PropTypes.string,
+    moviesListType: PropTypes.string.isRequired,
+    moviesSortingFactor: PropTypes.string.isRequired,
     selectedMovie: PropTypes.object.isRequired,
     setActors: PropTypes.func.isRequired,
     setFavoritedMovies: PropTypes.func.isRequired,
@@ -358,6 +439,9 @@ const mapStateToProps = state => {
         favoritedMovies: state.favoritedMovies,
         featuredMovies: state.featuredMovies,
         movies: state.movies,
+        moviesFilter: state.moviesFilter,
+        moviesListType: state.moviesListType,
+        moviesSortingFactor: state.moviesSortingFactor,
         selectedMovie: state.selectedMovie,
         user: state.user
     };
@@ -369,6 +453,7 @@ export default connect(mapStateToProps, {
     logoutUser,
     setActors, 
     setMovies, 
+    setMoviesFilter,
     setSelectedMovie,
     setUserInfo
 })(MainView);
