@@ -9,6 +9,7 @@ import {
     setFavoritedMovies, 
     setSelectedMovie
 } from '../../actions/actions';
+import {makeTextReadable} from '../../utils/helpers';
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
 import {addToList} from '../../utils/helpers';
 import '../../utils/partials/_view.scss';
@@ -94,7 +95,14 @@ const MovieView = ({
             </div>
             <div className="main-content">
                 <h1>
-                    {movie.name}
+                    <span>
+                        {movie.name}
+                        {movie.featured 
+                                ? (<small> (Featured)</small>)
+                                : null
+                        }
+                    </span>
+                    
                     <div className="user-list-icons">
                         <svg 
                             onClick={() => addToFavoritesList()}
@@ -155,11 +163,15 @@ const MovieView = ({
                     </div>
                 </h1>
                 <p className="label">Description</p>
-                <p className="description">{movie.description}</p>
+                <p className="description">{makeTextReadable(movie.description)}</p>
                 <p className="label">Release Year</p>
                 <p className="description">{movie.releaseYear}</p>
                 <p className="label">Rating</p>
                 <p className="description">{movie.rating}</p>
+                {movie.usersFavorited > 0
+                    ? (<><p className="label">Favorites by users</p>
+                        <p className="description">{movie.usersFavorited}</p></>)
+                    : null}
             </div>                      
             <div className="attributes">
                 <div className="attribute">
@@ -198,8 +210,7 @@ const MovieView = ({
                                                         className="description"
                                                     >
                                                         <Link 
-                                                            to={`/actors/
-                                                            ${actor._id}`}
+                                                            to={`/actors/${actor.id}`}
                                                         > 
                                                             {actor.actor}
                                                         </Link>
@@ -222,6 +233,15 @@ const MovieView = ({
                 </>)
                 : null
             }
+            <div className="source-container">
+                <a 
+                    href={movie.imdbLink} 
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    Source
+                </a>
+            </div> 
         </>              
     );
 };
@@ -236,14 +256,17 @@ MovieView.propTypes = {
         director: PropTypes.shape({
             name: PropTypes.string.isRequired
         }).isRequired,
+        featured: PropTypes.bool, 
         genre: PropTypes.shape({
             name: PropTypes.string.isRequired
         }).isRequired,
         image: PropTypes.string.isRequired,
+        imdbLink: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired,
         rating: PropTypes.number,
         releaseYear: PropTypes.number,
-        stars: PropTypes.array
+        stars: PropTypes.array,
+        usersFavorited: PropTypes.number
     }).isRequired,
     movieActors: PropTypes.array.isRequired,
     onBackClick: PropTypes.func.isRequired,

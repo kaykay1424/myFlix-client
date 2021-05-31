@@ -47,9 +47,10 @@ const UserList = ({
                 };
             }));
         } else if (listTypeJS.match(/actors/i)) {
-            setList(user[listTypeJS].map((actor) => {
+            
+            setList(user[listTypeJS].map((actorId) => {
                 
-                const matchingActor = actors.find((actorId) => {
+                const matchingActor = actors.find((actor) => {
                     
                     return actor._id === actorId;
                 });
@@ -63,15 +64,7 @@ const UserList = ({
                     name: matchingActor.name
                 };
             }));
-        }
-        
-        // axios.get(
-        //     `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}`,
-        //     {
-        //         headers: {Authorization: `Bearer ${token}`}
-        //     }).then(response => {
-        //     setList(response.data);
-        // });
+        }        
     },[]);
 
     const addItemsToListLink = () => {
@@ -97,12 +90,13 @@ const UserList = ({
         data[itemIdType] = itemId;
         axios({
             method: 'delete',
-            url: `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}/${itemId}`,
+            url: `https://my-flix-2021.herokuapp.com/users/${user.id}/${listType}/${itemId}`,
             data,
             headers:  {Authorization: `Bearer ${token}`}
         }).then(() => {
+            console.log('removed');
             const newList = list.filter(listItem => {
-                return listItem._id !== itemId;
+                return listItem.id !== itemId;
             });
             setList(newList);
             if (listTypeJS === 'favoriteMovies') {
@@ -132,6 +126,7 @@ const UserList = ({
             <h4 className="heading">{title}</h4>
             <ul>
                 {list && (list.length > 0) ? list.map((item) => {
+                    console.log(user)
                     return (
                         <li className="user-list-item" key={item.id}>
                             <div className="details">
@@ -203,7 +198,6 @@ UserList.propTypes = {
     user: PropTypes.shape({
         id: PropTypes.string.isRequired
     }),
-    userId: PropTypes.string.isRequired, 
     token: PropTypes.string.isRequired, 
     itemIdType: PropTypes.string.isRequired
 };

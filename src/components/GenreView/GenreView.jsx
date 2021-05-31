@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
 
+import {makeTextReadable} from '../../utils/helpers';
 import '../../utils/partials/_view.scss';
 import './genre-view.scss';
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
@@ -36,7 +37,7 @@ const GenreView = ({
             <div className="main-content">
                 <h1>{selectedGenre.name}</h1>
                 <p className="label">Description</p>
-                <p className="description">{selectedGenre.description}</p>
+                <p className="description">{makeTextReadable(selectedGenre.description)}</p>
             </div>                      
             {otherMovies.length > 0
                 ? (<>
@@ -67,6 +68,15 @@ const GenreView = ({
                 </>)
                 : null
             }
+            <div className="source-container">
+                <a 
+                    href={selectedGenre.wikipediaLink} 
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    Source
+                </a>
+            </div> 
         </>              
     );
 };

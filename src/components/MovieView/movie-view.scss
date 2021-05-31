@@ -9,6 +9,10 @@
     h1 {
         display: flex;
         justify-content: space-between;
+        small {
+            font-size: 40%;
+            margin-left: 10px;
+        }
         svg {
             cursor: pointer;
             height: 18px;

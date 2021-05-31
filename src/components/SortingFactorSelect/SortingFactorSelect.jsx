@@ -1,10 +1,19 @@
 import React from 'react';
 import {Form} from 'react-bootstrap';
 import {connect} from 'react-redux';
+import PropTypes from 'prop-types';
 
-import {setActorsSortingFactor, setMoviesSortingFactor} from '../../actions/actions';
+import {
+    setActorsSortingFactor, 
+    setMoviesSortingFactor
+} from '../../actions/actions';
 
-const SortingFactorSelect = ({setActorsSortingFactor, setMoviesSortingFactor, options, type}) => {
+const SortingFactorSelect = ({
+    setActorsSortingFactor, 
+    setMoviesSortingFactor, 
+    options, 
+    type
+}) => {
     return (
         <Form.Group controlId="list-type-select">
             <Form.Label>Sort by:</Form.Label>
@@ -19,9 +28,18 @@ const SortingFactorSelect = ({setActorsSortingFactor, setMoviesSortingFactor, op
                 {options.map(option => {
                     const selected = option.selected ? true : false;
                     if (selected) {
-                        return <option value={option.value} selected>{option.text}</option>;
+                        return (<option 
+                            value={option.value} 
+                            selected
+                        >
+                            {option.text}
+                        </option>);
                     } else {
-                        return <option value={option.value}>{option.text}</option>
+                        return (<option 
+                            value={option.value}
+                        >
+                            {option.text}
+                        </option>);
                     }
                     
                 })}
@@ -30,4 +48,14 @@ const SortingFactorSelect = ({setActorsSortingFactor, setMoviesSortingFactor, op
     );
 };
 
-export default connect(null, {setActorsSortingFactor, setMoviesSortingFactor})(SortingFactorSelect);
+SortingFactorSelect.propTypes = {
+    options: PropTypes.array.isRequired,
+    setActorsSortingFactor: PropTypes.func.isRequired,
+    setMoviesSortingFactor: PropTypes.func.isRequired,
+    type: PropTypes.string.isRequired
+};
+
+export default connect(null, {
+    setActorsSortingFactor, 
+    setMoviesSortingFactor
+})(SortingFactorSelect);

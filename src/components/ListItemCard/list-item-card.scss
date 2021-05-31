@@ -1,9 +1,10 @@
 @import '../../utils/partials/variables';
-.card.movie-card {
+.card.list-item-card {
     background-color: $secondary-background-color;
 }
-.movie-card {
+.list-item-card {
     background-color: $secondary-background-color;
+    color: $label-color;
     // display: flex;
     // flex-direction: column;
     // padding: 1em;
@@ -21,6 +22,10 @@
     .description {
         border-bottom: 1px solid $border-color;
         height: 53px;
+    }
+    .feather-star {
+        fill: gold;
+        margin-right: 1em;
     }
     .read-more-link {
         align-self: center;

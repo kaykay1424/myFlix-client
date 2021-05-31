@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom';
 
 import '../../utils/partials/_view.scss';
 import './director-view.scss';
+import {makeTextReadable} from '../../utils/helpers';
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
 
 const DirectorView = ({
@@ -36,7 +37,7 @@ const DirectorView = ({
             <div className="main-content">
                 <h1>{selectedDirector.name}</h1>
                 <p className="label">Biography</p>
-                <p className="description">{selectedDirector.bio}</p>
+                <div className="description">{makeTextReadable(selectedDirector.bio)}</div>
             </div>                      
             <div className="attributes">
                 <div className="attribute">
@@ -81,6 +82,15 @@ const DirectorView = ({
                 </>)
                 : null
             }
+            <div className="source-container">
+                <a 
+                    href={selectedDirector.imdbLink} 
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    Source
+                </a>
+            </div>
         </>              
     );
 };
@@ -90,6 +100,7 @@ DirectorView.propTypes = {
         bio: PropTypes.string.isRequired,
         birthYear: PropTypes.number.isRequired,
         deathYear: PropTypes.number,
+        imdbLink: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired
     }).isRequired,
     onBackClick: PropTypes.func.isRequired,

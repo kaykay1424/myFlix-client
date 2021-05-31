@@ -26489,6 +26489,8 @@ try {
   var _reactBootstrap = require('react-bootstrap');
   var _reactRouterDom = require('react-router-dom');
   var _reactRedux = require('react-redux');
+  var _ActorViewActorView = require('../ActorView/ActorView');
+  var _ActorViewActorViewDefault = _parcelHelpers.interopDefault(_ActorViewActorView);
   var _GenreViewGenreView = require('../GenreView/GenreView');
   var _GenreViewGenreViewDefault = _parcelHelpers.interopDefault(_GenreViewGenreView);
   var _DirectorViewDirectorView = require('../DirectorView/DirectorView');
@@ -26497,8 +26499,8 @@ try {
   var _ListTypeSelectListTypeSelectDefault = _parcelHelpers.interopDefault(_ListTypeSelectListTypeSelect);
   var _MainNavbarMainNavbar = require('../MainNavbar/MainNavbar');
   var _MainNavbarMainNavbarDefault = _parcelHelpers.interopDefault(_MainNavbarMainNavbar);
-  var _MovieCardMovieCard = require('../MovieCard/MovieCard');
-  var _MovieCardMovieCardDefault = _parcelHelpers.interopDefault(_MovieCardMovieCard);
+  var _ListItemCardListItemCard = require('../ListItemCard/ListItemCard');
+  var _ListItemCardListItemCardDefault = _parcelHelpers.interopDefault(_ListItemCardListItemCard);
   var _MovieViewMovieView = require('../MovieView/MovieView');
   var _MovieViewMovieViewDefault = _parcelHelpers.interopDefault(_MovieViewMovieView);
   var _LoginViewLoginView = require('../LoginView/LoginView');
@@ -26512,7 +26514,7 @@ try {
   var _actionsActions = require('../../actions/actions');
   require('./main-view.scss');
   var _s = $RefreshSig$();
-  const MainView = ({actors, favoritedMovies, featuredMovies, movies, moviesFilter, moviesListType, moviesSortingFactor, selectedMovie, logoutUser, setActors, setMovies, setFavoritedMovies, setFeaturedMovies, setUserInfo}) => {
+  const MainView = ({actors, actorsFilter, actorsSortingFactor, favoritedMovies, featuredMovies, movies, moviesFilter, moviesListType, moviesSortingFactor, selectedMovie, logoutUser, setActors, setMovies, setFavoritedMovies, setFeaturedMovies, setUserInfo, user}) => {
     _s();
     _react.useEffect(() => {
       if (token && movies.length === 0) {
@@ -26520,7 +26522,26 @@ try {
         getMovies(token);
         getFavoritedMovies(token);
       }
-    }, [moviesFilter]);
+      if (token && !user.id) {
+        _axiosDefault.default.get(`https://my-flix-2021.herokuapp.com/users/${localStorage.getItem('user')}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }).then(response => {
+          const currentUser = response.data;
+          setUserInfo({
+            birthDate: currentUser.birthDate,
+            favoriteActors: currentUser.favoriteActors,
+            favoriteMovies: currentUser.favoriteMovies,
+            email: currentUser.email,
+            id: localStorage.getItem('user'),
+            password: currentUser.password,
+            toWatchMovies: currentUser.toWatchMovies,
+            username: currentUser.username
+          });
+        });
+      }
+    }, []);
     const token = localStorage.getItem('token');
     const [error, setError] = _react.useState(false);
     const getActors = token => {
@@ -26581,22 +26602,6 @@ try {
       logoutUser();
       window.open('/', '_self');
     };
-    let selectedMovies;
-    if (moviesListType === 'all') selectedMovies = movies;
-    if (moviesListType === 'featured') selectedMovies = featuredMovies;
-    if (moviesListType === 'favorited') selectedMovies = favoritedMovies;
-    if (moviesSortingFactor === 'rating') selectedMovies.sort((movie1, movie2) => {
-      return movie2.rating - movie1.rating;
-    });
-    if (moviesSortingFactor === 'releaseYear') selectedMovies.sort((movie1, movie2) => {
-      return movie2.rating - movie1.rating;
-    });
-    if (moviesFilter !== '') {
-      selectedMovies = selectedMovies.filter(movie => {
-        const regExp = new RegExp(moviesFilter, 'i');
-        return movie.name.match(regExp);
-      });
-    }
     const showLogin = path => {
       if (path == 'logout') onLogout();
       return (
@@ -26630,6 +26635,40 @@ try {
               }, /*#__PURE__*/_reactDefault.default.createElement("div", null, "An error has occurred. Please try again."))))
             );
           }
+          let selectedMovies;
+          if (moviesListType === 'all') selectedMovies = [...movies];
+          if (moviesListType === 'featured') selectedMovies = featuredMovies;
+          if (moviesListType === 'favorited') {
+            selectedMovies = favoritedMovies;
+            selectedMovies = movies.filter(movie => {
+              for (let i = 0; i < selectedMovies.length; i++) {
+                if (Object.values(selectedMovies[i]).indexOf(movie.name) > -1) return true;
+              }
+              return false;
+            });
+          }
+          if (moviesSortingFactor === 'rating') selectedMovies.sort((movie1, movie2) => {
+            return movie2.rating - movie1.rating;
+          });
+          if (moviesSortingFactor === 'releaseYear') selectedMovies.sort((movie1, movie2) => {
+            return movie2.releaseYear - movie1.releaseYear;
+          });
+          if (moviesFilter !== '') {
+            selectedMovies = selectedMovies.filter(movie => {
+              const regExp = new RegExp(moviesFilter, 'i');
+              return movie.name.match(regExp);
+            });
+          }
+          selectedMovies = selectedMovies.map(movie => {
+            let usersFavorited = 0;
+            for (let i = 0; i < favoritedMovies.length; i++) {
+              if (favoritedMovies[i].name === movie.name) usersFavorited = favoritedMovies[i].usersFavorited;
+            }
+            return {
+              ...movie,
+              usersFavorited
+            };
+          });
           // If there are no movies to display
           if (selectedMovies.length === 0) return (
             /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
@@ -26640,8 +26679,8 @@ try {
             /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
               className: "movies-container  justify-content-md-center"
             }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-              md: 6
-            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, null, /*#__PURE__*/_reactDefault.default.createElement(_ListTypeSelectListTypeSelectDefault.default, null), /*#__PURE__*/_reactDefault.default.createElement(_SortingFactorSelectSortingFactorSelectDefault.default, {
+              md: 4
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_ListTypeSelectListTypeSelectDefault.default, null)), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_SortingFactorSelectSortingFactorSelectDefault.default, {
               options: [{
                 text: 'None',
                 value: 'none',
@@ -26656,19 +26695,14 @@ try {
                 selected: false
               }],
               type: "movies"
-            })))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, selectedMovies.map(movie => {
-              if (moviesListType === 'favorited') {
-                const fullMovie = movies.find(currentMovie => {
-                  return movie.name === currentMovie.name;
-                });
-                movie = fullMovie;
-              }
+            })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, selectedMovies.map(movie => {
               return (
                 /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
                   key: movie._id,
                   md: 4
-                }, /*#__PURE__*/_reactDefault.default.createElement(_MovieCardMovieCardDefault.default, {
-                  movie: movie
+                }, /*#__PURE__*/_reactDefault.default.createElement(_ListItemCardListItemCardDefault.default, {
+                  item: movie,
+                  itemType: "movies"
                 }))
               );
             }), ";"), ";")
@@ -26679,7 +26713,17 @@ try {
         render: ({history, match}) => {
           // If user is not logged in, show login view
           if (!token) return showLogin();
-          const movie = movies.find(movie => {
+          const fullSelectedMovies = movies.map(movie => {
+            let usersFavorited = 0;
+            for (let i = 0; i < favoritedMovies.length; i++) {
+              if (favoritedMovies[i].name === movie.name) usersFavorited = favoritedMovies[i].usersFavorited;
+            }
+            return {
+              ...movie,
+              usersFavorited
+            };
+          });
+          const movie = fullSelectedMovies.find(movie => {
             // console.log(movie)
             return movie._id === match.params.id;
           });
@@ -26708,6 +26752,104 @@ try {
           );
         }
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        exact: true,
+        path: "/actors",
+        render: () => {
+          // If user is not logged in, show login view
+          if (!token) return showLogin();
+          // if there is an error loading the movies
+          if (error) {
+            return (
+              /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+                className: "justify-content-md-center"
+              }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+                md: "5"
+              }, /*#__PURE__*/_reactDefault.default.createElement("div", null, "An error has occurred. Please try again."))))
+            );
+          }
+          let selectedActors = [...actors];
+          // if (actorsSortingFactor === 'none')
+          // selectedActors = [...actors];
+          if (actorsSortingFactor === 'birthCountry') {
+            selectedActors.sort((actor1, actor2) => {
+              if (actor1.birthCountry > actor2.birthCountry) return 1;
+              if (actor1.birthCountry === actor2.birthCountry) return 0;
+              if (actor1.birthCountry < actor2.birthCountry) return -1;
+            });
+          }
+          if (actorsSortingFactor === 'birthDate') selectedActors.sort((actor1, actor2) => {
+            const actor1BirthYear = new Date(actor1.birthDate).getFullYear();
+            const actor2BirthYear = new Date(actor2.birthDate).getFullYear();
+            return actor2BirthYear - actor1BirthYear;
+          });
+          if (actorsFilter !== '') {
+            selectedActors = selectedActors.filter(actor => {
+              const regExp = new RegExp(actorsFilter, 'i');
+              return actor.name.match(regExp);
+            });
+          }
+          // If there are no actors to display
+          if (selectedActors.length === 0) return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+              className: "actors-container"
+            }))
+          );
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+              className: "actors-container  movies-container justify-content-md-center"
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+              md: 2
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_SortingFactorSelectSortingFactorSelectDefault.default, {
+              options: [{
+                text: 'None',
+                value: 'none',
+                selected: true
+              }, {
+                text: 'Birth date',
+                value: 'birthDate',
+                selected: false
+              }, {
+                text: 'Birth country',
+                value: 'birthCountry',
+                selected: false
+              }],
+              type: "actors"
+            })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, selectedActors.map(actor => {
+              return (
+                /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+                  key: actor._id,
+                  md: 4
+                }, /*#__PURE__*/_reactDefault.default.createElement(_ListItemCardListItemCardDefault.default, {
+                  item: actor,
+                  itemType: "actors"
+                }))
+              );
+            }), ";"), ";")
+          );
+        }
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        path: "/actors/:id",
+        render: ({history, match}) => {
+          // If user is not logged in, show login view
+          if (!token) return showLogin();
+          const actor = actors.find(actor => {
+            // console.log(movie)
+            return actor._id === match.params.id;
+          });
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+              className: "justify-content-md-center"
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+              id: "actor-view",
+              className: "view",
+              md: 6
+            }, /*#__PURE__*/_reactDefault.default.createElement(_ActorViewActorViewDefault.default, {
+              actor: actor,
+              onBackClick: () => history.goBack()
+            }))))
+          );
+        }
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
         path: "/genres/:name",
         render: ({history, match}) => {
           // If user is not logged in, show login view
@@ -26723,7 +26865,6 @@ try {
               className: "view",
               md: 6
             }, /*#__PURE__*/_reactDefault.default.createElement(_GenreViewGenreViewDefault.default, {
-              onItemClick: undefined.handleItemClick,
               selectedGenre: selectedGenre,
               otherMovies: movies.filter(movie => {
                 return movie.name !== selectedMovie.name && movie.genre.name === selectedGenre.name;
@@ -26746,7 +26887,6 @@ try {
               className: "view",
               md: 6
             }, /*#__PURE__*/_reactDefault.default.createElement(_DirectorViewDirectorViewDefault.default, {
-              onItemClick: undefined.handleItemClick,
               selectedDirector: selectedDirector,
               otherMovies: movies.filter(movie => {
                 return movie.name !== selectedMovie.name && movie.director.name === selectedDirector.name;
@@ -26802,6 +26942,8 @@ try {
   _c = MainView;
   MainView.propTypes = {
     actors: _propTypesDefault.default.array.isRequired,
+    actorsFilter: _propTypesDefault.default.string.isRequired,
+    actorsSortingFactor: _propTypesDefault.default.string.isRequired,
     favoritedMovies: _propTypesDefault.default.array.isRequired,
     featuredMovies: _propTypesDefault.default.array.isRequired,
     logoutUser: _propTypesDefault.default.func.isRequired,
@@ -26820,6 +26962,8 @@ try {
   const mapStateToProps = state => {
     return {
       actors: state.actors,
+      actorsFilter: state.actorsFilter,
+      actorsSortingFactor: state.actorsSortingFactor,
       favoritedMovies: state.favoritedMovies,
       featuredMovies: state.featuredMovies,
       movies: state.movies,
@@ -26848,77 +26992,1752 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../MovieCard/MovieCard":"7csoe","../MovieView/MovieView":"6fxIo","axios":"7rA65","../RegistrationView/RegistrationView":"4DfHF","../LoginView/LoginView":"1zhWx","./main-view.scss":"3JwwG","prop-types":"4dfy5","react-bootstrap":"4n7hB","../DirectorView/DirectorView":"7nJwh","../GenreView/GenreView":"4kDeE","react-router-dom":"1PMSK","../ProfileView/ProfileView":"7iKJS","react-redux":"7GDa4","../../actions/actions":"5S6cN","../MainNavbar/MainNavbar":"6h1DY","../ListTypeSelect/ListTypeSelect":"2FsjQ","../SortingFactorSelect/SortingFactorSelect":"6zJdJ"}],"7csoe":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactBootstrap = require('react-bootstrap');
-  var _reactRouterDom = require('react-router-dom');
-  var _utilsHelpers = require('../../utils/helpers');
-  require('./movie-card.scss');
-  const MovieCard = ({movie}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card, {
-        className: "movie-card"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Body, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Title, {
-        className: "header"
-      }, movie.name), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Img, {
-        src: movie.image
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Text, {
-        className: "description"
-      }, _utilsHelpers.createExcerpt(movie.description), " …"), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "read-more-link-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-arrow-right"
-      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "5",
-        y1: "12",
-        x2: "19",
-        y2: "12"
-      }), /*#__PURE__*/_reactDefault.default.createElement("polyline", {
-        points: "12 5 19 12 12 19"
-      })), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: `/movies/${movie._id}`,
-        className: "read-more-link"
-      }, "Read More"))))
-    );
-  };
-  _c = MovieCard;
-  MovieCard.propTypes = {
-    movie: _propTypesDefault.default.shape({
-      _id: _propTypesDefault.default.string.isRequired,
-      description: _propTypesDefault.default.string.isRequired,
-      image: _propTypesDefault.default.string.isRequired,
-      name: _propTypesDefault.default.string.isRequired
-    }).isRequired
-  };
-  exports.default = MovieCard;
-  var _c;
-  $RefreshReg$(_c, "MovieCard");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
+},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-bootstrap":"4n7hB","react-router-dom":"1PMSK","react-redux":"7GDa4","../ActorView/ActorView":"3o4Df","../GenreView/GenreView":"4kDeE","../DirectorView/DirectorView":"7nJwh","../ListTypeSelect/ListTypeSelect":"2FsjQ","../MainNavbar/MainNavbar":"6h1DY","../MovieView/MovieView":"6fxIo","../LoginView/LoginView":"1zhWx","../ProfileView/ProfileView":"7iKJS","../RegistrationView/RegistrationView":"4DfHF","../SortingFactorSelect/SortingFactorSelect":"6zJdJ","../../actions/actions":"5S6cN","./main-view.scss":"3JwwG","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../ListItemCard/ListItemCard":"5PP2u"}],"7rA65":[function(require,module,exports) {
+module.exports = require('./lib/axios');
+},{"./lib/axios":"4qfhW"}],"4qfhW":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./utils');
+var bind = require('./helpers/bind');
+var Axios = require('./core/Axios');
+var mergeConfig = require('./core/mergeConfig');
+var defaults = require('./defaults');
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios(defaultConfig);
+  var instance = bind(Axios.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  return instance;
 }
 
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","prop-types":"4dfy5","./movie-card.scss":"1jHjl","react-bootstrap":"4n7hB","react-router-dom":"1PMSK","../../utils/helpers":"1nff4"}],"4dfy5":[function(require,module,exports) {
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(mergeConfig(axios.defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = require('./cancel/Cancel');
+axios.CancelToken = require('./cancel/CancelToken');
+axios.isCancel = require('./cancel/isCancel');
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = require('./helpers/spread');
+
+// Expose isAxiosError
+axios.isAxiosError = require('./helpers/isAxiosError');
+
+module.exports = axios;
+
+// Allow use of default import syntax in TypeScript
+module.exports.default = axios;
+
+},{"./utils":"7J9rV","./helpers/bind":"78Fwk","./core/Axios":"26bz2","./core/mergeConfig":"42z1a","./defaults":"5j10E","./cancel/Cancel":"1Ql7i","./cancel/CancelToken":"hHamf","./cancel/isCancel":"3MAgn","./helpers/spread":"9FoXt","./helpers/isAxiosError":"1bzv8"}],"7J9rV":[function(require,module,exports) {
+'use strict';
+
+var bind = require('./helpers/bind');
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is a Buffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Buffer, otherwise false
+ */
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
+    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a plain Object
+ *
+ * @param {Object} val The value to test
+ * @return {boolean} True if value is a plain Object, otherwise false
+ */
+function isPlainObject(val) {
+  if (toString.call(val) !== '[object Object]') {
+    return false;
+  }
+
+  var prototype = Object.getPrototypeOf(val);
+  return prototype === null || prototype === Object.prototype;
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
+                                           navigator.product === 'NativeScript' ||
+                                           navigator.product === 'NS')) {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (isPlainObject(result[key]) && isPlainObject(val)) {
+      result[key] = merge(result[key], val);
+    } else if (isPlainObject(val)) {
+      result[key] = merge({}, val);
+    } else if (isArray(val)) {
+      result[key] = val.slice();
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+/**
+ * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+ *
+ * @param {string} content with BOM
+ * @return {string} content value without BOM
+ */
+function stripBOM(content) {
+  if (content.charCodeAt(0) === 0xFEFF) {
+    content = content.slice(1);
+  }
+  return content;
+}
+
+module.exports = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isPlainObject: isPlainObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  extend: extend,
+  trim: trim,
+  stripBOM: stripBOM
+};
+
+},{"./helpers/bind":"78Fwk"}],"78Fwk":[function(require,module,exports) {
+'use strict';
+
+module.exports = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+},{}],"26bz2":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+var buildURL = require('../helpers/buildURL');
+var InterceptorManager = require('./InterceptorManager');
+var dispatchRequest = require('./dispatchRequest');
+var mergeConfig = require('./mergeConfig');
+
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = arguments[1] || {};
+    config.url = arguments[0];
+  } else {
+    config = config || {};
+  }
+
+  config = mergeConfig(this.defaults, config);
+
+  // Set config.method
+  if (config.method) {
+    config.method = config.method.toLowerCase();
+  } else if (this.defaults.method) {
+    config.method = this.defaults.method.toLowerCase();
+  } else {
+    config.method = 'get';
+  }
+
+  // Hook up interceptors middleware
+  var chain = [dispatchRequest, undefined];
+  var promise = Promise.resolve(config);
+
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    chain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+
+Axios.prototype.getUri = function getUri(config) {
+  config = mergeConfig(this.defaults, config);
+  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: (config || {}).data
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+module.exports = Axios;
+
+},{"./../utils":"7J9rV","../helpers/buildURL":"25KfR","./InterceptorManager":"33sRR","./dispatchRequest":"1mCjo","./mergeConfig":"42z1a"}],"25KfR":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+module.exports = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    var hashmarkIndex = url.indexOf('#');
+    if (hashmarkIndex !== -1) {
+      url = url.slice(0, hashmarkIndex);
+    }
+
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+},{"./../utils":"7J9rV"}],"33sRR":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+module.exports = InterceptorManager;
+
+},{"./../utils":"7J9rV"}],"1mCjo":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+var transformData = require('./transformData');
+var isCancel = require('../cancel/isCancel');
+var defaults = require('../defaults');
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+},{"./../utils":"7J9rV","./transformData":"1ueU6","../cancel/isCancel":"3MAgn","../defaults":"5j10E"}],"1ueU6":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+module.exports = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+},{"./../utils":"7J9rV"}],"3MAgn":[function(require,module,exports) {
+'use strict';
+
+module.exports = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+},{}],"5j10E":[function(require,module,exports) {
+"use strict";
+var process = require("process");
+var utils = require('./utils');
+var normalizeHeaderName = require('./helpers/normalizeHeaderName');
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = require('./adapters/xhr');
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = require('./adapters/http');
+  }
+  return adapter;
+}
+var defaults = {
+  adapter: getDefaultAdapter(),
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Accept');
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) || utils.isArrayBuffer(data) || utils.isBuffer(data) || utils.isStream(data) || utils.isFile(data) || utils.isBlob(data)) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) {}
+    }
+    return data;
+  }],
+  /**
+  * A timeout in milliseconds to abort a request. If set to 0 (default) a
+  * timeout is not created.
+  */
+  timeout: 0,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+  maxContentLength: -1,
+  maxBodyLength: -1,
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+module.exports = defaults;
+
+},{"process":"352Fm","./utils":"7J9rV","./helpers/normalizeHeaderName":"5yMqL","./adapters/xhr":"6pJqL","./adapters/http":"6pJqL"}],"352Fm":[function(require,module,exports) {
+// shim for using process in browser
+var process = module.exports = {};
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+var cachedSetTimeout;
+var cachedClearTimeout;
+function defaultSetTimout() {
+  throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout() {
+  throw new Error('clearTimeout has not been defined');
+}
+(function () {
+  try {
+    if (typeof setTimeout === 'function') {
+      cachedSetTimeout = setTimeout;
+    } else {
+      cachedSetTimeout = defaultSetTimout;
+    }
+  } catch (e) {
+    cachedSetTimeout = defaultSetTimout;
+  }
+  try {
+    if (typeof clearTimeout === 'function') {
+      cachedClearTimeout = clearTimeout;
+    } else {
+      cachedClearTimeout = defaultClearTimeout;
+    }
+  } catch (e) {
+    cachedClearTimeout = defaultClearTimeout;
+  }
+})();
+function runTimeout(fun) {
+  if (cachedSetTimeout === setTimeout) {
+    // normal enviroments in sane situations
+    return setTimeout(fun, 0);
+  }
+  // if setTimeout wasn't available but was latter defined
+  if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+    cachedSetTimeout = setTimeout;
+    return setTimeout(fun, 0);
+  }
+  try {
+    // when when somebody has screwed with setTimeout but no I.E. maddness
+    return cachedSetTimeout(fun, 0);
+  } catch (e) {
+    try {
+      // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+      return cachedSetTimeout.call(null, fun, 0);
+    } catch (e) {
+      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+      return cachedSetTimeout.call(this, fun, 0);
+    }
+  }
+}
+function runClearTimeout(marker) {
+  if (cachedClearTimeout === clearTimeout) {
+    // normal enviroments in sane situations
+    return clearTimeout(marker);
+  }
+  // if clearTimeout wasn't available but was latter defined
+  if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+    cachedClearTimeout = clearTimeout;
+    return clearTimeout(marker);
+  }
+  try {
+    // when when somebody has screwed with setTimeout but no I.E. maddness
+    return cachedClearTimeout(marker);
+  } catch (e) {
+    try {
+      // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+      return cachedClearTimeout.call(null, marker);
+    } catch (e) {
+      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+      // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+      return cachedClearTimeout.call(this, marker);
+    }
+  }
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+function cleanUpNextTick() {
+  if (!draining || !currentQueue) {
+    return;
+  }
+  draining = false;
+  if (currentQueue.length) {
+    queue = currentQueue.concat(queue);
+  } else {
+    queueIndex = -1;
+  }
+  if (queue.length) {
+    drainQueue();
+  }
+}
+function drainQueue() {
+  if (draining) {
+    return;
+  }
+  var timeout = runTimeout(cleanUpNextTick);
+  draining = true;
+  var len = queue.length;
+  while (len) {
+    currentQueue = queue;
+    queue = [];
+    while (++queueIndex < len) {
+      if (currentQueue) {
+        currentQueue[queueIndex].run();
+      }
+    }
+    queueIndex = -1;
+    len = queue.length;
+  }
+  currentQueue = null;
+  draining = false;
+  runClearTimeout(timeout);
+}
+process.nextTick = function (fun) {
+  var args = new Array(arguments.length - 1);
+  if (arguments.length > 1) {
+    for (var i = 1; i < arguments.length; i++) {
+      args[i - 1] = arguments[i];
+    }
+  }
+  queue.push(new Item(fun, args));
+  if (queue.length === 1 && !draining) {
+    runTimeout(drainQueue);
+  }
+};
+// v8 likes predictible objects
+function Item(fun, array) {
+  this.fun = fun;
+  this.array = array;
+}
+Item.prototype.run = function () {
+  this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = '';
+// empty string to avoid regexp issues
+process.versions = {};
+function noop() {}
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+process.listeners = function (name) {
+  return [];
+};
+process.binding = function (name) {
+  throw new Error('process.binding is not supported');
+};
+process.cwd = function () {
+  return '/';
+};
+process.chdir = function (dir) {
+  throw new Error('process.chdir is not supported');
+};
+process.umask = function () {
+  return 0;
+};
+
+},{}],"5yMqL":[function(require,module,exports) {
+'use strict';
+
+var utils = require('../utils');
+
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+},{"../utils":"7J9rV"}],"6pJqL":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+var settle = require('./../core/settle');
+var cookies = require('./../helpers/cookies');
+var buildURL = require('./../helpers/buildURL');
+var buildFullPath = require('../core/buildFullPath');
+var parseHeaders = require('./../helpers/parseHeaders');
+var isURLSameOrigin = require('./../helpers/isURLSameOrigin');
+var createError = require('../core/createError');
+
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password ? unescape(encodeURIComponent(config.auth.password)) : '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    var fullPath = buildFullPath(config.baseURL, config.url);
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    // Listen for ready state
+    request.onreadystatechange = function handleLoad() {
+      if (!request || request.readyState !== 4) {
+        return;
+      }
+
+      // The request errored out and we didn't get a response, this will be
+      // handled by onerror instead
+      // With one exception: request that using file: protocol, most browsers
+      // will return status as 0 even though it's a successful request
+      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+        return;
+      }
+
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle browser request cancellation (as opposed to a manual cancellation)
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+        cookies.read(config.xsrfCookieName) :
+        undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (!utils.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!config.withCredentials;
+    }
+
+    // Add responseType to request if needed
+    if (config.responseType) {
+      try {
+        request.responseType = config.responseType;
+      } catch (e) {
+        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+        if (config.responseType !== 'json') {
+          throw e;
+        }
+      }
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (!requestData) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+},{"./../utils":"7J9rV","./../core/settle":"72M6J","./../helpers/cookies":"1m0F1","./../helpers/buildURL":"25KfR","../core/buildFullPath":"5fWja","./../helpers/parseHeaders":"1KizL","./../helpers/isURLSameOrigin":"6Gtz3","../core/createError":"7ETv1"}],"72M6J":[function(require,module,exports) {
+'use strict';
+
+var createError = require('./createError');
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+},{"./createError":"7ETv1"}],"7ETv1":[function(require,module,exports) {
+'use strict';
+
+var enhanceError = require('./enhanceError');
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+module.exports = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+},{"./enhanceError":"2O2Ud"}],"2O2Ud":[function(require,module,exports) {
+'use strict';
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+module.exports = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+
+  error.request = request;
+  error.response = response;
+  error.isAxiosError = true;
+
+  error.toJSON = function toJSON() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: this.config,
+      code: this.code
+    };
+  };
+  return error;
+};
+
+},{}],"1m0F1":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+    (function standardBrowserEnv() {
+      return {
+        write: function write(name, value, expires, path, domain, secure) {
+          var cookie = [];
+          cookie.push(name + '=' + encodeURIComponent(value));
+
+          if (utils.isNumber(expires)) {
+            cookie.push('expires=' + new Date(expires).toGMTString());
+          }
+
+          if (utils.isString(path)) {
+            cookie.push('path=' + path);
+          }
+
+          if (utils.isString(domain)) {
+            cookie.push('domain=' + domain);
+          }
+
+          if (secure === true) {
+            cookie.push('secure');
+          }
+
+          document.cookie = cookie.join('; ');
+        },
+
+        read: function read(name) {
+          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+          return (match ? decodeURIComponent(match[3]) : null);
+        },
+
+        remove: function remove(name) {
+          this.write(name, '', Date.now() - 86400000);
+        }
+      };
+    })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return {
+        write: function write() {},
+        read: function read() { return null; },
+        remove: function remove() {}
+      };
+    })()
+);
+
+},{"./../utils":"7J9rV"}],"5fWja":[function(require,module,exports) {
+'use strict';
+
+var isAbsoluteURL = require('../helpers/isAbsoluteURL');
+var combineURLs = require('../helpers/combineURLs');
+
+/**
+ * Creates a new URL by combining the baseURL with the requestedURL,
+ * only when the requestedURL is not already an absolute URL.
+ * If the requestURL is absolute, this function returns the requestedURL untouched.
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} requestedURL Absolute or relative URL to combine
+ * @returns {string} The combined full path
+ */
+module.exports = function buildFullPath(baseURL, requestedURL) {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
+
+},{"../helpers/isAbsoluteURL":"4FcN1","../helpers/combineURLs":"qMap4"}],"4FcN1":[function(require,module,exports) {
+'use strict';
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+module.exports = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+},{}],"qMap4":[function(require,module,exports) {
+'use strict';
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+},{}],"1KizL":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+module.exports = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+},{"./../utils":"7J9rV"}],"6Gtz3":[function(require,module,exports) {
+'use strict';
+
+var utils = require('./../utils');
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+    (function standardBrowserEnv() {
+      var msie = /(msie|trident)/i.test(navigator.userAgent);
+      var urlParsingNode = document.createElement('a');
+      var originURL;
+
+      /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+      function resolveURL(url) {
+        var href = url;
+
+        if (msie) {
+        // IE needs attribute set twice to normalize properties
+          urlParsingNode.setAttribute('href', href);
+          href = urlParsingNode.href;
+        }
+
+        urlParsingNode.setAttribute('href', href);
+
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+          href: urlParsingNode.href,
+          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+          host: urlParsingNode.host,
+          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+          hostname: urlParsingNode.hostname,
+          port: urlParsingNode.port,
+          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+            urlParsingNode.pathname :
+            '/' + urlParsingNode.pathname
+        };
+      }
+
+      originURL = resolveURL(window.location.href);
+
+      /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+      return function isURLSameOrigin(requestURL) {
+        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+        return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+      };
+    })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return function isURLSameOrigin() {
+        return true;
+      };
+    })()
+);
+
+},{"./../utils":"7J9rV"}],"42z1a":[function(require,module,exports) {
+'use strict';
+
+var utils = require('../utils');
+
+/**
+ * Config-specific merge-function which creates a new config-object
+ * by merging two configuration objects together.
+ *
+ * @param {Object} config1
+ * @param {Object} config2
+ * @returns {Object} New object resulting from merging config2 to config1
+ */
+module.exports = function mergeConfig(config1, config2) {
+  // eslint-disable-next-line no-param-reassign
+  config2 = config2 || {};
+  var config = {};
+
+  var valueFromConfig2Keys = ['url', 'method', 'data'];
+  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy', 'params'];
+  var defaultToConfig2Keys = [
+    'baseURL', 'transformRequest', 'transformResponse', 'paramsSerializer',
+    'timeout', 'timeoutMessage', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
+    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress', 'decompress',
+    'maxContentLength', 'maxBodyLength', 'maxRedirects', 'transport', 'httpAgent',
+    'httpsAgent', 'cancelToken', 'socketPath', 'responseEncoding'
+  ];
+  var directMergeKeys = ['validateStatus'];
+
+  function getMergedValue(target, source) {
+    if (utils.isPlainObject(target) && utils.isPlainObject(source)) {
+      return utils.merge(target, source);
+    } else if (utils.isPlainObject(source)) {
+      return utils.merge({}, source);
+    } else if (utils.isArray(source)) {
+      return source.slice();
+    }
+    return source;
+  }
+
+  function mergeDeepProperties(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  }
+
+  utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    }
+  });
+
+  utils.forEach(mergeDeepPropertiesKeys, mergeDeepProperties);
+
+  utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  utils.forEach(directMergeKeys, function merge(prop) {
+    if (prop in config2) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (prop in config1) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  var axiosKeys = valueFromConfig2Keys
+    .concat(mergeDeepPropertiesKeys)
+    .concat(defaultToConfig2Keys)
+    .concat(directMergeKeys);
+
+  var otherKeys = Object
+    .keys(config1)
+    .concat(Object.keys(config2))
+    .filter(function filterAxiosKeys(key) {
+      return axiosKeys.indexOf(key) === -1;
+    });
+
+  utils.forEach(otherKeys, mergeDeepProperties);
+
+  return config;
+};
+
+},{"../utils":"7J9rV"}],"1Ql7i":[function(require,module,exports) {
+'use strict';
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+
+},{}],"hHamf":[function(require,module,exports) {
+'use strict';
+
+var Cancel = require('./Cancel');
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+
+},{"./Cancel":"1Ql7i"}],"9FoXt":[function(require,module,exports) {
+'use strict';
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+},{}],"1bzv8":[function(require,module,exports) {
+'use strict';
+
+/**
+ * Determines whether the payload is an error thrown by Axios
+ *
+ * @param {*} payload The value to test
+ * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
+ */
+module.exports = function isAxiosError(payload) {
+  return (typeof payload === 'object') && (payload.isAxiosError === true);
+};
+
+},{}],"4dfy5":[function(require,module,exports) {
 /**
 * Copyright (c) 2013-present, Facebook, Inc.
 *
@@ -27728,7 +29547,7 @@ checkPropTypes.resetWarningCache = function () {
 };
 module.exports = checkPropTypes;
 
-},{"./lib/ReactPropTypesSecret":"3OVnw"}],"1jHjl":[function() {},{}],"4n7hB":[function(require,module,exports) {
+},{"./lib/ReactPropTypesSecret":"3OVnw"}],"4n7hB":[function(require,module,exports) {
 "use strict";
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
@@ -44427,2053 +46246,7 @@ function hoistNonReactStatics(targetComponent, sourceComponent, blacklist) {
 
 module.exports = hoistNonReactStatics;
 
-},{"react-is":"68QIU"}],"1nff4":[function(require,module,exports) {
-var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-_parcelHelpers.defineInteropFlag(exports);
-_parcelHelpers.export(exports, "addToList", function () {
-  return addToList;
-});
-_parcelHelpers.export(exports, "createExcerpt", function () {
-  return createExcerpt;
-});
-_parcelHelpers.export(exports, "addFocusedClass", function () {
-  return addFocusedClass;
-});
-_parcelHelpers.export(exports, "removeFocusedClass", function () {
-  return removeFocusedClass;
-});
-var _axios = require('axios');
-var _axiosDefault = _parcelHelpers.interopDefault(_axios);
-const addToList = (userId, listType, itemId, itemIdType) => {
-  const token = localStorage.getItem('token'), data = {};
-  data[itemIdType] = itemId;
-  return _axiosDefault.default({
-    method: 'patch',
-    url: `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}/${itemId}`,
-    data,
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-};
-const createExcerpt = description => {
-  return description.slice(0, 45);
-};
-const addFocusedClass = e => {
-  const element = e.target;
-  // make container surrounding svg icon match .form-control
-  // when .form-control is focused
-  element.nextSibling.classList.add('focused');
-  element.nextSibling.firstChild.firstChild.classList.add('focused');
-};
-const removeFocusedClass = e => {
-  const element = e.target;
-  // make container surrounding svg icon match .form-control
-  // when .form-control is focused
-  element.nextSibling.classList.remove('focused');
-  element.nextSibling.firstChild.firstChild.classList.remove('focused');
-};
-
-},{"@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","axios":"7rA65"}],"7rA65":[function(require,module,exports) {
-module.exports = require('./lib/axios');
-},{"./lib/axios":"4qfhW"}],"4qfhW":[function(require,module,exports) {
-'use strict';
-
-var utils = require('./utils');
-var bind = require('./helpers/bind');
-var Axios = require('./core/Axios');
-var mergeConfig = require('./core/mergeConfig');
-var defaults = require('./defaults');
-
-/**
- * Create an instance of Axios
- *
- * @param {Object} defaultConfig The default config for the instance
- * @return {Axios} A new instance of Axios
- */
-function createInstance(defaultConfig) {
-  var context = new Axios(defaultConfig);
-  var instance = bind(Axios.prototype.request, context);
-
-  // Copy axios.prototype to instance
-  utils.extend(instance, Axios.prototype, context);
-
-  // Copy context to instance
-  utils.extend(instance, context);
-
-  return instance;
-}
-
-// Create the default instance to be exported
-var axios = createInstance(defaults);
-
-// Expose Axios class to allow class inheritance
-axios.Axios = Axios;
-
-// Factory for creating new instances
-axios.create = function create(instanceConfig) {
-  return createInstance(mergeConfig(axios.defaults, instanceConfig));
-};
-
-// Expose Cancel & CancelToken
-axios.Cancel = require('./cancel/Cancel');
-axios.CancelToken = require('./cancel/CancelToken');
-axios.isCancel = require('./cancel/isCancel');
-
-// Expose all/spread
-axios.all = function all(promises) {
-  return Promise.all(promises);
-};
-axios.spread = require('./helpers/spread');
-
-// Expose isAxiosError
-axios.isAxiosError = require('./helpers/isAxiosError');
-
-module.exports = axios;
-
-// Allow use of default import syntax in TypeScript
-module.exports.default = axios;
-
-},{"./utils":"7J9rV","./helpers/bind":"78Fwk","./core/Axios":"26bz2","./core/mergeConfig":"42z1a","./defaults":"5j10E","./cancel/Cancel":"1Ql7i","./cancel/CancelToken":"hHamf","./cancel/isCancel":"3MAgn","./helpers/spread":"9FoXt","./helpers/isAxiosError":"1bzv8"}],"7J9rV":[function(require,module,exports) {
-'use strict';
-
-var bind = require('./helpers/bind');
-
-/*global toString:true*/
-
-// utils is a library of generic helper functions non-specific to axios
-
-var toString = Object.prototype.toString;
-
-/**
- * Determine if a value is an Array
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Array, otherwise false
- */
-function isArray(val) {
-  return toString.call(val) === '[object Array]';
-}
-
-/**
- * Determine if a value is undefined
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if the value is undefined, otherwise false
- */
-function isUndefined(val) {
-  return typeof val === 'undefined';
-}
-
-/**
- * Determine if a value is a Buffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Buffer, otherwise false
- */
-function isBuffer(val) {
-  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
-    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
-}
-
-/**
- * Determine if a value is an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an ArrayBuffer, otherwise false
- */
-function isArrayBuffer(val) {
-  return toString.call(val) === '[object ArrayBuffer]';
-}
-
-/**
- * Determine if a value is a FormData
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an FormData, otherwise false
- */
-function isFormData(val) {
-  return (typeof FormData !== 'undefined') && (val instanceof FormData);
-}
-
-/**
- * Determine if a value is a view on an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
- */
-function isArrayBufferView(val) {
-  var result;
-  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
-    result = ArrayBuffer.isView(val);
-  } else {
-    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
-  }
-  return result;
-}
-
-/**
- * Determine if a value is a String
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a String, otherwise false
- */
-function isString(val) {
-  return typeof val === 'string';
-}
-
-/**
- * Determine if a value is a Number
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Number, otherwise false
- */
-function isNumber(val) {
-  return typeof val === 'number';
-}
-
-/**
- * Determine if a value is an Object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Object, otherwise false
- */
-function isObject(val) {
-  return val !== null && typeof val === 'object';
-}
-
-/**
- * Determine if a value is a plain Object
- *
- * @param {Object} val The value to test
- * @return {boolean} True if value is a plain Object, otherwise false
- */
-function isPlainObject(val) {
-  if (toString.call(val) !== '[object Object]') {
-    return false;
-  }
-
-  var prototype = Object.getPrototypeOf(val);
-  return prototype === null || prototype === Object.prototype;
-}
-
-/**
- * Determine if a value is a Date
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Date, otherwise false
- */
-function isDate(val) {
-  return toString.call(val) === '[object Date]';
-}
-
-/**
- * Determine if a value is a File
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a File, otherwise false
- */
-function isFile(val) {
-  return toString.call(val) === '[object File]';
-}
-
-/**
- * Determine if a value is a Blob
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Blob, otherwise false
- */
-function isBlob(val) {
-  return toString.call(val) === '[object Blob]';
-}
-
-/**
- * Determine if a value is a Function
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Function, otherwise false
- */
-function isFunction(val) {
-  return toString.call(val) === '[object Function]';
-}
-
-/**
- * Determine if a value is a Stream
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Stream, otherwise false
- */
-function isStream(val) {
-  return isObject(val) && isFunction(val.pipe);
-}
-
-/**
- * Determine if a value is a URLSearchParams object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a URLSearchParams object, otherwise false
- */
-function isURLSearchParams(val) {
-  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
-}
-
-/**
- * Trim excess whitespace off the beginning and end of a string
- *
- * @param {String} str The String to trim
- * @returns {String} The String freed of excess whitespace
- */
-function trim(str) {
-  return str.replace(/^\s*/, '').replace(/\s*$/, '');
-}
-
-/**
- * Determine if we're running in a standard browser environment
- *
- * This allows axios to run in a web worker, and react-native.
- * Both environments support XMLHttpRequest, but not fully standard globals.
- *
- * web workers:
- *  typeof window -> undefined
- *  typeof document -> undefined
- *
- * react-native:
- *  navigator.product -> 'ReactNative'
- * nativescript
- *  navigator.product -> 'NativeScript' or 'NS'
- */
-function isStandardBrowserEnv() {
-  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
-                                           navigator.product === 'NativeScript' ||
-                                           navigator.product === 'NS')) {
-    return false;
-  }
-  return (
-    typeof window !== 'undefined' &&
-    typeof document !== 'undefined'
-  );
-}
-
-/**
- * Iterate over an Array or an Object invoking a function for each item.
- *
- * If `obj` is an Array callback will be called passing
- * the value, index, and complete array for each item.
- *
- * If 'obj' is an Object callback will be called passing
- * the value, key, and complete object for each property.
- *
- * @param {Object|Array} obj The object to iterate
- * @param {Function} fn The callback to invoke for each item
- */
-function forEach(obj, fn) {
-  // Don't bother if no value provided
-  if (obj === null || typeof obj === 'undefined') {
-    return;
-  }
-
-  // Force an array if not already something iterable
-  if (typeof obj !== 'object') {
-    /*eslint no-param-reassign:0*/
-    obj = [obj];
-  }
-
-  if (isArray(obj)) {
-    // Iterate over array values
-    for (var i = 0, l = obj.length; i < l; i++) {
-      fn.call(null, obj[i], i, obj);
-    }
-  } else {
-    // Iterate over object keys
-    for (var key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        fn.call(null, obj[key], key, obj);
-      }
-    }
-  }
-}
-
-/**
- * Accepts varargs expecting each argument to be an object, then
- * immutably merges the properties of each object and returns result.
- *
- * When multiple objects contain the same key the later object in
- * the arguments list will take precedence.
- *
- * Example:
- *
- * ```js
- * var result = merge({foo: 123}, {foo: 456});
- * console.log(result.foo); // outputs 456
- * ```
- *
- * @param {Object} obj1 Object to merge
- * @returns {Object} Result of all merge properties
- */
-function merge(/* obj1, obj2, obj3, ... */) {
-  var result = {};
-  function assignValue(val, key) {
-    if (isPlainObject(result[key]) && isPlainObject(val)) {
-      result[key] = merge(result[key], val);
-    } else if (isPlainObject(val)) {
-      result[key] = merge({}, val);
-    } else if (isArray(val)) {
-      result[key] = val.slice();
-    } else {
-      result[key] = val;
-    }
-  }
-
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    forEach(arguments[i], assignValue);
-  }
-  return result;
-}
-
-/**
- * Extends object a by mutably adding to it the properties of object b.
- *
- * @param {Object} a The object to be extended
- * @param {Object} b The object to copy properties from
- * @param {Object} thisArg The object to bind function to
- * @return {Object} The resulting value of object a
- */
-function extend(a, b, thisArg) {
-  forEach(b, function assignValue(val, key) {
-    if (thisArg && typeof val === 'function') {
-      a[key] = bind(val, thisArg);
-    } else {
-      a[key] = val;
-    }
-  });
-  return a;
-}
-
-/**
- * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
- *
- * @param {string} content with BOM
- * @return {string} content value without BOM
- */
-function stripBOM(content) {
-  if (content.charCodeAt(0) === 0xFEFF) {
-    content = content.slice(1);
-  }
-  return content;
-}
-
-module.exports = {
-  isArray: isArray,
-  isArrayBuffer: isArrayBuffer,
-  isBuffer: isBuffer,
-  isFormData: isFormData,
-  isArrayBufferView: isArrayBufferView,
-  isString: isString,
-  isNumber: isNumber,
-  isObject: isObject,
-  isPlainObject: isPlainObject,
-  isUndefined: isUndefined,
-  isDate: isDate,
-  isFile: isFile,
-  isBlob: isBlob,
-  isFunction: isFunction,
-  isStream: isStream,
-  isURLSearchParams: isURLSearchParams,
-  isStandardBrowserEnv: isStandardBrowserEnv,
-  forEach: forEach,
-  merge: merge,
-  extend: extend,
-  trim: trim,
-  stripBOM: stripBOM
-};
-
-},{"./helpers/bind":"78Fwk"}],"78Fwk":[function(require,module,exports) {
-'use strict';
-
-module.exports = function bind(fn, thisArg) {
-  return function wrap() {
-    var args = new Array(arguments.length);
-    for (var i = 0; i < args.length; i++) {
-      args[i] = arguments[i];
-    }
-    return fn.apply(thisArg, args);
-  };
-};
-
-},{}],"26bz2":[function(require,module,exports) {
-'use strict';
-
-var utils = require('./../utils');
-var buildURL = require('../helpers/buildURL');
-var InterceptorManager = require('./InterceptorManager');
-var dispatchRequest = require('./dispatchRequest');
-var mergeConfig = require('./mergeConfig');
-
-/**
- * Create a new instance of Axios
- *
- * @param {Object} instanceConfig The default config for the instance
- */
-function Axios(instanceConfig) {
-  this.defaults = instanceConfig;
-  this.interceptors = {
-    request: new InterceptorManager(),
-    response: new InterceptorManager()
-  };
-}
-
-/**
- * Dispatch a request
- *
- * @param {Object} config The config specific for this request (merged with this.defaults)
- */
-Axios.prototype.request = function request(config) {
-  /*eslint no-param-reassign:0*/
-  // Allow for axios('example/url'[, config]) a la fetch API
-  if (typeof config === 'string') {
-    config = arguments[1] || {};
-    config.url = arguments[0];
-  } else {
-    config = config || {};
-  }
-
-  config = mergeConfig(this.defaults, config);
-
-  // Set config.method
-  if (config.method) {
-    config.method = config.method.toLowerCase();
-  } else if (this.defaults.method) {
-    config.method = this.defaults.method.toLowerCase();
-  } else {
-    config.method = 'get';
-  }
-
-  // Hook up interceptors middleware
-  var chain = [dispatchRequest, undefined];
-  var promise = Promise.resolve(config);
-
-  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
-    chain.unshift(interceptor.fulfilled, interceptor.rejected);
-  });
-
-  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
-    chain.push(interceptor.fulfilled, interceptor.rejected);
-  });
-
-  while (chain.length) {
-    promise = promise.then(chain.shift(), chain.shift());
-  }
-
-  return promise;
-};
-
-Axios.prototype.getUri = function getUri(config) {
-  config = mergeConfig(this.defaults, config);
-  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
-};
-
-// Provide aliases for supported request methods
-utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
-  /*eslint func-names:0*/
-  Axios.prototype[method] = function(url, config) {
-    return this.request(mergeConfig(config || {}, {
-      method: method,
-      url: url,
-      data: (config || {}).data
-    }));
-  };
-});
-
-utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-  /*eslint func-names:0*/
-  Axios.prototype[method] = function(url, data, config) {
-    return this.request(mergeConfig(config || {}, {
-      method: method,
-      url: url,
-      data: data
-    }));
-  };
-});
-
-module.exports = Axios;
-
-},{"./../utils":"7J9rV","../helpers/buildURL":"25KfR","./InterceptorManager":"33sRR","./dispatchRequest":"1mCjo","./mergeConfig":"42z1a"}],"25KfR":[function(require,module,exports) {
-'use strict';
-
-var utils = require('./../utils');
-
-function encode(val) {
-  return encodeURIComponent(val).
-    replace(/%3A/gi, ':').
-    replace(/%24/g, '$').
-    replace(/%2C/gi, ',').
-    replace(/%20/g, '+').
-    replace(/%5B/gi, '[').
-    replace(/%5D/gi, ']');
-}
-
-/**
- * Build a URL by appending params to the end
- *
- * @param {string} url The base of the url (e.g., http://www.google.com)
- * @param {object} [params] The params to be appended
- * @returns {string} The formatted url
- */
-module.exports = function buildURL(url, params, paramsSerializer) {
-  /*eslint no-param-reassign:0*/
-  if (!params) {
-    return url;
-  }
-
-  var serializedParams;
-  if (paramsSerializer) {
-    serializedParams = paramsSerializer(params);
-  } else if (utils.isURLSearchParams(params)) {
-    serializedParams = params.toString();
-  } else {
-    var parts = [];
-
-    utils.forEach(params, function serialize(val, key) {
-      if (val === null || typeof val === 'undefined') {
-        return;
-      }
-
-      if (utils.isArray(val)) {
-        key = key + '[]';
-      } else {
-        val = [val];
-      }
-
-      utils.forEach(val, function parseValue(v) {
-        if (utils.isDate(v)) {
-          v = v.toISOString();
-        } else if (utils.isObject(v)) {
-          v = JSON.stringify(v);
-        }
-        parts.push(encode(key) + '=' + encode(v));
-      });
-    });
-
-    serializedParams = parts.join('&');
-  }
-
-  if (serializedParams) {
-    var hashmarkIndex = url.indexOf('#');
-    if (hashmarkIndex !== -1) {
-      url = url.slice(0, hashmarkIndex);
-    }
-
-    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
-  }
-
-  return url;
-};
-
-},{"./../utils":"7J9rV"}],"33sRR":[function(require,module,exports) {
-'use strict';
-
-var utils = require('./../utils');
-
-function InterceptorManager() {
-  this.handlers = [];
-}
-
-/**
- * Add a new interceptor to the stack
- *
- * @param {Function} fulfilled The function to handle `then` for a `Promise`
- * @param {Function} rejected The function to handle `reject` for a `Promise`
- *
- * @return {Number} An ID used to remove interceptor later
- */
-InterceptorManager.prototype.use = function use(fulfilled, rejected) {
-  this.handlers.push({
-    fulfilled: fulfilled,
-    rejected: rejected
-  });
-  return this.handlers.length - 1;
-};
-
-/**
- * Remove an interceptor from the stack
- *
- * @param {Number} id The ID that was returned by `use`
- */
-InterceptorManager.prototype.eject = function eject(id) {
-  if (this.handlers[id]) {
-    this.handlers[id] = null;
-  }
-};
-
-/**
- * Iterate over all the registered interceptors
- *
- * This method is particularly useful for skipping over any
- * interceptors that may have become `null` calling `eject`.
- *
- * @param {Function} fn The function to call for each interceptor
- */
-InterceptorManager.prototype.forEach = function forEach(fn) {
-  utils.forEach(this.handlers, function forEachHandler(h) {
-    if (h !== null) {
-      fn(h);
-    }
-  });
-};
-
-module.exports = InterceptorManager;
-
-},{"./../utils":"7J9rV"}],"1mCjo":[function(require,module,exports) {
-'use strict';
-
-var utils = require('./../utils');
-var transformData = require('./transformData');
-var isCancel = require('../cancel/isCancel');
-var defaults = require('../defaults');
-
-/**
- * Throws a `Cancel` if cancellation has been requested.
- */
-function throwIfCancellationRequested(config) {
-  if (config.cancelToken) {
-    config.cancelToken.throwIfRequested();
-  }
-}
-
-/**
- * Dispatch a request to the server using the configured adapter.
- *
- * @param {object} config The config that is to be used for the request
- * @returns {Promise} The Promise to be fulfilled
- */
-module.exports = function dispatchRequest(config) {
-  throwIfCancellationRequested(config);
-
-  // Ensure headers exist
-  config.headers = config.headers || {};
-
-  // Transform request data
-  config.data = transformData(
-    config.data,
-    config.headers,
-    config.transformRequest
-  );
-
-  // Flatten headers
-  config.headers = utils.merge(
-    config.headers.common || {},
-    config.headers[config.method] || {},
-    config.headers
-  );
-
-  utils.forEach(
-    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
-    function cleanHeaderConfig(method) {
-      delete config.headers[method];
-    }
-  );
-
-  var adapter = config.adapter || defaults.adapter;
-
-  return adapter(config).then(function onAdapterResolution(response) {
-    throwIfCancellationRequested(config);
-
-    // Transform response data
-    response.data = transformData(
-      response.data,
-      response.headers,
-      config.transformResponse
-    );
-
-    return response;
-  }, function onAdapterRejection(reason) {
-    if (!isCancel(reason)) {
-      throwIfCancellationRequested(config);
-
-      // Transform response data
-      if (reason && reason.response) {
-        reason.response.data = transformData(
-          reason.response.data,
-          reason.response.headers,
-          config.transformResponse
-        );
-      }
-    }
-
-    return Promise.reject(reason);
-  });
-};
-
-},{"./../utils":"7J9rV","./transformData":"1ueU6","../cancel/isCancel":"3MAgn","../defaults":"5j10E"}],"1ueU6":[function(require,module,exports) {
-'use strict';
-
-var utils = require('./../utils');
-
-/**
- * Transform the data for a request or a response
- *
- * @param {Object|String} data The data to be transformed
- * @param {Array} headers The headers for the request or response
- * @param {Array|Function} fns A single function or Array of functions
- * @returns {*} The resulting transformed data
- */
-module.exports = function transformData(data, headers, fns) {
-  /*eslint no-param-reassign:0*/
-  utils.forEach(fns, function transform(fn) {
-    data = fn(data, headers);
-  });
-
-  return data;
-};
-
-},{"./../utils":"7J9rV"}],"3MAgn":[function(require,module,exports) {
-'use strict';
-
-module.exports = function isCancel(value) {
-  return !!(value && value.__CANCEL__);
-};
-
-},{}],"5j10E":[function(require,module,exports) {
-"use strict";
-var process = require("process");
-var utils = require('./utils');
-var normalizeHeaderName = require('./helpers/normalizeHeaderName');
-var DEFAULT_CONTENT_TYPE = {
-  'Content-Type': 'application/x-www-form-urlencoded'
-};
-function setContentTypeIfUnset(headers, value) {
-  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
-    headers['Content-Type'] = value;
-  }
-}
-function getDefaultAdapter() {
-  var adapter;
-  if (typeof XMLHttpRequest !== 'undefined') {
-    // For browsers use XHR adapter
-    adapter = require('./adapters/xhr');
-  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
-    // For node use HTTP adapter
-    adapter = require('./adapters/http');
-  }
-  return adapter;
-}
-var defaults = {
-  adapter: getDefaultAdapter(),
-  transformRequest: [function transformRequest(data, headers) {
-    normalizeHeaderName(headers, 'Accept');
-    normalizeHeaderName(headers, 'Content-Type');
-    if (utils.isFormData(data) || utils.isArrayBuffer(data) || utils.isBuffer(data) || utils.isStream(data) || utils.isFile(data) || utils.isBlob(data)) {
-      return data;
-    }
-    if (utils.isArrayBufferView(data)) {
-      return data.buffer;
-    }
-    if (utils.isURLSearchParams(data)) {
-      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
-      return data.toString();
-    }
-    if (utils.isObject(data)) {
-      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
-      return JSON.stringify(data);
-    }
-    return data;
-  }],
-  transformResponse: [function transformResponse(data) {
-    /*eslint no-param-reassign:0*/
-    if (typeof data === 'string') {
-      try {
-        data = JSON.parse(data);
-      } catch (e) {}
-    }
-    return data;
-  }],
-  /**
-  * A timeout in milliseconds to abort a request. If set to 0 (default) a
-  * timeout is not created.
-  */
-  timeout: 0,
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN',
-  maxContentLength: -1,
-  maxBodyLength: -1,
-  validateStatus: function validateStatus(status) {
-    return status >= 200 && status < 300;
-  }
-};
-defaults.headers = {
-  common: {
-    'Accept': 'application/json, text/plain, */*'
-  }
-};
-utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
-  defaults.headers[method] = {};
-});
-utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
-});
-module.exports = defaults;
-
-},{"process":"352Fm","./utils":"7J9rV","./helpers/normalizeHeaderName":"5yMqL","./adapters/xhr":"6pJqL","./adapters/http":"6pJqL"}],"352Fm":[function(require,module,exports) {
-// shim for using process in browser
-var process = module.exports = {};
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-var cachedSetTimeout;
-var cachedClearTimeout;
-function defaultSetTimout() {
-  throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout() {
-  throw new Error('clearTimeout has not been defined');
-}
-(function () {
-  try {
-    if (typeof setTimeout === 'function') {
-      cachedSetTimeout = setTimeout;
-    } else {
-      cachedSetTimeout = defaultSetTimout;
-    }
-  } catch (e) {
-    cachedSetTimeout = defaultSetTimout;
-  }
-  try {
-    if (typeof clearTimeout === 'function') {
-      cachedClearTimeout = clearTimeout;
-    } else {
-      cachedClearTimeout = defaultClearTimeout;
-    }
-  } catch (e) {
-    cachedClearTimeout = defaultClearTimeout;
-  }
-})();
-function runTimeout(fun) {
-  if (cachedSetTimeout === setTimeout) {
-    // normal enviroments in sane situations
-    return setTimeout(fun, 0);
-  }
-  // if setTimeout wasn't available but was latter defined
-  if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-    cachedSetTimeout = setTimeout;
-    return setTimeout(fun, 0);
-  }
-  try {
-    // when when somebody has screwed with setTimeout but no I.E. maddness
-    return cachedSetTimeout(fun, 0);
-  } catch (e) {
-    try {
-      // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-      return cachedSetTimeout.call(null, fun, 0);
-    } catch (e) {
-      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-      return cachedSetTimeout.call(this, fun, 0);
-    }
-  }
-}
-function runClearTimeout(marker) {
-  if (cachedClearTimeout === clearTimeout) {
-    // normal enviroments in sane situations
-    return clearTimeout(marker);
-  }
-  // if clearTimeout wasn't available but was latter defined
-  if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-    cachedClearTimeout = clearTimeout;
-    return clearTimeout(marker);
-  }
-  try {
-    // when when somebody has screwed with setTimeout but no I.E. maddness
-    return cachedClearTimeout(marker);
-  } catch (e) {
-    try {
-      // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-      return cachedClearTimeout.call(null, marker);
-    } catch (e) {
-      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-      // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-      return cachedClearTimeout.call(this, marker);
-    }
-  }
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-function cleanUpNextTick() {
-  if (!draining || !currentQueue) {
-    return;
-  }
-  draining = false;
-  if (currentQueue.length) {
-    queue = currentQueue.concat(queue);
-  } else {
-    queueIndex = -1;
-  }
-  if (queue.length) {
-    drainQueue();
-  }
-}
-function drainQueue() {
-  if (draining) {
-    return;
-  }
-  var timeout = runTimeout(cleanUpNextTick);
-  draining = true;
-  var len = queue.length;
-  while (len) {
-    currentQueue = queue;
-    queue = [];
-    while (++queueIndex < len) {
-      if (currentQueue) {
-        currentQueue[queueIndex].run();
-      }
-    }
-    queueIndex = -1;
-    len = queue.length;
-  }
-  currentQueue = null;
-  draining = false;
-  runClearTimeout(timeout);
-}
-process.nextTick = function (fun) {
-  var args = new Array(arguments.length - 1);
-  if (arguments.length > 1) {
-    for (var i = 1; i < arguments.length; i++) {
-      args[i - 1] = arguments[i];
-    }
-  }
-  queue.push(new Item(fun, args));
-  if (queue.length === 1 && !draining) {
-    runTimeout(drainQueue);
-  }
-};
-// v8 likes predictible objects
-function Item(fun, array) {
-  this.fun = fun;
-  this.array = array;
-}
-Item.prototype.run = function () {
-  this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = '';
-// empty string to avoid regexp issues
-process.versions = {};
-function noop() {}
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-process.listeners = function (name) {
-  return [];
-};
-process.binding = function (name) {
-  throw new Error('process.binding is not supported');
-};
-process.cwd = function () {
-  return '/';
-};
-process.chdir = function (dir) {
-  throw new Error('process.chdir is not supported');
-};
-process.umask = function () {
-  return 0;
-};
-
-},{}],"5yMqL":[function(require,module,exports) {
-'use strict';
-
-var utils = require('../utils');
-
-module.exports = function normalizeHeaderName(headers, normalizedName) {
-  utils.forEach(headers, function processHeader(value, name) {
-    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
-      headers[normalizedName] = value;
-      delete headers[name];
-    }
-  });
-};
-
-},{"../utils":"7J9rV"}],"6pJqL":[function(require,module,exports) {
-'use strict';
-
-var utils = require('./../utils');
-var settle = require('./../core/settle');
-var cookies = require('./../helpers/cookies');
-var buildURL = require('./../helpers/buildURL');
-var buildFullPath = require('../core/buildFullPath');
-var parseHeaders = require('./../helpers/parseHeaders');
-var isURLSameOrigin = require('./../helpers/isURLSameOrigin');
-var createError = require('../core/createError');
-
-module.exports = function xhrAdapter(config) {
-  return new Promise(function dispatchXhrRequest(resolve, reject) {
-    var requestData = config.data;
-    var requestHeaders = config.headers;
-
-    if (utils.isFormData(requestData)) {
-      delete requestHeaders['Content-Type']; // Let the browser set it
-    }
-
-    var request = new XMLHttpRequest();
-
-    // HTTP basic authentication
-    if (config.auth) {
-      var username = config.auth.username || '';
-      var password = config.auth.password ? unescape(encodeURIComponent(config.auth.password)) : '';
-      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
-    }
-
-    var fullPath = buildFullPath(config.baseURL, config.url);
-    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
-
-    // Set the request timeout in MS
-    request.timeout = config.timeout;
-
-    // Listen for ready state
-    request.onreadystatechange = function handleLoad() {
-      if (!request || request.readyState !== 4) {
-        return;
-      }
-
-      // The request errored out and we didn't get a response, this will be
-      // handled by onerror instead
-      // With one exception: request that using file: protocol, most browsers
-      // will return status as 0 even though it's a successful request
-      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
-        return;
-      }
-
-      // Prepare the response
-      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
-      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
-      var response = {
-        data: responseData,
-        status: request.status,
-        statusText: request.statusText,
-        headers: responseHeaders,
-        config: config,
-        request: request
-      };
-
-      settle(resolve, reject, response);
-
-      // Clean up request
-      request = null;
-    };
-
-    // Handle browser request cancellation (as opposed to a manual cancellation)
-    request.onabort = function handleAbort() {
-      if (!request) {
-        return;
-      }
-
-      reject(createError('Request aborted', config, 'ECONNABORTED', request));
-
-      // Clean up request
-      request = null;
-    };
-
-    // Handle low level network errors
-    request.onerror = function handleError() {
-      // Real errors are hidden from us by the browser
-      // onerror should only fire if it's a network error
-      reject(createError('Network Error', config, null, request));
-
-      // Clean up request
-      request = null;
-    };
-
-    // Handle timeout
-    request.ontimeout = function handleTimeout() {
-      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
-      if (config.timeoutErrorMessage) {
-        timeoutErrorMessage = config.timeoutErrorMessage;
-      }
-      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
-        request));
-
-      // Clean up request
-      request = null;
-    };
-
-    // Add xsrf header
-    // This is only done if running in a standard browser environment.
-    // Specifically not if we're in a web worker, or react-native.
-    if (utils.isStandardBrowserEnv()) {
-      // Add xsrf header
-      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
-        cookies.read(config.xsrfCookieName) :
-        undefined;
-
-      if (xsrfValue) {
-        requestHeaders[config.xsrfHeaderName] = xsrfValue;
-      }
-    }
-
-    // Add headers to the request
-    if ('setRequestHeader' in request) {
-      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
-        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
-          // Remove Content-Type if data is undefined
-          delete requestHeaders[key];
-        } else {
-          // Otherwise add header to the request
-          request.setRequestHeader(key, val);
-        }
-      });
-    }
-
-    // Add withCredentials to request if needed
-    if (!utils.isUndefined(config.withCredentials)) {
-      request.withCredentials = !!config.withCredentials;
-    }
-
-    // Add responseType to request if needed
-    if (config.responseType) {
-      try {
-        request.responseType = config.responseType;
-      } catch (e) {
-        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
-        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
-        if (config.responseType !== 'json') {
-          throw e;
-        }
-      }
-    }
-
-    // Handle progress if needed
-    if (typeof config.onDownloadProgress === 'function') {
-      request.addEventListener('progress', config.onDownloadProgress);
-    }
-
-    // Not all browsers support upload events
-    if (typeof config.onUploadProgress === 'function' && request.upload) {
-      request.upload.addEventListener('progress', config.onUploadProgress);
-    }
-
-    if (config.cancelToken) {
-      // Handle cancellation
-      config.cancelToken.promise.then(function onCanceled(cancel) {
-        if (!request) {
-          return;
-        }
-
-        request.abort();
-        reject(cancel);
-        // Clean up request
-        request = null;
-      });
-    }
-
-    if (!requestData) {
-      requestData = null;
-    }
-
-    // Send the request
-    request.send(requestData);
-  });
-};
-
-},{"./../utils":"7J9rV","./../core/settle":"72M6J","./../helpers/cookies":"1m0F1","./../helpers/buildURL":"25KfR","../core/buildFullPath":"5fWja","./../helpers/parseHeaders":"1KizL","./../helpers/isURLSameOrigin":"6Gtz3","../core/createError":"7ETv1"}],"72M6J":[function(require,module,exports) {
-'use strict';
-
-var createError = require('./createError');
-
-/**
- * Resolve or reject a Promise based on response status.
- *
- * @param {Function} resolve A function that resolves the promise.
- * @param {Function} reject A function that rejects the promise.
- * @param {object} response The response.
- */
-module.exports = function settle(resolve, reject, response) {
-  var validateStatus = response.config.validateStatus;
-  if (!response.status || !validateStatus || validateStatus(response.status)) {
-    resolve(response);
-  } else {
-    reject(createError(
-      'Request failed with status code ' + response.status,
-      response.config,
-      null,
-      response.request,
-      response
-    ));
-  }
-};
-
-},{"./createError":"7ETv1"}],"7ETv1":[function(require,module,exports) {
-'use strict';
-
-var enhanceError = require('./enhanceError');
-
-/**
- * Create an Error with the specified message, config, error code, request and response.
- *
- * @param {string} message The error message.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The created error.
- */
-module.exports = function createError(message, config, code, request, response) {
-  var error = new Error(message);
-  return enhanceError(error, config, code, request, response);
-};
-
-},{"./enhanceError":"2O2Ud"}],"2O2Ud":[function(require,module,exports) {
-'use strict';
-
-/**
- * Update an Error with the specified config, error code, and response.
- *
- * @param {Error} error The error to update.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The error.
- */
-module.exports = function enhanceError(error, config, code, request, response) {
-  error.config = config;
-  if (code) {
-    error.code = code;
-  }
-
-  error.request = request;
-  error.response = response;
-  error.isAxiosError = true;
-
-  error.toJSON = function toJSON() {
-    return {
-      // Standard
-      message: this.message,
-      name: this.name,
-      // Microsoft
-      description: this.description,
-      number: this.number,
-      // Mozilla
-      fileName: this.fileName,
-      lineNumber: this.lineNumber,
-      columnNumber: this.columnNumber,
-      stack: this.stack,
-      // Axios
-      config: this.config,
-      code: this.code
-    };
-  };
-  return error;
-};
-
-},{}],"1m0F1":[function(require,module,exports) {
-'use strict';
-
-var utils = require('./../utils');
-
-module.exports = (
-  utils.isStandardBrowserEnv() ?
-
-  // Standard browser envs support document.cookie
-    (function standardBrowserEnv() {
-      return {
-        write: function write(name, value, expires, path, domain, secure) {
-          var cookie = [];
-          cookie.push(name + '=' + encodeURIComponent(value));
-
-          if (utils.isNumber(expires)) {
-            cookie.push('expires=' + new Date(expires).toGMTString());
-          }
-
-          if (utils.isString(path)) {
-            cookie.push('path=' + path);
-          }
-
-          if (utils.isString(domain)) {
-            cookie.push('domain=' + domain);
-          }
-
-          if (secure === true) {
-            cookie.push('secure');
-          }
-
-          document.cookie = cookie.join('; ');
-        },
-
-        read: function read(name) {
-          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
-          return (match ? decodeURIComponent(match[3]) : null);
-        },
-
-        remove: function remove(name) {
-          this.write(name, '', Date.now() - 86400000);
-        }
-      };
-    })() :
-
-  // Non standard browser env (web workers, react-native) lack needed support.
-    (function nonStandardBrowserEnv() {
-      return {
-        write: function write() {},
-        read: function read() { return null; },
-        remove: function remove() {}
-      };
-    })()
-);
-
-},{"./../utils":"7J9rV"}],"5fWja":[function(require,module,exports) {
-'use strict';
-
-var isAbsoluteURL = require('../helpers/isAbsoluteURL');
-var combineURLs = require('../helpers/combineURLs');
-
-/**
- * Creates a new URL by combining the baseURL with the requestedURL,
- * only when the requestedURL is not already an absolute URL.
- * If the requestURL is absolute, this function returns the requestedURL untouched.
- *
- * @param {string} baseURL The base URL
- * @param {string} requestedURL Absolute or relative URL to combine
- * @returns {string} The combined full path
- */
-module.exports = function buildFullPath(baseURL, requestedURL) {
-  if (baseURL && !isAbsoluteURL(requestedURL)) {
-    return combineURLs(baseURL, requestedURL);
-  }
-  return requestedURL;
-};
-
-},{"../helpers/isAbsoluteURL":"4FcN1","../helpers/combineURLs":"qMap4"}],"4FcN1":[function(require,module,exports) {
-'use strict';
-
-/**
- * Determines whether the specified URL is absolute
- *
- * @param {string} url The URL to test
- * @returns {boolean} True if the specified URL is absolute, otherwise false
- */
-module.exports = function isAbsoluteURL(url) {
-  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
-  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
-  // by any combination of letters, digits, plus, period, or hyphen.
-  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
-};
-
-},{}],"qMap4":[function(require,module,exports) {
-'use strict';
-
-/**
- * Creates a new URL by combining the specified URLs
- *
- * @param {string} baseURL The base URL
- * @param {string} relativeURL The relative URL
- * @returns {string} The combined URL
- */
-module.exports = function combineURLs(baseURL, relativeURL) {
-  return relativeURL
-    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
-    : baseURL;
-};
-
-},{}],"1KizL":[function(require,module,exports) {
-'use strict';
-
-var utils = require('./../utils');
-
-// Headers whose duplicates are ignored by node
-// c.f. https://nodejs.org/api/http.html#http_message_headers
-var ignoreDuplicateOf = [
-  'age', 'authorization', 'content-length', 'content-type', 'etag',
-  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
-  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
-  'referer', 'retry-after', 'user-agent'
-];
-
-/**
- * Parse headers into an object
- *
- * ```
- * Date: Wed, 27 Aug 2014 08:58:49 GMT
- * Content-Type: application/json
- * Connection: keep-alive
- * Transfer-Encoding: chunked
- * ```
- *
- * @param {String} headers Headers needing to be parsed
- * @returns {Object} Headers parsed into an object
- */
-module.exports = function parseHeaders(headers) {
-  var parsed = {};
-  var key;
-  var val;
-  var i;
-
-  if (!headers) { return parsed; }
-
-  utils.forEach(headers.split('\n'), function parser(line) {
-    i = line.indexOf(':');
-    key = utils.trim(line.substr(0, i)).toLowerCase();
-    val = utils.trim(line.substr(i + 1));
-
-    if (key) {
-      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
-        return;
-      }
-      if (key === 'set-cookie') {
-        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
-      } else {
-        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
-      }
-    }
-  });
-
-  return parsed;
-};
-
-},{"./../utils":"7J9rV"}],"6Gtz3":[function(require,module,exports) {
-'use strict';
-
-var utils = require('./../utils');
-
-module.exports = (
-  utils.isStandardBrowserEnv() ?
-
-  // Standard browser envs have full support of the APIs needed to test
-  // whether the request URL is of the same origin as current location.
-    (function standardBrowserEnv() {
-      var msie = /(msie|trident)/i.test(navigator.userAgent);
-      var urlParsingNode = document.createElement('a');
-      var originURL;
-
-      /**
-    * Parse a URL to discover it's components
-    *
-    * @param {String} url The URL to be parsed
-    * @returns {Object}
-    */
-      function resolveURL(url) {
-        var href = url;
-
-        if (msie) {
-        // IE needs attribute set twice to normalize properties
-          urlParsingNode.setAttribute('href', href);
-          href = urlParsingNode.href;
-        }
-
-        urlParsingNode.setAttribute('href', href);
-
-        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
-        return {
-          href: urlParsingNode.href,
-          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
-          host: urlParsingNode.host,
-          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
-          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
-          hostname: urlParsingNode.hostname,
-          port: urlParsingNode.port,
-          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
-            urlParsingNode.pathname :
-            '/' + urlParsingNode.pathname
-        };
-      }
-
-      originURL = resolveURL(window.location.href);
-
-      /**
-    * Determine if a URL shares the same origin as the current location
-    *
-    * @param {String} requestURL The URL to test
-    * @returns {boolean} True if URL shares the same origin, otherwise false
-    */
-      return function isURLSameOrigin(requestURL) {
-        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
-        return (parsed.protocol === originURL.protocol &&
-            parsed.host === originURL.host);
-      };
-    })() :
-
-  // Non standard browser envs (web workers, react-native) lack needed support.
-    (function nonStandardBrowserEnv() {
-      return function isURLSameOrigin() {
-        return true;
-      };
-    })()
-);
-
-},{"./../utils":"7J9rV"}],"42z1a":[function(require,module,exports) {
-'use strict';
-
-var utils = require('../utils');
-
-/**
- * Config-specific merge-function which creates a new config-object
- * by merging two configuration objects together.
- *
- * @param {Object} config1
- * @param {Object} config2
- * @returns {Object} New object resulting from merging config2 to config1
- */
-module.exports = function mergeConfig(config1, config2) {
-  // eslint-disable-next-line no-param-reassign
-  config2 = config2 || {};
-  var config = {};
-
-  var valueFromConfig2Keys = ['url', 'method', 'data'];
-  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy', 'params'];
-  var defaultToConfig2Keys = [
-    'baseURL', 'transformRequest', 'transformResponse', 'paramsSerializer',
-    'timeout', 'timeoutMessage', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
-    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress', 'decompress',
-    'maxContentLength', 'maxBodyLength', 'maxRedirects', 'transport', 'httpAgent',
-    'httpsAgent', 'cancelToken', 'socketPath', 'responseEncoding'
-  ];
-  var directMergeKeys = ['validateStatus'];
-
-  function getMergedValue(target, source) {
-    if (utils.isPlainObject(target) && utils.isPlainObject(source)) {
-      return utils.merge(target, source);
-    } else if (utils.isPlainObject(source)) {
-      return utils.merge({}, source);
-    } else if (utils.isArray(source)) {
-      return source.slice();
-    }
-    return source;
-  }
-
-  function mergeDeepProperties(prop) {
-    if (!utils.isUndefined(config2[prop])) {
-      config[prop] = getMergedValue(config1[prop], config2[prop]);
-    } else if (!utils.isUndefined(config1[prop])) {
-      config[prop] = getMergedValue(undefined, config1[prop]);
-    }
-  }
-
-  utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
-    if (!utils.isUndefined(config2[prop])) {
-      config[prop] = getMergedValue(undefined, config2[prop]);
-    }
-  });
-
-  utils.forEach(mergeDeepPropertiesKeys, mergeDeepProperties);
-
-  utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
-    if (!utils.isUndefined(config2[prop])) {
-      config[prop] = getMergedValue(undefined, config2[prop]);
-    } else if (!utils.isUndefined(config1[prop])) {
-      config[prop] = getMergedValue(undefined, config1[prop]);
-    }
-  });
-
-  utils.forEach(directMergeKeys, function merge(prop) {
-    if (prop in config2) {
-      config[prop] = getMergedValue(config1[prop], config2[prop]);
-    } else if (prop in config1) {
-      config[prop] = getMergedValue(undefined, config1[prop]);
-    }
-  });
-
-  var axiosKeys = valueFromConfig2Keys
-    .concat(mergeDeepPropertiesKeys)
-    .concat(defaultToConfig2Keys)
-    .concat(directMergeKeys);
-
-  var otherKeys = Object
-    .keys(config1)
-    .concat(Object.keys(config2))
-    .filter(function filterAxiosKeys(key) {
-      return axiosKeys.indexOf(key) === -1;
-    });
-
-  utils.forEach(otherKeys, mergeDeepProperties);
-
-  return config;
-};
-
-},{"../utils":"7J9rV"}],"1Ql7i":[function(require,module,exports) {
-'use strict';
-
-/**
- * A `Cancel` is an object that is thrown when an operation is canceled.
- *
- * @class
- * @param {string=} message The message.
- */
-function Cancel(message) {
-  this.message = message;
-}
-
-Cancel.prototype.toString = function toString() {
-  return 'Cancel' + (this.message ? ': ' + this.message : '');
-};
-
-Cancel.prototype.__CANCEL__ = true;
-
-module.exports = Cancel;
-
-},{}],"hHamf":[function(require,module,exports) {
-'use strict';
-
-var Cancel = require('./Cancel');
-
-/**
- * A `CancelToken` is an object that can be used to request cancellation of an operation.
- *
- * @class
- * @param {Function} executor The executor function.
- */
-function CancelToken(executor) {
-  if (typeof executor !== 'function') {
-    throw new TypeError('executor must be a function.');
-  }
-
-  var resolvePromise;
-  this.promise = new Promise(function promiseExecutor(resolve) {
-    resolvePromise = resolve;
-  });
-
-  var token = this;
-  executor(function cancel(message) {
-    if (token.reason) {
-      // Cancellation has already been requested
-      return;
-    }
-
-    token.reason = new Cancel(message);
-    resolvePromise(token.reason);
-  });
-}
-
-/**
- * Throws a `Cancel` if cancellation has been requested.
- */
-CancelToken.prototype.throwIfRequested = function throwIfRequested() {
-  if (this.reason) {
-    throw this.reason;
-  }
-};
-
-/**
- * Returns an object that contains a new `CancelToken` and a function that, when called,
- * cancels the `CancelToken`.
- */
-CancelToken.source = function source() {
-  var cancel;
-  var token = new CancelToken(function executor(c) {
-    cancel = c;
-  });
-  return {
-    token: token,
-    cancel: cancel
-  };
-};
-
-module.exports = CancelToken;
-
-},{"./Cancel":"1Ql7i"}],"9FoXt":[function(require,module,exports) {
-'use strict';
-
-/**
- * Syntactic sugar for invoking a function and expanding an array for arguments.
- *
- * Common use case would be to use `Function.prototype.apply`.
- *
- *  ```js
- *  function f(x, y, z) {}
- *  var args = [1, 2, 3];
- *  f.apply(null, args);
- *  ```
- *
- * With `spread` this example can be re-written.
- *
- *  ```js
- *  spread(function(x, y, z) {})([1, 2, 3]);
- *  ```
- *
- * @param {Function} callback
- * @returns {Function}
- */
-module.exports = function spread(callback) {
-  return function wrap(arr) {
-    return callback.apply(null, arr);
-  };
-};
-
-},{}],"1bzv8":[function(require,module,exports) {
-'use strict';
-
-/**
- * Determines whether the payload is an error thrown by Axios
- *
- * @param {*} payload The value to test
- * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
- */
-module.exports = function isAxiosError(payload) {
-  return (typeof payload === 'object') && (payload.isAxiosError === true);
-};
-
-},{}],"6fxIo":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactRouterDom = require('react-router-dom');
-  var _reactRedux = require('react-redux');
-  var _actionsActions = require('../../actions/actions');
-  var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
-  var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
-  var _utilsHelpers = require('../../utils/helpers');
-  require('../../utils/partials/_view.scss');
-  require('./movie-view.scss');
-  var _s = $RefreshSig$();
-  const MovieView = ({addUserFavoriteMovie, addUserToWatchMovie, favoritedMovies, movieActors, movie, setSelectedMovie, onBackClick, user}) => {
-    _s();
-    const [favorited, setFavorited] = _react.useState(false);
-    const [willWatch, setWillWatch] = _react.useState(false);
-    _react.useEffect(() => {
-      setSelectedMovie(movie);
-    }, []);
-    const addToFavoritesList = () => {
-      _utilsHelpers.addToList(user.id, 'favorite-movies', movie._id, 'movie_id').then(() => {
-        setFavorited(true);
-        addUserFavoriteMovie(movie._id);
-        _actionsActions.setFavoritedMovies(favoritedMovies.map(favoritedMovie => {
-          if (favoritedMovie.name === movie.name) {
-            return {
-              ...movie,
-              usersFavorited: favoritedMovie.usersFavorited++
-            };
-          }
-          return movie;
-        }));
-      });
-    };
-    const addToWatchList = () => {
-      _utilsHelpers.addToList(user.id, 'to-watch-movies', movie._id, 'movie_id').then(() => {
-        setWillWatch(true);
-        addUserToWatchMovie(movie._id);
-      });
-    };
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "image-cover",
-        style: {
-          backgroundImage: `url(${movie.image})`
-        }
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "close-box"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        onClick: () => onBackClick(),
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-x"
-      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "18",
-        y1: "6",
-        x2: "6",
-        y2: "18"
-      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "6",
-        y1: "6",
-        x2: "18",
-        y2: "18"
-      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "main-content"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, movie.name, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "user-list-icons"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        onClick: () => addToFavoritesList(),
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: `feather feather-heart 
-                            ${favorited || user.favoriteMovies && user.favoriteMovies.indexOf(movie._id) > -1 ? 'added-to-list' : ''}`,
-        title: "Add this movie to your Favorite Movies list"
-      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M20.84 4.61a5.5 5.5 0 0 0-7.78  0L12 5.67l-1.06-1.06a5.5  5.5 0 0 0-7.78 7.78l1.06  1.06L12 21.23l7.78-7.78  1.06-1.06a5.5 5.5 0 0 0  0-7.78z"
-      })), /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        onClick: () => addToWatchList(),
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: `feather feather-bookmark 
-                            ${willWatch || user.toWatchMovies && user.toWatchMovies.indexOf(movie._id) > -1 ? 'added-to-list' : ''}`,
-        title: "Add this movie to your To Watch Movies list"
-      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M19 21l-7-5-7  5V5a2 2 0 0  1 2-2h10a2 2  0 0 1 2 2z"
-      })))), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "description"
-      }, movie.description), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Release Year"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "description"
-      }, movie.releaseYear), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Rating"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "description"
-      }, movie.rating)), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attributes"
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attribute"
-      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Director"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: `/directors/${movie.director.name}`
-      }, movie.director.name)), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attribute"
-      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Genre"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: `/genres/${movie.genre.name}`
-      }, movie.genre.name))), movie.stars.length > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "related-attributes"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Stars of ", /*#__PURE__*/_reactDefault.default.createElement("i", null, movie.name), " "), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "related-attributes-card-container"
-      }, movieActors.map((actor, i) => {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
-            key: i,
-            image: actor.image,
-            description: /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("p", {
-              className: "label"
-            }, /*#__PURE__*/_reactDefault.default.createElement("b", null, "Actor: "), " ", /*#__PURE__*/_reactDefault.default.createElement("br", null), /*#__PURE__*/_reactDefault.default.createElement("span", {
-              className: "description"
-            }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-              to: `/actors/
-                                                            ${actor._id}`
-            }, actor.actor))), /*#__PURE__*/_reactDefault.default.createElement("p", {
-              className: "label"
-            }, /*#__PURE__*/_reactDefault.default.createElement("b", null, "Character: "), " ", /*#__PURE__*/_reactDefault.default.createElement("br", null), /*#__PURE__*/_reactDefault.default.createElement("span", {
-              className: "description"
-            }, actor.character)))
-          })
-        );
-      })))) : null)
-    );
-  };
-  _s(MovieView, "zWe27iCj0K6kxPif8QfeM+Eem3U=");
-  _c = MovieView;
-  MovieView.propTypes = {
-    addUserFavoriteMovie: _propTypesDefault.default.func.isRequired,
-    addUserToWatchMovie: _propTypesDefault.default.func.isRequired,
-    favoritedMovies: _propTypesDefault.default.array.isRequired,
-    movie: _propTypesDefault.default.shape({
-      _id: _propTypesDefault.default.string.isRequired,
-      description: _propTypesDefault.default.string.isRequired,
-      director: _propTypesDefault.default.shape({
-        name: _propTypesDefault.default.string.isRequired
-      }).isRequired,
-      genre: _propTypesDefault.default.shape({
-        name: _propTypesDefault.default.string.isRequired
-      }).isRequired,
-      image: _propTypesDefault.default.string.isRequired,
-      name: _propTypesDefault.default.string.isRequired,
-      rating: _propTypesDefault.default.number,
-      releaseYear: _propTypesDefault.default.number,
-      stars: _propTypesDefault.default.array
-    }).isRequired,
-    movieActors: _propTypesDefault.default.array.isRequired,
-    onBackClick: _propTypesDefault.default.func.isRequired,
-    onItemClick: _propTypesDefault.default.func.isRequired,
-    setSelectedMovie: _propTypesDefault.default.func.isRequired,
-    setFavoritedMovies: _propTypesDefault.default.func.isRequired,
-    user: _propTypesDefault.default.shape({
-      id: _propTypesDefault.default.string.isRequired,
-      favoriteMovies: _propTypesDefault.default.array.isRequired,
-      toWatchMovies: _propTypesDefault.default.array.isRequired
-    })
-  };
-  const mapStateToProps = state => ({
-    favoritedMovies: state.favoritedMovies,
-    user: state.user
-  });
-  exports.default = _reactRedux.connect(mapStateToProps, {
-    addUserFavoriteMovie: _actionsActions.addUserFavoriteMovie,
-    addUserToWatchMovie: _actionsActions.addUserToWatchMovie,
-    setFavoritedMovies: _actionsActions.setFavoritedMovies,
-    setSelectedMovie: _actionsActions.setSelectedMovie
-  })(MovieView);
-  var _c;
-  $RefreshReg$(_c, "MovieView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","prop-types":"4dfy5","../../utils/partials/_view.scss":"552MA","react-router-dom":"1PMSK","./movie-view.scss":"74xbX","../../utils/helpers":"1nff4","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","react-redux":"7GDa4","../../actions/actions":"5S6cN"}],"552MA":[function() {},{}],"74xbX":[function() {},{}],"1tzTm":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _reactBootstrap = require('react-bootstrap');
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  require('./related-attribute-card.scss');
-  const RelatedAttributeCard = ({description, image}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card, {
-        className: "related-attribute-card"
-      }, /*#__PURE__*/_reactDefault.default.createElement("img", {
-        src: image
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Body, null, description))
-    );
-  };
-  _c = RelatedAttributeCard;
-  RelatedAttributeCard.propTypes = {
-    image: _propTypesDefault.default.string.isRequired,
-    description: _propTypesDefault.default.object.isRequired
-  };
-  exports.default = RelatedAttributeCard;
-  var _c;
-  $RefreshReg$(_c, "RelatedAttributeCard");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","react-bootstrap":"4n7hB","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./related-attribute-card.scss":"3D90e","prop-types":"4dfy5"}],"3D90e":[function() {},{}],"7GDa4":[function(require,module,exports) {
+},{"react-is":"68QIU"}],"7GDa4":[function(require,module,exports) {
 "use strict";
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
@@ -47874,7 +47647,159 @@ exports.unstable_batchedUpdates = void 0;
 var _reactDom = require("react-dom");
 
 exports.unstable_batchedUpdates = _reactDom.unstable_batchedUpdates;
-},{"react-dom":"2sg1U"}],"5S6cN":[function(require,module,exports) {
+},{"react-dom":"2sg1U"}],"3o4Df":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
+  var _utilsHelpers = require('../../utils/helpers');
+  require('../../utils/partials/_view.scss');
+  require('./actor-view.scss');
+  var _s = $RefreshSig$();
+  const ActorView = ({actor, addUserFavoriteActor, onBackClick, user}) => {
+    _s();
+    const [favorited, setFavorited] = _react.useState(false);
+    const addToFavoritesList = () => {
+      _utilsHelpers.addToList(user.id, 'favorite-actors', actor._id, 'actor_id').then(() => {
+        setFavorited(true);
+        addUserFavoriteActor(actor._id);
+      });
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "image-cover",
+        style: {
+          backgroundImage: `url(${actor.image})`
+        }
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "close-box"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => onBackClick(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-x"
+      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "18",
+        y1: "6",
+        x2: "6",
+        y2: "18"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "6",
+        y1: "6",
+        x2: "18",
+        y2: "18"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "main-content"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, actor.name, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "user-list-icons"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => addToFavoritesList(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: `feather feather-heart 
+                            ${favorited || user.favoriteActors && user.favoriteActors.indexOf(actor._id) > -1 ? 'added-to-list' : ''}`,
+        title: "Add this actor to your Favorite Movies list"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M20.84 4.61a5.5 5.5 0 0 0-7.78  0L12 5.67l-1.06-1.06a5.5  5.5 0 0 0-7.78 7.78l1.06  1.06L12 21.23l7.78-7.78  1.06-1.06a5.5 5.5 0 0 0  0-7.78z"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, _utilsHelpers.makeTextReadable(actor.bio)), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Birthday"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, new Date(actor.birthDate).toDateString()), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Birth country"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, actor.birthCountry)), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attributes"
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attribute"
+      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Occupations"), actor.occupations.join(', ')), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attribute"
+      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Stars in"), actor.starsIn.join(', '))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "source-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("a", {
+        href: actor.imdbLink,
+        target: "_blank",
+        rel: "noreferrer"
+      }, "Source")))
+    );
+  };
+  _s(ActorView, "0+lqqgLZmBBYgYeoprcvHUdKHfY=");
+  _c = ActorView;
+  ActorView.propTypes = {
+    actor: _propTypesDefault.default.object.isRequired,
+    addUserFavoriteActor: _propTypesDefault.default.func.isRequired,
+    movie: _propTypesDefault.default.shape({
+      _id: _propTypesDefault.default.string.isRequired,
+      description: _propTypesDefault.default.string.isRequired,
+      director: _propTypesDefault.default.shape({
+        name: _propTypesDefault.default.string.isRequired
+      }).isRequired,
+      genre: _propTypesDefault.default.shape({
+        name: _propTypesDefault.default.string.isRequired
+      }).isRequired,
+      image: _propTypesDefault.default.string.isRequired,
+      name: _propTypesDefault.default.string.isRequired,
+      rating: _propTypesDefault.default.number,
+      releaseYear: _propTypesDefault.default.number,
+      stars: _propTypesDefault.default.array
+    }).isRequired,
+    movieActors: _propTypesDefault.default.array.isRequired,
+    onBackClick: _propTypesDefault.default.func.isRequired,
+    onItemClick: _propTypesDefault.default.func.isRequired,
+    setSelectedMovie: _propTypesDefault.default.func.isRequired,
+    setFavoritedMovies: _propTypesDefault.default.func.isRequired,
+    user: _propTypesDefault.default.shape({
+      id: _propTypesDefault.default.string.isRequired,
+      favoriteActors: _propTypesDefault.default.array.isRequired
+    })
+  };
+  const mapStateToProps = state => ({
+    user: state.user
+  });
+  exports.default = _reactRedux.connect(mapStateToProps, {
+    addUserFavoriteActor: _actionsActions.addUserFavoriteActor
+  })(ActorView);
+  var _c;
+  $RefreshReg$(_c, "ActorView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","prop-types":"4dfy5","react-redux":"7GDa4","../../actions/actions":"5S6cN","../../utils/helpers":"1nff4","../../utils/partials/_view.scss":"552MA","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./actor-view.scss":"4OZHF"}],"5S6cN":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 _parcelHelpers.export(exports, "LOGOUT_USER", function () {
@@ -48086,7 +48011,3355 @@ const removeUserToWatchMovie = movieId => ({
   movieId
 });
 
-},{"@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU"}],"4DfHF":[function(require,module,exports) {
+},{"@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU"}],"1nff4":[function(require,module,exports) {
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+_parcelHelpers.export(exports, "addToList", function () {
+  return addToList;
+});
+_parcelHelpers.export(exports, "createExcerpt", function () {
+  return createExcerpt;
+});
+_parcelHelpers.export(exports, "makeTextReadable", function () {
+  return makeTextReadable;
+});
+_parcelHelpers.export(exports, "addFocusedClass", function () {
+  return addFocusedClass;
+});
+_parcelHelpers.export(exports, "removeFocusedClass", function () {
+  return removeFocusedClass;
+});
+var _axios = require('axios');
+var _axiosDefault = _parcelHelpers.interopDefault(_axios);
+var _htmlReactParser = require('html-react-parser');
+var _htmlReactParserDefault = _parcelHelpers.interopDefault(_htmlReactParser);
+const addToList = (userId, listType, itemId, itemIdType) => {
+  const token = localStorage.getItem('token'), data = {};
+  data[itemIdType] = itemId;
+  return _axiosDefault.default({
+    method: 'patch',
+    url: `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}/${itemId}`,
+    data,
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+};
+const createExcerpt = description => {
+  return description.slice(0, 45);
+};
+const makeTextReadable = text => {
+  const textArray = text.split('');
+  textArray.unshift('<p>');
+  const indexesArray = [];
+  let numParagraphs = 0;
+  for (let i = 0; i < textArray.length; i++) {
+    // Add a paragraph after every 5 sentences
+    if (textArray[i] === '.' && textArray[i + 1] === ' ') {
+      numParagraphs++;
+      if (numParagraphs === 5) {
+        indexesArray.push(i + 1);
+        numParagraphs = 0;
+        textArray.splice(i + 1, 0, '</p><p>');
+      }
+    }
+  }
+  return _htmlReactParserDefault.default(textArray.join(''));
+};
+const addFocusedClass = e => {
+  const element = e.target;
+  // make container surrounding svg icon match .form-control
+  // when .form-control is focused
+  element.nextSibling.classList.add('focused');
+  element.nextSibling.firstChild.firstChild.classList.add('focused');
+};
+const removeFocusedClass = e => {
+  const element = e.target;
+  // make container surrounding svg icon match .form-control
+  // when .form-control is focused
+  element.nextSibling.classList.remove('focused');
+  element.nextSibling.firstChild.firstChild.classList.remove('focused');
+};
+
+},{"axios":"7rA65","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","html-react-parser":"7AuyE"}],"7AuyE":[function(require,module,exports) {
+var domToReact = require('./lib/dom-to-react');
+var attributesToProps = require('./lib/attributes-to-props');
+var htmlToDOM = require('html-dom-parser');
+
+var domParserOptions = { lowerCaseAttributeNames: false };
+
+/**
+ * Converts HTML string to React elements.
+ *
+ * @param  {String}   html                    - HTML string.
+ * @param  {Object}   [options]               - Parser options.
+ * @param  {Object}   [options.htmlparser2]   - htmlparser2 options.
+ * @param  {Object}   [options.library]       - Library for React, Preact, etc.
+ * @param  {Function} [options.replace]       - Replace method.
+ * @return {JSX.Element|JSX.Element[]|String} - React element(s), empty array, or string.
+ */
+function HTMLReactParser(html, options) {
+  if (typeof html !== 'string') {
+    throw new TypeError('First argument must be a string');
+  }
+  if (html === '') {
+    return [];
+  }
+  options = options || {};
+  return domToReact(
+    htmlToDOM(html, options.htmlparser2 || domParserOptions),
+    options
+  );
+}
+
+HTMLReactParser.domToReact = domToReact;
+HTMLReactParser.htmlToDOM = htmlToDOM;
+HTMLReactParser.attributesToProps = attributesToProps;
+
+// support CommonJS and ES Modules
+module.exports = HTMLReactParser;
+module.exports.default = HTMLReactParser;
+
+},{"./lib/dom-to-react":"7bhBQ","./lib/attributes-to-props":"4QCws","html-dom-parser":"7EdwH"}],"7bhBQ":[function(require,module,exports) {
+var React = require('react');
+var attributesToProps = require('./attributes-to-props');
+var utilities = require('./utilities');
+
+var setStyleProp = utilities.setStyleProp;
+
+/**
+ * Converts DOM nodes to JSX element(s).
+ *
+ * @param  {DomElement[]} nodes             - DOM nodes.
+ * @param  {object}       [options={}]      - Options.
+ * @param  {Function}     [options.replace] - Replacer.
+ * @param  {object}       [options.library] - Library (React/Preact/etc.).
+ * @return {string|JSX.Element|JSX.Element[]}
+ */
+function domToReact(nodes, options) {
+  options = options || {};
+
+  var library = options.library || React;
+  var cloneElement = library.cloneElement;
+  var createElement = library.createElement;
+  var isValidElement = library.isValidElement;
+
+  var result = [];
+  var node;
+  var hasReplace = typeof options.replace === 'function';
+  var replaceElement;
+  var props;
+  var children;
+  var data;
+  var trim = options.trim;
+
+  for (var i = 0, len = nodes.length; i < len; i++) {
+    node = nodes[i];
+
+    // replace with custom React element (if present)
+    if (hasReplace) {
+      replaceElement = options.replace(node);
+
+      if (isValidElement(replaceElement)) {
+        // set "key" prop for sibling elements
+        // https://fb.me/react-warning-keys
+        if (len > 1) {
+          replaceElement = cloneElement(replaceElement, {
+            key: replaceElement.key || i
+          });
+        }
+        result.push(replaceElement);
+        continue;
+      }
+    }
+
+    if (node.type === 'text') {
+      // if trim option is enabled, skip whitespace text nodes
+      if (trim) {
+        data = node.data.trim();
+        if (data) {
+          result.push(node.data);
+        }
+      } else {
+        result.push(node.data);
+      }
+      continue;
+    }
+
+    props = node.attribs;
+    if (skipAttributesToProps(node)) {
+      setStyleProp(props.style, props);
+    } else if (props) {
+      props = attributesToProps(props);
+    }
+
+    children = null;
+
+    switch (node.type) {
+      case 'script':
+      case 'style':
+        // prevent text in <script> or <style> from being escaped
+        // https://reactjs.org/docs/dom-elements.html#dangerouslysetinnerhtml
+        if (node.children[0]) {
+          props.dangerouslySetInnerHTML = {
+            __html: node.children[0].data
+          };
+        }
+        break;
+
+      case 'tag':
+        // setting textarea value in children is an antipattern in React
+        // https://reactjs.org/docs/forms.html#the-textarea-tag
+        if (node.name === 'textarea' && node.children[0]) {
+          props.defaultValue = node.children[0].data;
+        } else if (node.children && node.children.length) {
+          // continue recursion of creating React elements (if applicable)
+          children = domToReact(node.children, options);
+        }
+        break;
+
+      // skip all other cases (e.g., comment)
+      default:
+        continue;
+    }
+
+    // set "key" prop for sibling elements
+    // https://fb.me/react-warning-keys
+    if (len > 1) {
+      props.key = i;
+    }
+
+    result.push(createElement(node.name, props, children));
+  }
+
+  return result.length === 1 ? result[0] : result;
+}
+
+/**
+ * Determines whether DOM element attributes should be transformed to props.
+ * Web Components should not have their attributes transformed except for `style`.
+ *
+ * @param  {DomElement} node
+ * @return {boolean}
+ */
+function skipAttributesToProps(node) {
+  return (
+    utilities.PRESERVE_CUSTOM_ATTRIBUTES &&
+    node.type === 'tag' &&
+    utilities.isCustomComponent(node.name, node.attribs)
+  );
+}
+
+module.exports = domToReact;
+
+},{"react":"3b2NM","./attributes-to-props":"4QCws","./utilities":"3EKOa"}],"4QCws":[function(require,module,exports) {
+var reactProperty = require('react-property');
+var utilities = require('./utilities');
+
+var setStyleProp = utilities.setStyleProp;
+
+var htmlProperties = reactProperty.html;
+var svgProperties = reactProperty.svg;
+var isCustomAttribute = reactProperty.isCustomAttribute;
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+/**
+ * Converts HTML/SVG DOM attributes to React props.
+ *
+ * @param  {object} [attributes={}] - HTML/SVG DOM attributes.
+ * @return {object}                 - React props.
+ */
+function attributesToProps(attributes) {
+  attributes = attributes || {};
+
+  var attributeName;
+  var attributeNameLowerCased;
+  var attributeValue;
+  var property;
+  var props = {};
+
+  for (attributeName in attributes) {
+    attributeValue = attributes[attributeName];
+
+    // ARIA (aria-*) or custom data (data-*) attribute
+    if (isCustomAttribute(attributeName)) {
+      props[attributeName] = attributeValue;
+      continue;
+    }
+
+    // convert HTML attribute to React prop
+    attributeNameLowerCased = attributeName.toLowerCase();
+    if (hasOwnProperty.call(htmlProperties, attributeNameLowerCased)) {
+      property = htmlProperties[attributeNameLowerCased];
+      props[property.propertyName] =
+        property.hasBooleanValue ||
+        (property.hasOverloadedBooleanValue && !attributeValue)
+          ? true
+          : attributeValue;
+      continue;
+    }
+
+    // convert SVG attribute to React prop
+    if (hasOwnProperty.call(svgProperties, attributeName)) {
+      property = svgProperties[attributeName];
+      props[property.propertyName] = attributeValue;
+      continue;
+    }
+
+    // preserve custom attribute if React >=16
+    if (utilities.PRESERVE_CUSTOM_ATTRIBUTES) {
+      props[attributeName] = attributeValue;
+    }
+  }
+
+  // transform inline style to object
+  setStyleProp(attributes.style, props);
+
+  return props;
+}
+
+module.exports = attributesToProps;
+
+},{"react-property":"JnafL","./utilities":"3EKOa"}],"JnafL":[function(require,module,exports) {
+var HTMLDOMPropertyConfig = require('./lib/HTMLDOMPropertyConfig');
+var SVGDOMPropertyConfig = require('./lib/SVGDOMPropertyConfig');
+var injection = require('./lib/injection');
+
+var MUST_USE_PROPERTY = injection.MUST_USE_PROPERTY;
+var HAS_BOOLEAN_VALUE = injection.HAS_BOOLEAN_VALUE;
+var HAS_NUMERIC_VALUE = injection.HAS_NUMERIC_VALUE;
+var HAS_POSITIVE_NUMERIC_VALUE = injection.HAS_POSITIVE_NUMERIC_VALUE;
+var HAS_OVERLOADED_BOOLEAN_VALUE = injection.HAS_OVERLOADED_BOOLEAN_VALUE;
+
+/**
+ * @see https://github.com/facebook/react/blob/15-stable/src/renderers/dom/shared/DOMProperty.js#L14-L16
+ *
+ * @param  {Number}  value
+ * @param  {Number}  bitmask
+ * @return {Boolean}
+ */
+function checkMask(value, bitmask) {
+  return (value & bitmask) === bitmask;
+}
+
+/**
+ * @see https://github.com/facebook/react/blob/15-stable/src/renderers/dom/shared/DOMProperty.js#L57
+ *
+ * @param {Object}  domPropertyConfig - HTMLDOMPropertyConfig or SVGDOMPropertyConfig
+ * @param {Object}  config            - The object to be mutated
+ * @param {Boolean} isSVG             - Whether the injected config is HTML or SVG (it assumes the default is HTML)
+ */
+function injectDOMPropertyConfig(domPropertyConfig, config, isSVG) {
+  var Properties = domPropertyConfig.Properties;
+  var DOMAttributeNames = domPropertyConfig.DOMAttributeNames;
+  var attributeName;
+  var propertyName;
+  var propConfig;
+
+  for (propertyName in Properties) {
+    attributeName =
+      DOMAttributeNames[propertyName] ||
+      (isSVG ? propertyName : propertyName.toLowerCase());
+    propConfig = Properties[propertyName];
+
+    config[attributeName] = {
+      attributeName: attributeName,
+      propertyName: propertyName,
+      mustUseProperty: checkMask(propConfig, MUST_USE_PROPERTY),
+      hasBooleanValue: checkMask(propConfig, HAS_BOOLEAN_VALUE),
+      hasNumericValue: checkMask(propConfig, HAS_NUMERIC_VALUE),
+      hasPositiveNumericValue: checkMask(
+        propConfig,
+        HAS_POSITIVE_NUMERIC_VALUE
+      ),
+      hasOverloadedBooleanValue: checkMask(
+        propConfig,
+        HAS_OVERLOADED_BOOLEAN_VALUE
+      )
+    };
+  }
+}
+
+/**
+ * HTML properties config.
+ *
+ * @type {Object}
+ */
+var html = {};
+injectDOMPropertyConfig(HTMLDOMPropertyConfig, html);
+
+/**
+ * SVG properties config.
+ *
+ * @type {Object}
+ */
+var svg = {};
+injectDOMPropertyConfig(SVGDOMPropertyConfig, svg, true);
+
+/**
+ * HTML and SVG properties config.
+ *
+ * @type {Object}
+ */
+var properties = {};
+injectDOMPropertyConfig(HTMLDOMPropertyConfig, properties);
+injectDOMPropertyConfig(SVGDOMPropertyConfig, properties, true);
+
+var ATTRIBUTE_NAME_START_CHAR =
+  ':A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD';
+var ATTRIBUTE_NAME_CHAR =
+  ATTRIBUTE_NAME_START_CHAR + '\\-.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040';
+
+module.exports = {
+  html: html,
+  svg: svg,
+  properties: properties,
+
+  /**
+   * Checks whether a property name is a custom attribute.
+   *
+   * @see https://github.com/facebook/react/blob/15-stable/src/renderers/dom/shared/HTMLDOMPropertyConfig.js#L23-L25
+   *
+   * @param {String}
+   * @return {Boolean}
+   */
+  isCustomAttribute: RegExp.prototype.test.bind(
+    new RegExp('^(data|aria)-[' + ATTRIBUTE_NAME_CHAR + ']*$')
+  )
+};
+
+},{"./lib/HTMLDOMPropertyConfig":"3wzR8","./lib/SVGDOMPropertyConfig":"4w6n9","./lib/injection":"35tpX"}],"3wzR8":[function(require,module,exports) {
+module.exports = {
+  Properties: {
+    autoFocus: 4,
+    accept: 0,
+    acceptCharset: 0,
+    accessKey: 0,
+    action: 0,
+    allowFullScreen: 4,
+    allowTransparency: 0,
+    alt: 0,
+    as: 0,
+    async: 4,
+    autoComplete: 0,
+    autoPlay: 4,
+    capture: 4,
+    cellPadding: 0,
+    cellSpacing: 0,
+    charSet: 0,
+    challenge: 0,
+    checked: 5,
+    cite: 0,
+    classID: 0,
+    className: 0,
+    cols: 24,
+    colSpan: 0,
+    content: 0,
+    contentEditable: 0,
+    contextMenu: 0,
+    controls: 4,
+    controlsList: 0,
+    coords: 0,
+    crossOrigin: 0,
+    data: 0,
+    dateTime: 0,
+    default: 4,
+    defer: 4,
+    dir: 0,
+    disabled: 4,
+    download: 32,
+    draggable: 0,
+    encType: 0,
+    form: 0,
+    formAction: 0,
+    formEncType: 0,
+    formMethod: 0,
+    formNoValidate: 4,
+    formTarget: 0,
+    frameBorder: 0,
+    headers: 0,
+    height: 0,
+    hidden: 4,
+    high: 0,
+    href: 0,
+    hrefLang: 0,
+    htmlFor: 0,
+    httpEquiv: 0,
+    icon: 0,
+    id: 0,
+    inputMode: 0,
+    integrity: 0,
+    is: 0,
+    keyParams: 0,
+    keyType: 0,
+    kind: 0,
+    label: 0,
+    lang: 0,
+    list: 0,
+    loop: 4,
+    low: 0,
+    manifest: 0,
+    marginHeight: 0,
+    marginWidth: 0,
+    max: 0,
+    maxLength: 0,
+    media: 0,
+    mediaGroup: 0,
+    method: 0,
+    min: 0,
+    minLength: 0,
+    multiple: 5,
+    muted: 5,
+    name: 0,
+    nonce: 0,
+    noValidate: 4,
+    open: 4,
+    optimum: 0,
+    pattern: 0,
+    placeholder: 0,
+    playsInline: 4,
+    poster: 0,
+    preload: 0,
+    profile: 0,
+    radioGroup: 0,
+    readOnly: 4,
+    referrerPolicy: 0,
+    rel: 0,
+    required: 4,
+    reversed: 4,
+    role: 0,
+    rows: 24,
+    rowSpan: 8,
+    sandbox: 0,
+    scope: 0,
+    scoped: 4,
+    scrolling: 0,
+    seamless: 4,
+    selected: 5,
+    shape: 0,
+    size: 24,
+    sizes: 0,
+    span: 24,
+    spellCheck: 0,
+    src: 0,
+    srcDoc: 0,
+    srcLang: 0,
+    srcSet: 0,
+    start: 8,
+    step: 0,
+    style: 0,
+    summary: 0,
+    tabIndex: 0,
+    target: 0,
+    title: 0,
+    type: 0,
+    useMap: 0,
+    value: 0,
+    width: 0,
+    wmode: 0,
+    wrap: 0,
+    about: 0,
+    datatype: 0,
+    inlist: 0,
+    prefix: 0,
+    property: 0,
+    resource: 0,
+    typeof: 0,
+    vocab: 0,
+    autoCapitalize: 0,
+    autoCorrect: 0,
+    autoSave: 0,
+    color: 0,
+    itemProp: 0,
+    itemScope: 4,
+    itemType: 0,
+    itemID: 0,
+    itemRef: 0,
+    results: 0,
+    security: 0,
+    unselectable: 0
+  },
+  DOMAttributeNames: {
+    acceptCharset: 'accept-charset',
+    className: 'class',
+    htmlFor: 'for',
+    httpEquiv: 'http-equiv'
+  }
+};
+
+},{}],"4w6n9":[function(require,module,exports) {
+module.exports = {
+  Properties: {
+    accentHeight: 0,
+    accumulate: 0,
+    additive: 0,
+    alignmentBaseline: 0,
+    allowReorder: 0,
+    alphabetic: 0,
+    amplitude: 0,
+    arabicForm: 0,
+    ascent: 0,
+    attributeName: 0,
+    attributeType: 0,
+    autoReverse: 0,
+    azimuth: 0,
+    baseFrequency: 0,
+    baseProfile: 0,
+    baselineShift: 0,
+    bbox: 0,
+    begin: 0,
+    bias: 0,
+    by: 0,
+    calcMode: 0,
+    capHeight: 0,
+    clip: 0,
+    clipPath: 0,
+    clipRule: 0,
+    clipPathUnits: 0,
+    colorInterpolation: 0,
+    colorInterpolationFilters: 0,
+    colorProfile: 0,
+    colorRendering: 0,
+    contentScriptType: 0,
+    contentStyleType: 0,
+    cursor: 0,
+    cx: 0,
+    cy: 0,
+    d: 0,
+    decelerate: 0,
+    descent: 0,
+    diffuseConstant: 0,
+    direction: 0,
+    display: 0,
+    divisor: 0,
+    dominantBaseline: 0,
+    dur: 0,
+    dx: 0,
+    dy: 0,
+    edgeMode: 0,
+    elevation: 0,
+    enableBackground: 0,
+    end: 0,
+    exponent: 0,
+    externalResourcesRequired: 0,
+    fill: 0,
+    fillOpacity: 0,
+    fillRule: 0,
+    filter: 0,
+    filterRes: 0,
+    filterUnits: 0,
+    floodColor: 0,
+    floodOpacity: 0,
+    focusable: 0,
+    fontFamily: 0,
+    fontSize: 0,
+    fontSizeAdjust: 0,
+    fontStretch: 0,
+    fontStyle: 0,
+    fontVariant: 0,
+    fontWeight: 0,
+    format: 0,
+    from: 0,
+    fx: 0,
+    fy: 0,
+    g1: 0,
+    g2: 0,
+    glyphName: 0,
+    glyphOrientationHorizontal: 0,
+    glyphOrientationVertical: 0,
+    glyphRef: 0,
+    gradientTransform: 0,
+    gradientUnits: 0,
+    hanging: 0,
+    horizAdvX: 0,
+    horizOriginX: 0,
+    ideographic: 0,
+    imageRendering: 0,
+    in: 0,
+    in2: 0,
+    intercept: 0,
+    k: 0,
+    k1: 0,
+    k2: 0,
+    k3: 0,
+    k4: 0,
+    kernelMatrix: 0,
+    kernelUnitLength: 0,
+    kerning: 0,
+    keyPoints: 0,
+    keySplines: 0,
+    keyTimes: 0,
+    lengthAdjust: 0,
+    letterSpacing: 0,
+    lightingColor: 0,
+    limitingConeAngle: 0,
+    local: 0,
+    markerEnd: 0,
+    markerMid: 0,
+    markerStart: 0,
+    markerHeight: 0,
+    markerUnits: 0,
+    markerWidth: 0,
+    mask: 0,
+    maskContentUnits: 0,
+    maskUnits: 0,
+    mathematical: 0,
+    mode: 0,
+    numOctaves: 0,
+    offset: 0,
+    opacity: 0,
+    operator: 0,
+    order: 0,
+    orient: 0,
+    orientation: 0,
+    origin: 0,
+    overflow: 0,
+    overlinePosition: 0,
+    overlineThickness: 0,
+    paintOrder: 0,
+    panose1: 0,
+    pathLength: 0,
+    patternContentUnits: 0,
+    patternTransform: 0,
+    patternUnits: 0,
+    pointerEvents: 0,
+    points: 0,
+    pointsAtX: 0,
+    pointsAtY: 0,
+    pointsAtZ: 0,
+    preserveAlpha: 0,
+    preserveAspectRatio: 0,
+    primitiveUnits: 0,
+    r: 0,
+    radius: 0,
+    refX: 0,
+    refY: 0,
+    renderingIntent: 0,
+    repeatCount: 0,
+    repeatDur: 0,
+    requiredExtensions: 0,
+    requiredFeatures: 0,
+    restart: 0,
+    result: 0,
+    rotate: 0,
+    rx: 0,
+    ry: 0,
+    scale: 0,
+    seed: 0,
+    shapeRendering: 0,
+    slope: 0,
+    spacing: 0,
+    specularConstant: 0,
+    specularExponent: 0,
+    speed: 0,
+    spreadMethod: 0,
+    startOffset: 0,
+    stdDeviation: 0,
+    stemh: 0,
+    stemv: 0,
+    stitchTiles: 0,
+    stopColor: 0,
+    stopOpacity: 0,
+    strikethroughPosition: 0,
+    strikethroughThickness: 0,
+    string: 0,
+    stroke: 0,
+    strokeDasharray: 0,
+    strokeDashoffset: 0,
+    strokeLinecap: 0,
+    strokeLinejoin: 0,
+    strokeMiterlimit: 0,
+    strokeOpacity: 0,
+    strokeWidth: 0,
+    surfaceScale: 0,
+    systemLanguage: 0,
+    tableValues: 0,
+    targetX: 0,
+    targetY: 0,
+    textAnchor: 0,
+    textDecoration: 0,
+    textRendering: 0,
+    textLength: 0,
+    to: 0,
+    transform: 0,
+    u1: 0,
+    u2: 0,
+    underlinePosition: 0,
+    underlineThickness: 0,
+    unicode: 0,
+    unicodeBidi: 0,
+    unicodeRange: 0,
+    unitsPerEm: 0,
+    vAlphabetic: 0,
+    vHanging: 0,
+    vIdeographic: 0,
+    vMathematical: 0,
+    values: 0,
+    vectorEffect: 0,
+    version: 0,
+    vertAdvY: 0,
+    vertOriginX: 0,
+    vertOriginY: 0,
+    viewBox: 0,
+    viewTarget: 0,
+    visibility: 0,
+    widths: 0,
+    wordSpacing: 0,
+    writingMode: 0,
+    x: 0,
+    xHeight: 0,
+    x1: 0,
+    x2: 0,
+    xChannelSelector: 0,
+    xlinkActuate: 0,
+    xlinkArcrole: 0,
+    xlinkHref: 0,
+    xlinkRole: 0,
+    xlinkShow: 0,
+    xlinkTitle: 0,
+    xlinkType: 0,
+    xmlBase: 0,
+    xmlns: 0,
+    xmlnsXlink: 0,
+    xmlLang: 0,
+    xmlSpace: 0,
+    y: 0,
+    y1: 0,
+    y2: 0,
+    yChannelSelector: 0,
+    z: 0,
+    zoomAndPan: 0
+  },
+  DOMAttributeNames: {
+    accentHeight: 'accent-height',
+    alignmentBaseline: 'alignment-baseline',
+    arabicForm: 'arabic-form',
+    baselineShift: 'baseline-shift',
+    capHeight: 'cap-height',
+    clipPath: 'clip-path',
+    clipRule: 'clip-rule',
+    colorInterpolation: 'color-interpolation',
+    colorInterpolationFilters: 'color-interpolation-filters',
+    colorProfile: 'color-profile',
+    colorRendering: 'color-rendering',
+    dominantBaseline: 'dominant-baseline',
+    enableBackground: 'enable-background',
+    fillOpacity: 'fill-opacity',
+    fillRule: 'fill-rule',
+    floodColor: 'flood-color',
+    floodOpacity: 'flood-opacity',
+    fontFamily: 'font-family',
+    fontSize: 'font-size',
+    fontSizeAdjust: 'font-size-adjust',
+    fontStretch: 'font-stretch',
+    fontStyle: 'font-style',
+    fontVariant: 'font-variant',
+    fontWeight: 'font-weight',
+    glyphName: 'glyph-name',
+    glyphOrientationHorizontal: 'glyph-orientation-horizontal',
+    glyphOrientationVertical: 'glyph-orientation-vertical',
+    horizAdvX: 'horiz-adv-x',
+    horizOriginX: 'horiz-origin-x',
+    imageRendering: 'image-rendering',
+    letterSpacing: 'letter-spacing',
+    lightingColor: 'lighting-color',
+    markerEnd: 'marker-end',
+    markerMid: 'marker-mid',
+    markerStart: 'marker-start',
+    overlinePosition: 'overline-position',
+    overlineThickness: 'overline-thickness',
+    paintOrder: 'paint-order',
+    panose1: 'panose-1',
+    pointerEvents: 'pointer-events',
+    renderingIntent: 'rendering-intent',
+    shapeRendering: 'shape-rendering',
+    stopColor: 'stop-color',
+    stopOpacity: 'stop-opacity',
+    strikethroughPosition: 'strikethrough-position',
+    strikethroughThickness: 'strikethrough-thickness',
+    strokeDasharray: 'stroke-dasharray',
+    strokeDashoffset: 'stroke-dashoffset',
+    strokeLinecap: 'stroke-linecap',
+    strokeLinejoin: 'stroke-linejoin',
+    strokeMiterlimit: 'stroke-miterlimit',
+    strokeOpacity: 'stroke-opacity',
+    strokeWidth: 'stroke-width',
+    textAnchor: 'text-anchor',
+    textDecoration: 'text-decoration',
+    textRendering: 'text-rendering',
+    underlinePosition: 'underline-position',
+    underlineThickness: 'underline-thickness',
+    unicodeBidi: 'unicode-bidi',
+    unicodeRange: 'unicode-range',
+    unitsPerEm: 'units-per-em',
+    vAlphabetic: 'v-alphabetic',
+    vHanging: 'v-hanging',
+    vIdeographic: 'v-ideographic',
+    vMathematical: 'v-mathematical',
+    vectorEffect: 'vector-effect',
+    vertAdvY: 'vert-adv-y',
+    vertOriginX: 'vert-origin-x',
+    vertOriginY: 'vert-origin-y',
+    wordSpacing: 'word-spacing',
+    writingMode: 'writing-mode',
+    xHeight: 'x-height',
+    xlinkActuate: 'xlink:actuate',
+    xlinkArcrole: 'xlink:arcrole',
+    xlinkHref: 'xlink:href',
+    xlinkRole: 'xlink:role',
+    xlinkShow: 'xlink:show',
+    xlinkTitle: 'xlink:title',
+    xlinkType: 'xlink:type',
+    xmlBase: 'xml:base',
+    xmlnsXlink: 'xmlns:xlink',
+    xmlLang: 'xml:lang',
+    xmlSpace: 'xml:space'
+  }
+};
+
+},{}],"35tpX":[function(require,module,exports) {
+module.exports = {
+  MUST_USE_PROPERTY: 1,
+  HAS_BOOLEAN_VALUE: 4,
+  HAS_NUMERIC_VALUE: 8,
+  HAS_POSITIVE_NUMERIC_VALUE: 24,
+  HAS_OVERLOADED_BOOLEAN_VALUE: 32
+};
+
+},{}],"3EKOa":[function(require,module,exports) {
+var React = require('react');
+var styleToJS = require('style-to-js').default;
+
+/**
+ * Swap key with value in an object.
+ *
+ * @param  {Object}   obj        - The object.
+ * @param  {Function} [override] - The override method.
+ * @return {Object}              - The inverted object.
+ */
+function invertObject(obj, override) {
+  if (!obj || typeof obj !== 'object') {
+    throw new TypeError('First argument must be an object');
+  }
+
+  var key;
+  var value;
+  var isOverridePresent = typeof override === 'function';
+  var overrides = {};
+  var result = {};
+
+  for (key in obj) {
+    value = obj[key];
+
+    if (isOverridePresent) {
+      overrides = override(key, value);
+      if (overrides && overrides.length === 2) {
+        result[overrides[0]] = overrides[1];
+        continue;
+      }
+    }
+
+    if (typeof value === 'string') {
+      result[value] = key;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Check if a given tag is a custom component.
+ *
+ * @see {@link https://github.com/facebook/react/blob/v16.6.3/packages/react-dom/src/shared/isCustomComponent.js}
+ *
+ * @param {string} tagName - The name of the html tag.
+ * @param {Object} props   - The props being passed to the element.
+ * @return {boolean}
+ */
+function isCustomComponent(tagName, props) {
+  if (tagName.indexOf('-') === -1) {
+    return props && typeof props.is === 'string';
+  }
+
+  switch (tagName) {
+    // These are reserved SVG and MathML elements.
+    // We don't mind this whitelist too much because we expect it to never grow.
+    // The alternative is to track the namespace in a few places which is convoluted.
+    // https://w3c.github.io/webcomponents/spec/custom/#custom-elements-core-concepts
+    case 'annotation-xml':
+    case 'color-profile':
+    case 'font-face':
+    case 'font-face-src':
+    case 'font-face-uri':
+    case 'font-face-format':
+    case 'font-face-name':
+    case 'missing-glyph':
+      return false;
+    default:
+      return true;
+  }
+}
+
+var styleToJSOptions = { reactCompat: true };
+
+/**
+ * Sets style prop.
+ *
+ * @param {null|undefined|string} style
+ * @param {object} props
+ */
+function setStyleProp(style, props) {
+  if (style === null || style === undefined) {
+    return;
+  }
+  props.style = styleToJS(style, styleToJSOptions);
+}
+
+/**
+ * @constant {boolean}
+ * @see {@link https://reactjs.org/blog/2017/09/08/dom-attributes-in-react-16.html}
+ */
+var PRESERVE_CUSTOM_ATTRIBUTES = React.version.split('.')[0] >= 16;
+
+module.exports = {
+  PRESERVE_CUSTOM_ATTRIBUTES: PRESERVE_CUSTOM_ATTRIBUTES,
+  invertObject: invertObject,
+  isCustomComponent: isCustomComponent,
+  setStyleProp: setStyleProp
+};
+
+},{"react":"3b2NM","style-to-js":"2oKhH"}],"2oKhH":[function(require,module,exports) {
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+exports.__esModule = true;
+var style_to_object_1 = __importDefault(require("style-to-object"));
+var utilities_1 = require("./utilities");
+function StyleToJS(style, options) {
+    var output = {};
+    if (!style || typeof style !== 'string') {
+        return output;
+    }
+    style_to_object_1["default"](style, function (property, value) {
+        if (property && value) {
+            output[utilities_1.camelCase(property, options)] = value;
+        }
+    });
+    return output;
+}
+exports["default"] = StyleToJS;
+
+},{"style-to-object":"6z74Z","./utilities":"5W0H4"}],"6z74Z":[function(require,module,exports) {
+var parse = require('inline-style-parser');
+
+/**
+ * Parses inline style to object.
+ *
+ * @example
+ * // returns { 'line-height': '42' }
+ * StyleToObject('line-height: 42;');
+ *
+ * @param  {String}      style      - The inline style.
+ * @param  {Function}    [iterator] - The iterator function.
+ * @return {null|Object}
+ */
+function StyleToObject(style, iterator) {
+  var output = null;
+  if (!style || typeof style !== 'string') {
+    return output;
+  }
+
+  var declaration;
+  var declarations = parse(style);
+  var hasIterator = typeof iterator === 'function';
+  var property;
+  var value;
+
+  for (var i = 0, len = declarations.length; i < len; i++) {
+    declaration = declarations[i];
+    property = declaration.property;
+    value = declaration.value;
+
+    if (hasIterator) {
+      iterator(property, value, declaration);
+    } else if (value) {
+      output || (output = {});
+      output[property] = value;
+    }
+  }
+
+  return output;
+}
+
+module.exports = StyleToObject;
+
+},{"inline-style-parser":"1D9HG"}],"1D9HG":[function(require,module,exports) {
+// http://www.w3.org/TR/CSS21/grammar.html
+// https://github.com/visionmedia/css-parse/pull/49#issuecomment-30088027
+var COMMENT_REGEX = /\/\*[^*]*\*+([^/*][^*]*\*+)*\//g;
+
+var NEWLINE_REGEX = /\n/g;
+var WHITESPACE_REGEX = /^\s*/;
+
+// declaration
+var PROPERTY_REGEX = /^(\*?[-#/*\\\w]+(\[[0-9a-z_-]+\])?)\s*/;
+var COLON_REGEX = /^:\s*/;
+var VALUE_REGEX = /^((?:'(?:\\'|.)*?'|"(?:\\"|.)*?"|\([^)]*?\)|[^};])+)/;
+var SEMICOLON_REGEX = /^[;\s]*/;
+
+// https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/Trim#Polyfill
+var TRIM_REGEX = /^\s+|\s+$/g;
+
+// strings
+var NEWLINE = '\n';
+var FORWARD_SLASH = '/';
+var ASTERISK = '*';
+var EMPTY_STRING = '';
+
+// types
+var TYPE_COMMENT = 'comment';
+var TYPE_DECLARATION = 'declaration';
+
+/**
+ * @param {String} style
+ * @param {Object} [options]
+ * @return {Object[]}
+ * @throws {TypeError}
+ * @throws {Error}
+ */
+module.exports = function(style, options) {
+  if (typeof style !== 'string') {
+    throw new TypeError('First argument must be a string');
+  }
+
+  if (!style) return [];
+
+  options = options || {};
+
+  /**
+   * Positional.
+   */
+  var lineno = 1;
+  var column = 1;
+
+  /**
+   * Update lineno and column based on `str`.
+   *
+   * @param {String} str
+   */
+  function updatePosition(str) {
+    var lines = str.match(NEWLINE_REGEX);
+    if (lines) lineno += lines.length;
+    var i = str.lastIndexOf(NEWLINE);
+    column = ~i ? str.length - i : column + str.length;
+  }
+
+  /**
+   * Mark position and patch `node.position`.
+   *
+   * @return {Function}
+   */
+  function position() {
+    var start = { line: lineno, column: column };
+    return function(node) {
+      node.position = new Position(start);
+      whitespace();
+      return node;
+    };
+  }
+
+  /**
+   * Store position information for a node.
+   *
+   * @constructor
+   * @property {Object} start
+   * @property {Object} end
+   * @property {undefined|String} source
+   */
+  function Position(start) {
+    this.start = start;
+    this.end = { line: lineno, column: column };
+    this.source = options.source;
+  }
+
+  /**
+   * Non-enumerable source string.
+   */
+  Position.prototype.content = style;
+
+  var errorsList = [];
+
+  /**
+   * Error `msg`.
+   *
+   * @param {String} msg
+   * @throws {Error}
+   */
+  function error(msg) {
+    var err = new Error(
+      options.source + ':' + lineno + ':' + column + ': ' + msg
+    );
+    err.reason = msg;
+    err.filename = options.source;
+    err.line = lineno;
+    err.column = column;
+    err.source = style;
+
+    if (options.silent) {
+      errorsList.push(err);
+    } else {
+      throw err;
+    }
+  }
+
+  /**
+   * Match `re` and return captures.
+   *
+   * @param {RegExp} re
+   * @return {undefined|Array}
+   */
+  function match(re) {
+    var m = re.exec(style);
+    if (!m) return;
+    var str = m[0];
+    updatePosition(str);
+    style = style.slice(str.length);
+    return m;
+  }
+
+  /**
+   * Parse whitespace.
+   */
+  function whitespace() {
+    match(WHITESPACE_REGEX);
+  }
+
+  /**
+   * Parse comments.
+   *
+   * @param {Object[]} [rules]
+   * @return {Object[]}
+   */
+  function comments(rules) {
+    var c;
+    rules = rules || [];
+    while ((c = comment())) {
+      if (c !== false) {
+        rules.push(c);
+      }
+    }
+    return rules;
+  }
+
+  /**
+   * Parse comment.
+   *
+   * @return {Object}
+   * @throws {Error}
+   */
+  function comment() {
+    var pos = position();
+    if (FORWARD_SLASH != style.charAt(0) || ASTERISK != style.charAt(1)) return;
+
+    var i = 2;
+    while (
+      EMPTY_STRING != style.charAt(i) &&
+      (ASTERISK != style.charAt(i) || FORWARD_SLASH != style.charAt(i + 1))
+    ) {
+      ++i;
+    }
+    i += 2;
+
+    if (EMPTY_STRING === style.charAt(i - 1)) {
+      return error('End of comment missing');
+    }
+
+    var str = style.slice(2, i - 2);
+    column += 2;
+    updatePosition(str);
+    style = style.slice(i);
+    column += 2;
+
+    return pos({
+      type: TYPE_COMMENT,
+      comment: str
+    });
+  }
+
+  /**
+   * Parse declaration.
+   *
+   * @return {Object}
+   * @throws {Error}
+   */
+  function declaration() {
+    var pos = position();
+
+    // prop
+    var prop = match(PROPERTY_REGEX);
+    if (!prop) return;
+    comment();
+
+    // :
+    if (!match(COLON_REGEX)) return error("property missing ':'");
+
+    // val
+    var val = match(VALUE_REGEX);
+
+    var ret = pos({
+      type: TYPE_DECLARATION,
+      property: trim(prop[0].replace(COMMENT_REGEX, EMPTY_STRING)),
+      value: val
+        ? trim(val[0].replace(COMMENT_REGEX, EMPTY_STRING))
+        : EMPTY_STRING
+    });
+
+    // ;
+    match(SEMICOLON_REGEX);
+
+    return ret;
+  }
+
+  /**
+   * Parse declarations.
+   *
+   * @return {Object[]}
+   */
+  function declarations() {
+    var decls = [];
+
+    comments(decls);
+
+    // declarations
+    var decl;
+    while ((decl = declaration())) {
+      if (decl !== false) {
+        decls.push(decl);
+        comments(decls);
+      }
+    }
+
+    return decls;
+  }
+
+  whitespace();
+  return declarations();
+};
+
+/**
+ * Trim `str`.
+ *
+ * @param {String} str
+ * @return {String}
+ */
+function trim(str) {
+  return str ? str.replace(TRIM_REGEX, EMPTY_STRING) : EMPTY_STRING;
+}
+
+},{}],"5W0H4":[function(require,module,exports) {
+"use strict";
+exports.__esModule = true;
+exports.camelCase = void 0;
+var CUSTOM_PROPERTY_REGEX = /^--[a-zA-Z0-9-]+$/;
+var HYPHEN_REGEX = /-([a-z])/g;
+var NO_HYPHEN_REGEX = /^[^-]+$/;
+var VENDOR_PREFIX_REGEX = /^-(webkit|moz|ms|o|khtml)-/;
+var skipCamelCase = function (property) {
+    return !property ||
+        NO_HYPHEN_REGEX.test(property) ||
+        CUSTOM_PROPERTY_REGEX.test(property);
+};
+var capitalize = function (match, character) {
+    return character.toUpperCase();
+};
+var trimHyphen = function (match, prefix) { return prefix + "-"; };
+var camelCase = function (property, options) {
+    if (options === void 0) { options = {}; }
+    if (skipCamelCase(property)) {
+        return property;
+    }
+    property = property.toLowerCase();
+    if (!options.reactCompat) {
+        property = property.replace(VENDOR_PREFIX_REGEX, trimHyphen);
+    }
+    return property.replace(HYPHEN_REGEX, capitalize);
+};
+exports.camelCase = camelCase;
+
+},{}],"7EdwH":[function(require,module,exports) {
+var domparser = require('./domparser');
+var formatDOM = require('./utilities').formatDOM;
+
+var DIRECTIVE_REGEX = /<(![a-zA-Z\s]+)>/; // e.g., <!doctype html>
+
+/**
+ * Parses HTML string to DOM nodes in browser.
+ *
+ * @param  {string} html  - HTML markup.
+ * @return {DomElement[]} - DOM elements.
+ */
+function HTMLDOMParser(html) {
+  if (typeof html !== 'string') {
+    throw new TypeError('First argument must be a string');
+  }
+
+  if (html === '') {
+    return [];
+  }
+
+  // match directive
+  var match = html.match(DIRECTIVE_REGEX);
+  var directive;
+
+  if (match && match[1]) {
+    directive = match[1];
+  }
+
+  return formatDOM(domparser(html), null, directive);
+}
+
+module.exports = HTMLDOMParser;
+
+},{"./domparser":"1wwSJ","./utilities":"xsNpp"}],"1wwSJ":[function(require,module,exports) {
+// constants
+var HTML = 'html';
+var HEAD = 'head';
+var BODY = 'body';
+var FIRST_TAG_REGEX = /<([a-zA-Z]+[0-9]?)/; // e.g., <h1>
+var HEAD_TAG_REGEX = /<head.*>/i;
+var BODY_TAG_REGEX = /<body.*>/i;
+
+// falls back to `parseFromString` if `createHTMLDocument` cannot be used
+var parseFromDocument = function () {
+  throw new Error(
+    'This browser does not support `document.implementation.createHTMLDocument`'
+  );
+};
+
+var parseFromString = function () {
+  throw new Error(
+    'This browser does not support `DOMParser.prototype.parseFromString`'
+  );
+};
+
+/**
+ * DOMParser (performance: slow).
+ *
+ * @see https://developer.mozilla.org/docs/Web/API/DOMParser#Parsing_an_SVG_or_HTML_document
+ */
+if (typeof window.DOMParser === 'function') {
+  var domParser = new window.DOMParser();
+  var mimeType = 'text/html';
+
+  /**
+   * Creates an HTML document using `DOMParser.parseFromString`.
+   *
+   * @param  {string} html      - The HTML string.
+   * @param  {string} [tagName] - The element to render the HTML (with 'body' as fallback).
+   * @return {HTMLDocument}
+   */
+  parseFromString = function (html, tagName) {
+    if (tagName) {
+      html = '<' + tagName + '>' + html + '</' + tagName + '>';
+    }
+
+    return domParser.parseFromString(html, mimeType);
+  };
+
+  parseFromDocument = parseFromString;
+}
+
+/**
+ * DOMImplementation (performance: fair).
+ *
+ * @see https://developer.mozilla.org/docs/Web/API/DOMImplementation/createHTMLDocument
+ */
+if (document.implementation) {
+  var isIE = require('./utilities').isIE;
+
+  // title parameter is required in IE
+  // https://msdn.microsoft.com/en-us/library/ff975457(v=vs.85).aspx
+  var doc = document.implementation.createHTMLDocument(
+    isIE() ? 'html-dom-parser' : undefined
+  );
+
+  /**
+   * Use HTML document created by `document.implementation.createHTMLDocument`.
+   *
+   * @param  {string} html      - The HTML string.
+   * @param  {string} [tagName] - The element to render the HTML (with 'body' as fallback).
+   * @return {HTMLDocument}
+   */
+  parseFromDocument = function (html, tagName) {
+    if (tagName) {
+      doc.documentElement.getElementsByTagName(tagName)[0].innerHTML = html;
+      return doc;
+    }
+
+    doc.documentElement.innerHTML = html;
+    return doc;
+  };
+}
+
+/**
+ * Template (performance: fast).
+ *
+ * @see https://developer.mozilla.org/docs/Web/HTML/Element/template
+ */
+var template = document.createElement('template');
+var parseFromTemplate;
+
+if (template.content) {
+  /**
+   * Uses a template element (content fragment) to parse HTML.
+   *
+   * @param  {string} html - The HTML string.
+   * @return {NodeList}
+   */
+  parseFromTemplate = function (html) {
+    template.innerHTML = html;
+    return template.content.childNodes;
+  };
+}
+
+/**
+ * Parses HTML string to DOM nodes.
+ *
+ * @param  {string}   html - HTML markup.
+ * @return {NodeList}
+ */
+function domparser(html) {
+  var firstTagName;
+  var match = html.match(FIRST_TAG_REGEX);
+
+  if (match && match[1]) {
+    firstTagName = match[1].toLowerCase();
+  }
+
+  var doc;
+  var element;
+  var elements;
+
+  switch (firstTagName) {
+    case HTML:
+      doc = parseFromString(html);
+
+      // the created document may come with filler head/body elements,
+      // so make sure to remove them if they don't actually exist
+      if (!HEAD_TAG_REGEX.test(html)) {
+        element = doc.getElementsByTagName(HEAD)[0];
+        if (element) {
+          element.parentNode.removeChild(element);
+        }
+      }
+
+      if (!BODY_TAG_REGEX.test(html)) {
+        element = doc.getElementsByTagName(BODY)[0];
+        if (element) {
+          element.parentNode.removeChild(element);
+        }
+      }
+
+      return doc.getElementsByTagName(HTML);
+
+    case HEAD:
+    case BODY:
+      elements = parseFromDocument(html).getElementsByTagName(firstTagName);
+
+      // if there's a sibling element, then return both elements
+      if (BODY_TAG_REGEX.test(html) && HEAD_TAG_REGEX.test(html)) {
+        return elements[0].parentNode.childNodes;
+      }
+      return elements;
+
+    // low-level tag or text
+    default:
+      if (parseFromTemplate) {
+        return parseFromTemplate(html);
+      }
+
+      return parseFromDocument(html, BODY).getElementsByTagName(BODY)[0]
+        .childNodes;
+  }
+}
+
+module.exports = domparser;
+
+},{"./utilities":"xsNpp"}],"xsNpp":[function(require,module,exports) {
+var constants = require('./constants');
+var domhandler = require('domhandler/lib/node');
+
+var CASE_SENSITIVE_TAG_NAMES = constants.CASE_SENSITIVE_TAG_NAMES;
+
+var Comment = domhandler.Comment;
+var Element = domhandler.Element;
+var ProcessingInstruction = domhandler.ProcessingInstruction;
+var Text = domhandler.Text;
+
+var caseSensitiveTagNamesMap = {};
+var tagName;
+
+for (var i = 0, len = CASE_SENSITIVE_TAG_NAMES.length; i < len; i++) {
+  tagName = CASE_SENSITIVE_TAG_NAMES[i];
+  caseSensitiveTagNamesMap[tagName.toLowerCase()] = tagName;
+}
+
+/**
+ * Gets case-sensitive tag name.
+ *
+ * @param  {string}           tagName - Tag name in lowercase.
+ * @return {string|undefined}         - Case-sensitive tag name.
+ */
+function getCaseSensitiveTagName(tagName) {
+  return caseSensitiveTagNamesMap[tagName];
+}
+
+/**
+ * Formats DOM attributes to a hash map.
+ *
+ * @param  {NamedNodeMap} attributes - List of attributes.
+ * @return {object}                  - Map of attribute name to value.
+ */
+function formatAttributes(attributes) {
+  var result = {};
+  var attribute;
+  // `NamedNodeMap` is array-like
+  for (var i = 0, len = attributes.length; i < len; i++) {
+    attribute = attributes[i];
+    result[attribute.name] = attribute.value;
+  }
+  return result;
+}
+
+/**
+ * Corrects the tag name if it is case-sensitive (SVG).
+ * Otherwise, returns the lowercase tag name (HTML).
+ *
+ * @param  {string} tagName - Lowercase tag name.
+ * @return {string}         - Formatted tag name.
+ */
+function formatTagName(tagName) {
+  tagName = tagName.toLowerCase();
+  var caseSensitiveTagName = getCaseSensitiveTagName(tagName);
+  if (caseSensitiveTagName) {
+    return caseSensitiveTagName;
+  }
+  return tagName;
+}
+
+/**
+ * Transforms DOM nodes to `domhandler` nodes.
+ *
+ * @param  {NodeList}     nodes         - DOM nodes.
+ * @param  {Element|null} [parent=null] - Parent node.
+ * @param  {string}       [directive]   - Directive.
+ * @return {Array<Comment|Element|ProcessingInstruction|Text>}
+ */
+function formatDOM(nodes, parent, directive) {
+  parent = parent || null;
+  var result = [];
+
+  for (var index = 0, len = nodes.length; index < len; index++) {
+    var node = nodes[index];
+    var current;
+
+    // set the node data given the type
+    switch (node.nodeType) {
+      case 1:
+        // script, style, or tag
+        current = new Element(
+          formatTagName(node.nodeName),
+          formatAttributes(node.attributes)
+        );
+        current.children = formatDOM(node.childNodes, current);
+        break;
+
+      case 3:
+        current = new Text(node.nodeValue);
+        break;
+
+      case 8:
+        current = new Comment(node.nodeValue);
+        break;
+
+      default:
+        continue;
+    }
+
+    // set previous node next
+    var prev = result[index - 1] || null;
+    if (prev) {
+      prev.next = current;
+    }
+
+    // set properties for current node
+    current.parent = parent;
+    current.prev = prev;
+    current.next = null;
+
+    result.push(current);
+  }
+
+  if (directive) {
+    current = new ProcessingInstruction(
+      directive.substring(0, directive.indexOf(' ')).toLowerCase(),
+      directive
+    );
+    current.next = result[0] || null;
+    current.parent = parent;
+    result.unshift(current);
+
+    if (result[1]) {
+      result[1].prev = result[0];
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Detects if browser is Internet Explorer.
+ *
+ * @return {boolean} - Whether IE is detected.
+ */
+function isIE() {
+  return /(MSIE |Trident\/|Edge\/)/.test(navigator.userAgent);
+}
+
+module.exports = {
+  formatAttributes: formatAttributes,
+  formatDOM: formatDOM,
+  isIE: isIE
+};
+
+},{"./constants":"UBQr9","domhandler/lib/node":"6cbTG"}],"UBQr9":[function(require,module,exports) {
+/**
+ * SVG elements are case-sensitive.
+ *
+ * @see {@link https://developer.mozilla.org/docs/Web/SVG/Element#SVG_elements_A_to_Z}
+ */
+var CASE_SENSITIVE_TAG_NAMES = [
+  'animateMotion',
+  'animateTransform',
+  'clipPath',
+  'feBlend',
+  'feColorMatrix',
+  'feComponentTransfer',
+  'feComposite',
+  'feConvolveMatrix',
+  'feDiffuseLighting',
+  'feDisplacementMap',
+  'feDropShadow',
+  'feFlood',
+  'feFuncA',
+  'feFuncB',
+  'feFuncG',
+  'feFuncR',
+  'feGaussainBlur',
+  'feImage',
+  'feMerge',
+  'feMergeNode',
+  'feMorphology',
+  'feOffset',
+  'fePointLight',
+  'feSpecularLighting',
+  'feSpotLight',
+  'feTile',
+  'feTurbulence',
+  'foreignObject',
+  'linearGradient',
+  'radialGradient',
+  'textPath'
+];
+
+module.exports = {
+  CASE_SENSITIVE_TAG_NAMES: CASE_SENSITIVE_TAG_NAMES
+};
+
+},{}],"6cbTG":[function(require,module,exports) {
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.cloneNode = exports.Element = exports.Document = exports.NodeWithChildren = exports.ProcessingInstruction = exports.Comment = exports.Text = exports.DataNode = exports.Node = void 0;
+var nodeTypes = new Map([
+    ["tag" /* Tag */, 1],
+    ["script" /* Script */, 1],
+    ["style" /* Style */, 1],
+    ["directive" /* Directive */, 1],
+    ["text" /* Text */, 3],
+    ["cdata" /* CDATA */, 4],
+    ["comment" /* Comment */, 8],
+    ["root" /* Root */, 9],
+]);
+/**
+ * This object will be used as the prototype for Nodes when creating a
+ * DOM-Level-1-compliant structure.
+ */
+var Node = /** @class */ (function () {
+    /**
+     *
+     * @param type The type of the node.
+     */
+    function Node(type) {
+        this.type = type;
+        /** Parent of the node */
+        this.parent = null;
+        /** Previous sibling */
+        this.prev = null;
+        /** Next sibling */
+        this.next = null;
+        /** The start index of the node. Requires `withStartIndices` on the handler to be `true. */
+        this.startIndex = null;
+        /** The end index of the node. Requires `withEndIndices` on the handler to be `true. */
+        this.endIndex = null;
+    }
+    Object.defineProperty(Node.prototype, "nodeType", {
+        // Read-only aliases
+        get: function () {
+            var _a;
+            return (_a = nodeTypes.get(this.type)) !== null && _a !== void 0 ? _a : 1;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Node.prototype, "parentNode", {
+        // Read-write aliases for properties
+        get: function () {
+            return this.parent;
+        },
+        set: function (parent) {
+            this.parent = parent;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Node.prototype, "previousSibling", {
+        get: function () {
+            return this.prev;
+        },
+        set: function (prev) {
+            this.prev = prev;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Node.prototype, "nextSibling", {
+        get: function () {
+            return this.next;
+        },
+        set: function (next) {
+            this.next = next;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    /**
+     * Clone this node, and optionally its children.
+     *
+     * @param recursive Clone child nodes as well.
+     * @returns A clone of the node.
+     */
+    Node.prototype.cloneNode = function (recursive) {
+        if (recursive === void 0) { recursive = false; }
+        return cloneNode(this, recursive);
+    };
+    return Node;
+}());
+exports.Node = Node;
+var DataNode = /** @class */ (function (_super) {
+    __extends(DataNode, _super);
+    /**
+     * @param type The type of the node
+     * @param data The content of the data node
+     */
+    function DataNode(type, data) {
+        var _this = _super.call(this, type) || this;
+        _this.data = data;
+        return _this;
+    }
+    Object.defineProperty(DataNode.prototype, "nodeValue", {
+        get: function () {
+            return this.data;
+        },
+        set: function (data) {
+            this.data = data;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return DataNode;
+}(Node));
+exports.DataNode = DataNode;
+var Text = /** @class */ (function (_super) {
+    __extends(Text, _super);
+    function Text(data) {
+        return _super.call(this, "text" /* Text */, data) || this;
+    }
+    return Text;
+}(DataNode));
+exports.Text = Text;
+var Comment = /** @class */ (function (_super) {
+    __extends(Comment, _super);
+    function Comment(data) {
+        return _super.call(this, "comment" /* Comment */, data) || this;
+    }
+    return Comment;
+}(DataNode));
+exports.Comment = Comment;
+var ProcessingInstruction = /** @class */ (function (_super) {
+    __extends(ProcessingInstruction, _super);
+    function ProcessingInstruction(name, data) {
+        var _this = _super.call(this, "directive" /* Directive */, data) || this;
+        _this.name = name;
+        return _this;
+    }
+    return ProcessingInstruction;
+}(DataNode));
+exports.ProcessingInstruction = ProcessingInstruction;
+/**
+ * A `Node` that can have children.
+ */
+var NodeWithChildren = /** @class */ (function (_super) {
+    __extends(NodeWithChildren, _super);
+    /**
+     * @param type Type of the node.
+     * @param children Children of the node. Only certain node types can have children.
+     */
+    function NodeWithChildren(type, children) {
+        var _this = _super.call(this, type) || this;
+        _this.children = children;
+        return _this;
+    }
+    Object.defineProperty(NodeWithChildren.prototype, "firstChild", {
+        // Aliases
+        get: function () {
+            var _a;
+            return (_a = this.children[0]) !== null && _a !== void 0 ? _a : null;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(NodeWithChildren.prototype, "lastChild", {
+        get: function () {
+            return this.children.length > 0
+                ? this.children[this.children.length - 1]
+                : null;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(NodeWithChildren.prototype, "childNodes", {
+        get: function () {
+            return this.children;
+        },
+        set: function (children) {
+            this.children = children;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return NodeWithChildren;
+}(Node));
+exports.NodeWithChildren = NodeWithChildren;
+var Document = /** @class */ (function (_super) {
+    __extends(Document, _super);
+    function Document(children) {
+        return _super.call(this, "root" /* Root */, children) || this;
+    }
+    return Document;
+}(NodeWithChildren));
+exports.Document = Document;
+var Element = /** @class */ (function (_super) {
+    __extends(Element, _super);
+    /**
+     * @param name Name of the tag, eg. `div`, `span`.
+     * @param attribs Object mapping attribute names to attribute values.
+     * @param children Children of the node.
+     */
+    function Element(name, attribs, children) {
+        if (children === void 0) { children = []; }
+        var _this = _super.call(this, name === "script"
+            ? "script" /* Script */
+            : name === "style"
+                ? "style" /* Style */
+                : "tag" /* Tag */, children) || this;
+        _this.name = name;
+        _this.attribs = attribs;
+        _this.attribs = attribs;
+        return _this;
+    }
+    Object.defineProperty(Element.prototype, "tagName", {
+        // DOM Level 1 aliases
+        get: function () {
+            return this.name;
+        },
+        set: function (name) {
+            this.name = name;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Element.prototype, "attributes", {
+        get: function () {
+            var _this = this;
+            return Object.keys(this.attribs).map(function (name) {
+                var _a, _b;
+                return ({
+                    name: name,
+                    value: _this.attribs[name],
+                    namespace: (_a = _this["x-attribsNamespace"]) === null || _a === void 0 ? void 0 : _a[name],
+                    prefix: (_b = _this["x-attribsPrefix"]) === null || _b === void 0 ? void 0 : _b[name],
+                });
+            });
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return Element;
+}(NodeWithChildren));
+exports.Element = Element;
+/**
+ * Clone a node, and optionally its children.
+ *
+ * @param recursive Clone child nodes as well.
+ * @returns A clone of the node.
+ */
+function cloneNode(node, recursive) {
+    if (recursive === void 0) { recursive = false; }
+    var result;
+    switch (node.type) {
+        case "text" /* Text */:
+            result = new Text(node.data);
+            break;
+        case "directive" /* Directive */: {
+            var instr = node;
+            result = new ProcessingInstruction(instr.name, instr.data);
+            if (instr["x-name"] != null) {
+                result["x-name"] = instr["x-name"];
+                result["x-publicId"] = instr["x-publicId"];
+                result["x-systemId"] = instr["x-systemId"];
+            }
+            break;
+        }
+        case "comment" /* Comment */:
+            result = new Comment(node.data);
+            break;
+        case "tag" /* Tag */:
+        case "script" /* Script */:
+        case "style" /* Style */: {
+            var elem = node;
+            var children = recursive ? cloneChildren(elem.children) : [];
+            var clone_1 = new Element(elem.name, __assign({}, elem.attribs), children);
+            children.forEach(function (child) { return (child.parent = clone_1); });
+            if (elem["x-attribsNamespace"]) {
+                clone_1["x-attribsNamespace"] = __assign({}, elem["x-attribsNamespace"]);
+            }
+            if (elem["x-attribsPrefix"]) {
+                clone_1["x-attribsPrefix"] = __assign({}, elem["x-attribsPrefix"]);
+            }
+            result = clone_1;
+            break;
+        }
+        case "cdata" /* CDATA */: {
+            var cdata = node;
+            var children = recursive ? cloneChildren(cdata.children) : [];
+            var clone_2 = new NodeWithChildren(node.type, children);
+            children.forEach(function (child) { return (child.parent = clone_2); });
+            result = clone_2;
+            break;
+        }
+        case "root" /* Root */: {
+            var doc = node;
+            var children = recursive ? cloneChildren(doc.children) : [];
+            var clone_3 = new Document(children);
+            children.forEach(function (child) { return (child.parent = clone_3); });
+            if (doc["x-mode"]) {
+                clone_3["x-mode"] = doc["x-mode"];
+            }
+            result = clone_3;
+            break;
+        }
+        case "doctype" /* Doctype */: {
+            // This type isn't used yet.
+            throw new Error("Not implemented yet: ElementType.Doctype case");
+        }
+    }
+    result.startIndex = node.startIndex;
+    result.endIndex = node.endIndex;
+    return result;
+}
+exports.cloneNode = cloneNode;
+function cloneChildren(childs) {
+    var children = childs.map(function (child) { return cloneNode(child, true); });
+    for (var i = 1; i < children.length; i++) {
+        children[i].prev = children[i - 1];
+        children[i - 1].next = children[i];
+    }
+    return children;
+}
+
+},{}],"552MA":[function() {},{}],"4OZHF":[function() {},{}],"4kDeE":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRouterDom = require('react-router-dom');
+  var _utilsHelpers = require('../../utils/helpers');
+  require('../../utils/partials/_view.scss');
+  require('./genre-view.scss');
+  var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
+  var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
+  const GenreView = ({selectedGenre, onBackClick, onItemClick, otherMovies}) => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "image-cover"
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "close-box"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => onBackClick(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-x"
+      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "18",
+        y1: "6",
+        x2: "6",
+        y2: "18"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "6",
+        y1: "6",
+        x2: "18",
+        y2: "18"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "main-content"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedGenre.name), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, _utilsHelpers.makeTextReadable(selectedGenre.description))), otherMovies.length > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "related-attributes"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Other ", selectedGenre.name, " Movies"), otherMovies.map((movie, i) => {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
+            key: i,
+            image: movie.image,
+            description: /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+              to: `/movies/${movie._id}`
+            }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+              onClick: () => onItemClick('selectedMovie', movie)
+            }, movie.name))
+          })
+        );
+      }))) : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "source-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("a", {
+        href: selectedGenre.wikipediaLink,
+        target: "_blank",
+        rel: "noreferrer"
+      }, "Source")))
+    );
+  };
+  _c = GenreView;
+  GenreView.propTypes = {
+    selectedGenre: _propTypesDefault.default.object.isRequired,
+    onBackClick: _propTypesDefault.default.func.isRequired,
+    onItemClick: _propTypesDefault.default.func,
+    otherMovies: _propTypesDefault.default.array.isRequired
+  };
+  exports.default = GenreView;
+  var _c;
+  $RefreshReg$(_c, "GenreView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","prop-types":"4dfy5","react-router-dom":"1PMSK","../../utils/partials/_view.scss":"552MA","./genre-view.scss":"56Be2","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../../utils/helpers":"1nff4"}],"552MA":[function() {},{}],"56Be2":[function() {},{}],"1tzTm":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _reactBootstrap = require('react-bootstrap');
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  require('./related-attribute-card.scss');
+  const RelatedAttributeCard = ({description, image}) => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card, {
+        className: "related-attribute-card"
+      }, /*#__PURE__*/_reactDefault.default.createElement("img", {
+        src: image
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Body, null, description))
+    );
+  };
+  _c = RelatedAttributeCard;
+  RelatedAttributeCard.propTypes = {
+    image: _propTypesDefault.default.string.isRequired,
+    description: _propTypesDefault.default.object.isRequired
+  };
+  exports.default = RelatedAttributeCard;
+  var _c;
+  $RefreshReg$(_c, "RelatedAttributeCard");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","react-bootstrap":"4n7hB","prop-types":"4dfy5","./related-attribute-card.scss":"3D90e","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"3D90e":[function() {},{}],"7nJwh":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRouterDom = require('react-router-dom');
+  require('../../utils/partials/_view.scss');
+  require('./director-view.scss');
+  var _utilsHelpers = require('../../utils/helpers');
+  var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
+  var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
+  const DirectorView = ({selectedDirector, onBackClick, onItemClick, otherMovies}) => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "image-cover"
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "close-box"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => onBackClick('selectedDirector'),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-x"
+      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "18",
+        y1: "6",
+        x2: "6",
+        y2: "18"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "6",
+        y1: "6",
+        x2: "18",
+        y2: "18"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "main-content"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedDirector.name), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Biography"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "description"
+      }, _utilsHelpers.makeTextReadable(selectedDirector.bio))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attributes"
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attribute"
+      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Birth Year"), /*#__PURE__*/_reactDefault.default.createElement("p", null, selectedDirector.birthYear)), selectedDirector.deathYear ? /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attribute"
+      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Death Year"), /*#__PURE__*/_reactDefault.default.createElement("p", null, selectedDirector.deathYear)) : null), otherMovies.length > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Other ", selectedDirector.name, " Movies"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "related-attributes"
+      }, otherMovies.map((movie, i) => /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
+        key: i,
+        image: movie.image,
+        description: /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+          to: `/movies/${movie._id}`
+        }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+          onClick: () => onItemClick('selectedMovie', movie)
+        }, movie.name))
+      })))) : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "source-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("a", {
+        href: selectedDirector.imdbLink,
+        target: "_blank",
+        rel: "noreferrer"
+      }, "Source")))
+    );
+  };
+  _c = DirectorView;
+  DirectorView.propTypes = {
+    selectedDirector: _propTypesDefault.default.shape({
+      bio: _propTypesDefault.default.string.isRequired,
+      birthYear: _propTypesDefault.default.number.isRequired,
+      deathYear: _propTypesDefault.default.number,
+      imdbLink: _propTypesDefault.default.string.isRequired,
+      name: _propTypesDefault.default.string.isRequired
+    }).isRequired,
+    onBackClick: _propTypesDefault.default.func.isRequired,
+    onItemClick: _propTypesDefault.default.func,
+    otherMovies: _propTypesDefault.default.array.isRequired
+  };
+  exports.default = DirectorView;
+  var _c;
+  $RefreshReg$(_c, "DirectorView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","prop-types":"4dfy5","react-router-dom":"1PMSK","../../utils/partials/_view.scss":"552MA","./director-view.scss":"5RqqF","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../../utils/helpers":"1nff4"}],"552MA":[function() {},{}],"5RqqF":[function() {},{}],"2FsjQ":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
+  const ListTypeSelect = ({setMoviesListType}) => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "list-type-select"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Select type of movies"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Control, {
+        as: "select",
+        onChange: e => setMoviesListType(e.target.value)
+      }, /*#__PURE__*/_reactDefault.default.createElement("option", {
+        value: "all"
+      }, "All movies"), /*#__PURE__*/_reactDefault.default.createElement("option", {
+        value: "featured"
+      }, "Featured movies"), /*#__PURE__*/_reactDefault.default.createElement("option", {
+        value: "favorited"
+      }, "Favorited movies")))
+    );
+  };
+  _c = ListTypeSelect;
+  exports.default = _reactRedux.connect(null, {
+    setMoviesListType: _actionsActions.setMoviesListType
+  })(ListTypeSelect);
+  var _c;
+  $RefreshReg$(_c, "ListTypeSelect");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"6h1DY":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _reactBootstrap = require('react-bootstrap');
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRouterDom = require('react-router-dom');
+  var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
+  require('./main-navbar.scss');
+  var _s = $RefreshSig$();
+  const MainNavbar = ({setMoviesFilter}) => {
+    _s();
+    const [searchTerm, setSearchTerm] = _react.useState('');
+    const isUserLoggedIn = localStorage.getItem('token') ? true : false, pathname = _reactRouterDom.useLocation().pathname;
+    const onChangeSearchTerm = value => {
+      setSearchTerm(value);
+      setMoviesFilter(value);
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar, {
+        id: "main-navbar",
+        expand: "lg",
+        className: `${!isUserLoggedIn ? 'logged-out' : 'logged-in'}`
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Brand, {
+        to: "/",
+        className: `logo link ${!isUserLoggedIn ? 'logged-out' : 'logged-in'}`
+      }, "myFlix"), isUserLoggedIn ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Toggle, {
+        "aria-controls": "main-navbar-collapse"
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Collapse, {
+        id: "main-navbar-collapse"
+      }, pathname === '/' || pathname === '/actors' ? /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
+        className: "mx-auto",
+        inline: true
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Prepend, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, {
+        id: "search-bar"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: " http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather  feather-search"
+      }, /*#__PURE__*/_reactDefault.default.createElement("circle", {
+        cx: "11",
+        cy: "11",
+        r: "8"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "21",
+        y1: "21",
+        x2: "16.65",
+        y2: "16.65"
+      })))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        placeholder: "Search …",
+        onChange: e => onChangeSearchTerm(e.target.value),
+        value: searchTerm,
+        "aria-label": "Search …",
+        "aria-describedby": "search-bar"
+      }))) : null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav, null, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/logout",
+        className: "link nav-link logout"
+      }, "Logout")), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav, {
+        className: "nav-links"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/profile",
+        className: `link nav-link ${pathname === '/profile' ? 'active' : ''}`
+      }, "Profile"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/",
+        className: `link nav-link ${pathname === '/' || pathname.match('movies') ? 'active' : ''}`
+      }, "Movies"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/actors",
+        className: `link nav-link ${pathname.match('actors') ? 'active' : ''}`
+      }, "Actors"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/about",
+        className: "link nav-link"
+      }, "About")))) : null)
+    );
+  };
+  _s(MainNavbar, "28elvjxmtl+5CeMxa5d1UsuvFhM=", false, function () {
+    return [_reactRouterDom.useLocation];
+  });
+  _c = MainNavbar;
+  MainNavbar.propTypes = {
+    setMoviesFilter: _propTypesDefault.default.func.isRequired,
+    user: _propTypesDefault.default.object.isRequired
+  };
+  const mapStateToProps = state => {
+    return {
+      user: state.user
+    };
+  };
+  exports.default = _reactRedux.connect(mapStateToProps, {
+    setMoviesFilter: _actionsActions.setMoviesFilter
+  })(MainNavbar);
+  var _c;
+  $RefreshReg$(_c, "MainNavbar");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","react-bootstrap":"4n7hB","prop-types":"4dfy5","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./main-navbar.scss":"RFYh5","react-redux":"7GDa4","react-router-dom":"1PMSK","../../actions/actions":"5S6cN"}],"RFYh5":[function() {},{}],"6fxIo":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRouterDom = require('react-router-dom');
+  var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
+  var _utilsHelpers = require('../../utils/helpers');
+  var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
+  var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
+  require('../../utils/partials/_view.scss');
+  require('./movie-view.scss');
+  var _s = $RefreshSig$();
+  const MovieView = ({addUserFavoriteMovie, addUserToWatchMovie, favoritedMovies, movieActors, movie, setSelectedMovie, onBackClick, user}) => {
+    _s();
+    const [favorited, setFavorited] = _react.useState(false);
+    const [willWatch, setWillWatch] = _react.useState(false);
+    _react.useEffect(() => {
+      setSelectedMovie(movie);
+    }, []);
+    const addToFavoritesList = () => {
+      _utilsHelpers.addToList(user.id, 'favorite-movies', movie._id, 'movie_id').then(() => {
+        setFavorited(true);
+        addUserFavoriteMovie(movie._id);
+        _actionsActions.setFavoritedMovies(favoritedMovies.map(favoritedMovie => {
+          if (favoritedMovie.name === movie.name) {
+            return {
+              ...movie,
+              usersFavorited: favoritedMovie.usersFavorited++
+            };
+          }
+          return movie;
+        }));
+      });
+    };
+    const addToWatchList = () => {
+      _utilsHelpers.addToList(user.id, 'to-watch-movies', movie._id, 'movie_id').then(() => {
+        setWillWatch(true);
+        addUserToWatchMovie(movie._id);
+      });
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "image-cover",
+        style: {
+          backgroundImage: `url(${movie.image})`
+        }
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "close-box"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => onBackClick(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-x"
+      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "18",
+        y1: "6",
+        x2: "6",
+        y2: "18"
+      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "6",
+        y1: "6",
+        x2: "18",
+        y2: "18"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "main-content"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, /*#__PURE__*/_reactDefault.default.createElement("span", null, movie.name, movie.featured ? /*#__PURE__*/_reactDefault.default.createElement("small", null, " (Featured)") : null), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "user-list-icons"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => addToFavoritesList(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: `feather feather-heart 
+                            ${favorited || user.favoriteMovies && user.favoriteMovies.indexOf(movie._id) > -1 ? 'added-to-list' : ''}`,
+        title: "Add this movie to your Favorite Movies list"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M20.84 4.61a5.5 5.5 0 0 0-7.78  0L12 5.67l-1.06-1.06a5.5  5.5 0 0 0-7.78 7.78l1.06  1.06L12 21.23l7.78-7.78  1.06-1.06a5.5 5.5 0 0 0  0-7.78z"
+      })), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => addToWatchList(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: `feather feather-bookmark 
+                            ${willWatch || user.toWatchMovies && user.toWatchMovies.indexOf(movie._id) > -1 ? 'added-to-list' : ''}`,
+        title: "Add this movie to your To Watch Movies list"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M19 21l-7-5-7  5V5a2 2 0 0  1 2-2h10a2 2  0 0 1 2 2z"
+      })))), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, _utilsHelpers.makeTextReadable(movie.description)), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Release Year"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, movie.releaseYear), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Rating"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, movie.rating), movie.usersFavorited > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Favorites by users"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, movie.usersFavorited)) : null), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attributes"
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attribute"
+      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Director"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: `/directors/${movie.director.name}`
+      }, movie.director.name)), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "attribute"
+      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "label"
+      }, "Genre"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: `/genres/${movie.genre.name}`
+      }, movie.genre.name))), movie.stars.length > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "related-attributes"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Stars of ", /*#__PURE__*/_reactDefault.default.createElement("i", null, movie.name), " "), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "related-attributes-card-container"
+      }, movieActors.map((actor, i) => {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
+            key: i,
+            image: actor.image,
+            description: /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("p", {
+              className: "label"
+            }, /*#__PURE__*/_reactDefault.default.createElement("b", null, "Actor: "), " ", /*#__PURE__*/_reactDefault.default.createElement("br", null), /*#__PURE__*/_reactDefault.default.createElement("span", {
+              className: "description"
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+              to: `/actors/${actor.id}`
+            }, actor.actor))), /*#__PURE__*/_reactDefault.default.createElement("p", {
+              className: "label"
+            }, /*#__PURE__*/_reactDefault.default.createElement("b", null, "Character: "), " ", /*#__PURE__*/_reactDefault.default.createElement("br", null), /*#__PURE__*/_reactDefault.default.createElement("span", {
+              className: "description"
+            }, actor.character)))
+          })
+        );
+      })))) : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "source-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("a", {
+        href: movie.imdbLink,
+        target: "_blank",
+        rel: "noreferrer"
+      }, "Source")))
+    );
+  };
+  _s(MovieView, "zWe27iCj0K6kxPif8QfeM+Eem3U=");
+  _c = MovieView;
+  MovieView.propTypes = {
+    addUserFavoriteMovie: _propTypesDefault.default.func.isRequired,
+    addUserToWatchMovie: _propTypesDefault.default.func.isRequired,
+    favoritedMovies: _propTypesDefault.default.array.isRequired,
+    movie: _propTypesDefault.default.shape({
+      _id: _propTypesDefault.default.string.isRequired,
+      description: _propTypesDefault.default.string.isRequired,
+      director: _propTypesDefault.default.shape({
+        name: _propTypesDefault.default.string.isRequired
+      }).isRequired,
+      featured: _propTypesDefault.default.bool,
+      genre: _propTypesDefault.default.shape({
+        name: _propTypesDefault.default.string.isRequired
+      }).isRequired,
+      image: _propTypesDefault.default.string.isRequired,
+      imdbLink: _propTypesDefault.default.string.isRequired,
+      name: _propTypesDefault.default.string.isRequired,
+      rating: _propTypesDefault.default.number,
+      releaseYear: _propTypesDefault.default.number,
+      stars: _propTypesDefault.default.array,
+      usersFavorited: _propTypesDefault.default.number
+    }).isRequired,
+    movieActors: _propTypesDefault.default.array.isRequired,
+    onBackClick: _propTypesDefault.default.func.isRequired,
+    onItemClick: _propTypesDefault.default.func.isRequired,
+    setSelectedMovie: _propTypesDefault.default.func.isRequired,
+    setFavoritedMovies: _propTypesDefault.default.func.isRequired,
+    user: _propTypesDefault.default.shape({
+      id: _propTypesDefault.default.string.isRequired,
+      favoriteMovies: _propTypesDefault.default.array.isRequired,
+      toWatchMovies: _propTypesDefault.default.array.isRequired
+    })
+  };
+  const mapStateToProps = state => ({
+    favoritedMovies: state.favoritedMovies,
+    user: state.user
+  });
+  exports.default = _reactRedux.connect(mapStateToProps, {
+    addUserFavoriteMovie: _actionsActions.addUserFavoriteMovie,
+    addUserToWatchMovie: _actionsActions.addUserToWatchMovie,
+    setFavoritedMovies: _actionsActions.setFavoritedMovies,
+    setSelectedMovie: _actionsActions.setSelectedMovie
+  })(MovieView);
+  var _c;
+  $RefreshReg$(_c, "MovieView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","prop-types":"4dfy5","react-router-dom":"1PMSK","react-redux":"7GDa4","../../actions/actions":"5S6cN","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","../../utils/helpers":"1nff4","../../utils/partials/_view.scss":"552MA","./movie-view.scss":"74xbX","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"552MA":[function() {},{}],"74xbX":[function() {},{}],"1zhWx":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _axios = require('axios');
+  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
+  var _reactRouterDom = require('react-router-dom');
+  var _reactBootstrap = require('react-bootstrap');
+  var _utilsHelpers = require('../../utils/helpers');
+  require('../../utils/partials/_form.scss');
+  require('./login-view.scss');
+  var _s = $RefreshSig$();
+  const LoginView = ({onLoggedIn}) => {
+    _s();
+    const [username, setUsername] = _react.useState('');
+    const [loginError, setLoginError] = _react.useState(false);
+    const [password, setPassword] = _react.useState('');
+    const handleSubmit = e => {
+      e.preventDefault();
+      _axiosDefault.default.post('https://my-flix-2021.herokuapp.com/login', {
+        username,
+        password
+      }).then(response => {
+        onLoggedIn(response.data);
+      }, err => {
+        setLoginError(err);
+      });
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
+        id: "login-form",
+        onSubmit: e => handleSubmit(e)
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Great to Meet you!"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Text, {
+        className: "label"
+      }, "Login to your account"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "email"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Username"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        type: "text",
+        placeholder: "Enter your username",
+        onBlur: e => _utilsHelpers.removeFocusedClass(e),
+        onFocus: e => _utilsHelpers.addFocusedClass(e),
+        onChange: e => setUsername(e.target.value),
+        value: username,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-user"
+      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("circle", {
+        cx: "12",
+        cy: "7",
+        r: "4"
+      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "password",
+        className: "form-group"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
+        className: "input-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        type: "password",
+        onBlur: e => _utilsHelpers.removeFocusedClass(e),
+        onFocus: e => _utilsHelpers.addFocusedClass(e),
+        onChange: e => setPassword(e.target.value),
+        placeholder: "Enter your password",
+        value: password,
+        required: true
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-lock"
+      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
+        x: "3",
+        y: "11",
+        width: "18",
+        height: "11",
+        rx: "2",
+        ry: "2"
+      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M7 11V7a5 5 0 0 1 10 0v4"
+      })))))), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "btn-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
+        type: "submit"
+      }, "Login"))), loginError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "There was an error. Please try again.") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "btn-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/register"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
+        type: "button"
+      }, "Register"))))
+    );
+  };
+  _s(LoginView, "Q0DOD4fIQaMtcr0yrRc4JqEd3vg=");
+  _c = LoginView;
+  LoginView.propTypes = {
+    onLoggedIn: _propTypesDefault.default.func.isRequired
+  };
+  exports.default = LoginView;
+  var _c;
+  $RefreshReg$(_c, "LoginView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","prop-types":"4dfy5","axios":"7rA65","react-router-dom":"1PMSK","react-bootstrap":"4n7hB","../../utils/helpers":"1nff4","../../utils/partials/_form.scss":"5D0uY","./login-view.scss":"2Muu9","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"5D0uY":[function() {},{}],"2Muu9":[function() {},{}],"7iKJS":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _axios = require('axios');
+  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
+  var _UserListUserList = require('../UserList/UserList');
+  var _UserListUserListDefault = _parcelHelpers.interopDefault(_UserListUserList);
+  require('../../utils/partials/_form.scss');
+  require('./profile-view.scss');
+  var _s = $RefreshSig$();
+  const ProfileView = ({onLogout, user}) => {
+    _s();
+    // Make date appear in readable format (2021-05-01)
+    // const date = new Date(response.data.birthDate);
+    // const birthdate = `${
+    // date.getFullYear()}-${
+    // date.getMonth() < 10
+    // ? `0${date.getMonth()+1}`
+    // : date.getMonth()+1}-${date.getDate()}`;
+    const [birthDate, setBirthDate] = _react.useState(user.birthDate ? user.birthDate : '');
+    const [email, setEmail] = _react.useState(user.email);
+    const oldPassword = user.password;
+    const [username, setUsername] = _react.useState(user.username);
+    const [newPassword1, setNewPassword1] = _react.useState('');
+    const [newPassword2, setNewPassword2] = _react.useState('');
+    const [successfulUpdate, setSuccessfulUpdate] = _react.useState(false);
+    const [successfulRemoval, setSuccessfulRemoval] = _react.useState(false);
+    const [birthDateError, setBirthDateError] = _react.useState(false);
+    const [deleteUserError, setDeleteUserError] = _react.useState(false);
+    const [passwordMatchError, setPasswordMatchError] = _react.useState(false);
+    const [updateProfileError, setUpdateProfileError] = _react.useState(false);
+    const [usernameLengthError, setUsernameLengthError] = _react.useState(false);
+    const [usernameTypeError, setUsernameTypeError] = _react.useState(false);
+    const token = localStorage.getItem('token');
+    const deleteUser = () => {
+      confirm('Are you sure you want to delete your account') ? _axiosDefault.default({
+        method: 'delete',
+        url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(() => {
+        setSuccessfulRemoval(true);
+        setTimeout(() => {
+          onLogout();
+        }, 3000);
+      }).catch(() => {
+        setDeleteUserError(true);
+      }) : null;
+    };
+    const handleSubmit = e => {
+      e.preventDefault();
+      // Reset error values
+      setBirthDateError(false);
+      setPasswordMatchError(false);
+      const updatedUser = {
+        email,
+        password: oldPassword,
+        username
+      };
+      // Make sure passwords match
+      if ((newPassword1 !== '' || newPassword2 !== '') && newPassword1 !== newPassword2) {
+        setPasswordMatchError(false);
+        return;
+      } else if ((newPassword1 !== '' || newPassword2 !== '') && newPassword1 === newPassword2) updatedUser['password'] = newPassword1;
+      // Check if birthDate was entered and if it is valid
+      // if it is add it to user object
+      if (!validateBirthDate()) return;
+      updatedUser['birthDate'] = birthDate;
+      _axiosDefault.default({
+        method: 'patch',
+        url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
+        data: updatedUser,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(() => {
+        _actionsActions.setUserInfo(updatedUser);
+        if (newPassword1) {
+          _actionsActions.logoutUser();
+          window.open('/', '_self');
+        }
+        setSuccessfulUpdate(true);
+        setTimeout(() => {
+          setSuccessfulUpdate(false);
+        }, 3000);
+      }, err => {
+        setUpdateProfileError(err);
+      });
+    };
+    const onChangeBirthDate = e => {
+      setBirthDate(e.target.value);
+      validateBirthDate(e.target.value);
+    };
+    const onChangeNewPassword1 = e => {
+      setNewPassword1(e.target.value);
+      setPasswordMatchError(false);
+      if (newPassword2 !== '' && e.target.value !== newPassword2) setPasswordMatchError(true);
+    };
+    const onChangeNewPassword2 = e => {
+      setNewPassword2(e.target.value);
+      setPasswordMatchError(false);
+      if (newPassword1 !== '' && newPassword1 !== e.target.value) setPasswordMatchError(true);
+    };
+    const onChangeUsername = e => {
+      const value = e.target.value;
+      setUsername(value);
+      setUsernameLengthError(false);
+      setUsernameTypeError(false);
+      if (value !== '') {
+        if (value.length < 6) setUsernameLengthError(true);
+        const nonAlphaCharacters = value.match(/\W/g);
+        // If there are non alphabetical characters
+        // make sure that they are only numbers
+        // Username should only contain alphanumeric characters
+        if (nonAlphaCharacters) {
+          for (let i = 0; i < nonAlphaCharacters.length; i++) {
+            if (!nonAlphaCharacters[i].match(/\d/)) setUsernameTypeError(true);
+            return;
+          }
+        }
+      }
+    };
+    const validateBirthDate = (birthdate = birthDate) => {
+      const regex = /\d\d\d\d-\d\d-\d\d/;
+      // valid date format
+      if (!birthdate.match(regex)) {
+        setBirthDateError(`${birthdate} is not a valid date. 
+                Please enter a date in this format: yyyy-mm-dd`);
+        return false;
+      } else if (birthdate && birthdate.match(regex)) {
+        setBirthDateError(null);
+        return true;
+      }
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Personal Info"))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
+        id: "edit-profile-form",
+        onSubmit: e => handleSubmit(e)
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Username"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "username",
+        type: "text",
+        placeholder: "Enter your username",
+        onChange: e => onChangeUsername(e),
+        value: username,
+        required: true
+      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Birthday"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "birth-date",
+        className: `input-container 
+                                    ${birthDateError ? 'error' : ''}`,
+        type: "text",
+        placeholder: "2021-05-10",
+        onChange: e => onChangeBirthDate(e),
+        value: birthDate
+      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Email"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "email",
+        type: "email",
+        placeholder: "me@gmail.com",
+        onChange: e => setEmail(e.target.value),
+        value: email,
+        required: true
+      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Old Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "oldPassword",
+        className: "input-container",
+        type: "password",
+        onChange: e => onChangeNewPassword1(e),
+        placeholder: "Enter your password",
+        value: oldPassword,
+        disabled: true
+      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "New Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "newPassword1",
+        type: "password",
+        className: `input-container ${passwordMatchError ? 'error' : ''}`,
+        onChange: e => onChangeNewPassword1(e),
+        placeholder: "Enter your password again",
+        value: newPassword1
+      }))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
+        className: "form-label"
+      }, "Repeat Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
+        id: "newPassword2",
+        type: "password",
+        className: `input-container ${passwordMatchError ? 'error' : ''}`,
+        onChange: e => onChangeNewPassword2(e),
+        placeholder: "Enter your password again",
+        value: newPassword2
+      })))), usernameLengthError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Username must be at least 6 characters long.") : null, usernameTypeError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Username must only contain alphanumeric characters.") : null, birthDateError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, birthDateError) : null, passwordMatchError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Passwords must match.") : null, updateProfileError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "There was an error updating your profile. Please try again.") : null, successfulUpdate ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "text-info"
+      }, "Your profile was updated successfully!") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "btn-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
+        type: "submit"
+      }, "Save Settings")))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
+        title: "Favorite Movies",
+        listType: "favorite-movies",
+        listTypeJS: "favoriteMovies",
+        userId: user.id,
+        itemIdType: "movie_id",
+        token: token
+      }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
+        title: "To Watch Movies",
+        listType: "to-watch-movies",
+        listTypeJS: "toWatchMovies",
+        userId: user.id,
+        itemIdType: "movie_id",
+        token: token
+      }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
+        title: "Favorite Actors",
+        listType: "favorite-actors",
+        listTypeJS: "favoriteActors",
+        userId: user.id,
+        itemIdType: "actor_id",
+        token: token
+      }))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+        className: "justify-content-end"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+        xs: 12,
+        sm: 4,
+        md: 5
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "delete-user-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        onClick: () => deleteUser(),
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-trash"
+      }, /*#__PURE__*/_reactDefault.default.createElement("polyline", {
+        points: "3 6 5 6 21 6"
+      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
+        d: "M19 6v14a2 2 0 0  1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2  2 0 0 1 2 2v2"
+      })), /*#__PURE__*/_reactDefault.default.createElement("span", null, "Delete Account")), successfulRemoval ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "text-info"
+      }, "Your account was successfully deleted!") : null, deleteUserError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "Your account could not be deleted. Please try again") : null)))
+    );
+  };
+  _s(ProfileView, "2+N52NXXkjIdNJKljSLKLJgCwFg=");
+  _c = ProfileView;
+  ProfileView.propTypes = {
+    onLogout: _propTypesDefault.default.func.isRequired,
+    user: _propTypesDefault.default.shape({
+      id: _propTypesDefault.default.string.isRequired,
+      birthDate: _propTypesDefault.default.string,
+      email: _propTypesDefault.default.string,
+      password: _propTypesDefault.default.string.isRequired,
+      username: _propTypesDefault.default.string.isRequired
+    })
+  };
+  const mapStateToProps = state => {
+    return {
+      user: state.user
+    };
+  };
+  exports.default = _reactRedux.connect(mapStateToProps, {
+    logoutUser: _actionsActions.logoutUser,
+    setUserInfo: _actionsActions.setUserInfo
+  })(ProfileView);
+  var _c;
+  $RefreshReg$(_c, "ProfileView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-bootstrap":"4n7hB","react-redux":"7GDa4","../../actions/actions":"5S6cN","../UserList/UserList":"7D85R","../../utils/partials/_form.scss":"5D0uY","./profile-view.scss":"aH745","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"7D85R":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _axios = require('axios');
+  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRouterDom = require('react-router-dom');
+  var _reactRedux = require('react-redux');
+  var _actionsActions = require('../../actions/actions');
+  var _utilsHelpers = require('../../utils/helpers');
+  require('./user-list.scss');
+  var _s = $RefreshSig$();
+  const UserList = ({actors, favoritedMovies, title, listType, listTypeJS, movies, token, itemIdType, setFavoritedMovies, user}) => {
+    _s();
+    const [list, setList] = _react.useState(null);
+    const [error, setError] = _react.useState(false);
+    _react.useEffect(() => {
+      if (listTypeJS.match(/movies/i)) {
+        setList(user[listTypeJS].map(movieId => {
+          const matchingMovie = movies.find(movie => {
+            return movie._id === movieId;
+          });
+          return {
+            id: matchingMovie._id,
+            description: matchingMovie.description,
+            image: matchingMovie.image,
+            name: matchingMovie.name
+          };
+        }));
+      } else if (listTypeJS.match(/actors/i)) {
+        setList(user[listTypeJS].map(actorId => {
+          const matchingActor = actors.find(actor => {
+            return actor._id === actorId;
+          });
+          return {
+            id: matchingActor._id,
+            bio: matchingActor.bio,
+            image: matchingActor.image,
+            name: matchingActor.name
+          };
+        }));
+      }
+    }, []);
+    const addItemsToListLink = () => {
+      const listTypeString = listType.replace(/-/g, ' ');
+      if (listTypeString.match(/movies/i)) {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+            to: "/"
+          }, "movies"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
+            className: "list-type"
+          }, listTypeString), " list!")
+        );
+      } else if (listTypeString.match(/actors/i)) {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+            to: "/actors"
+          }, "actors"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
+            className: "list-type"
+          }, listTypeString), " list!")
+        );
+      }
+    };
+    const removeListItem = (itemId, itemName) => {
+      const data = {};
+      data[itemIdType] = itemId;
+      _axiosDefault.default({
+        method: 'delete',
+        url: `https://my-flix-2021.herokuapp.com/users/${user.id}/${listType}/${itemId}`,
+        data,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(() => {
+        console.log('removed');
+        const newList = list.filter(listItem => {
+          return listItem.id !== itemId;
+        });
+        setList(newList);
+        if (listTypeJS === 'favoriteMovies') {
+          _actionsActions.removeUserFavoriteMovie(itemId);
+          setFavoritedMovies(favoritedMovies.map(movie => {
+            if (movie.name === itemName) {
+              return {
+                ...movie,
+                usersFavorited: movie.usersFavorited--
+              };
+            }
+            return movie;
+          }));
+        }
+        if (listTypeJS === 'favoriteActors') _actionsActions.removeUserFavoriteActor(itemId);
+        if (listTypeJS === 'toWatchMovies') _actionsActions.removeUserToWatchMovie(itemId);
+      }).catch(err => {
+        setError(err);
+      });
+    };
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "user-list"
+      }, /*#__PURE__*/_reactDefault.default.createElement("h4", {
+        className: "heading"
+      }, title), /*#__PURE__*/_reactDefault.default.createElement("ul", null, list && list.length > 0 ? list.map(item => {
+        console.log(user);
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement("li", {
+            className: "user-list-item",
+            key: item.id
+          }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+            className: "details"
+          }, /*#__PURE__*/_reactDefault.default.createElement("p", null, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+            to: `${listType.match(/movies/i) ? `/movies/${item.id}` : `/actors/${item.id}`}`
+          }, item.name)), /*#__PURE__*/_reactDefault.default.createElement("p", {
+            className: "description"
+          }, _utilsHelpers.createExcerpt(item.description ? item.description : item.bio), " …")), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+            onClick: () => removeListItem(item.id, item.name),
+            xmlns: "http://www.w3.org/2000/svg",
+            width: "24",
+            height: "24",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            className: "feather feather-trash"
+          }, /*#__PURE__*/_reactDefault.default.createElement("polyline", {
+            points: "3 6 5 6 21 6"
+          }), /*#__PURE__*/_reactDefault.default.createElement("path", {
+            d: "M19 6v14a2 2 0 0  1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2  2 0 0 1 2 2v2"
+          })))
+        );
+      }) : addItemsToListLink()), error ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "error"
+      }, "There was an error removing that item from your", listType.replace(/-/g, ' '), " list.") : null)
+    );
+  };
+  _s(UserList, "wqZ8XUITYSmvxIIOXK3f7cJazjA=");
+  _c = UserList;
+  UserList.propTypes = {
+    actors: _propTypesDefault.default.array.isRequired,
+    favoritedMovies: _propTypesDefault.default.array.isRequired,
+    movies: _propTypesDefault.default.array.isRequired,
+    title: _propTypesDefault.default.string.isRequired,
+    listType: _propTypesDefault.default.string.isRequired,
+    listTypeJS: _propTypesDefault.default.string,
+    setFavoritedMovies: _propTypesDefault.default.func.isRequired,
+    user: _propTypesDefault.default.shape({
+      id: _propTypesDefault.default.string.isRequired
+    }),
+    token: _propTypesDefault.default.string.isRequired,
+    itemIdType: _propTypesDefault.default.string.isRequired
+  };
+  const mapToStateProps = state => ({
+    actors: state.actors,
+    favoritedMovies: state.favoritedMovies,
+    movies: state.movies,
+    user: state.user
+  });
+  exports.default = _reactRedux.connect(mapToStateProps, {
+    removeUserFavoriteActor: _actionsActions.removeUserFavoriteActor,
+    removeUserFavoriteMovie: _actionsActions.removeUserFavoriteMovie,
+    removeUserToWatchMovie: _actionsActions.removeUserToWatchMovie,
+    setFavoritedMovies: _actionsActions.setFavoritedMovies
+  })(UserList);
+  var _c;
+  $RefreshReg$(_c, "UserList");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-router-dom":"1PMSK","react-redux":"7GDa4","../../actions/actions":"5S6cN","../../utils/helpers":"1nff4","./user-list.scss":"3enCW","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"3enCW":[function() {},{}],"5D0uY":[function() {},{}],"aH745":[function() {},{}],"4DfHF":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -48401,914 +51674,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./registration-view.scss":"4BDo8","../../utils/partials/_form.scss":"5D0uY","react-bootstrap":"4n7hB","../../utils/helpers":"1nff4","axios":"7rA65"}],"4BDo8":[function() {},{}],"5D0uY":[function() {},{}],"1zhWx":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _axios = require('axios');
-  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
-  var _reactRouterDom = require('react-router-dom');
-  var _reactBootstrap = require('react-bootstrap');
-  var _utilsHelpers = require('../../utils/helpers');
-  require('../../utils/partials/_form.scss');
-  require('./login-view.scss');
-  var _s = $RefreshSig$();
-  const LoginView = ({onLoggedIn}) => {
-    _s();
-    const [username, setUsername] = _react.useState('');
-    const [loginError, setLoginError] = _react.useState(false);
-    const [password, setPassword] = _react.useState('');
-    const handleSubmit = e => {
-      e.preventDefault();
-      _axiosDefault.default.post('https://my-flix-2021.herokuapp.com/login', {
-        username,
-        password
-      }).then(response => {
-        onLoggedIn(response.data);
-      }, err => {
-        setLoginError(err);
-      });
-    };
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
-        id: "login-form",
-        onSubmit: e => handleSubmit(e)
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Great to Meet you!"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Text, {
-        className: "label"
-      }, "Login to your account"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
-        controlId: "email"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Username"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
-        className: "input-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        type: "text",
-        placeholder: "Enter your username",
-        onBlur: e => _utilsHelpers.removeFocusedClass(e),
-        onFocus: e => _utilsHelpers.addFocusedClass(e),
-        onChange: e => setUsername(e.target.value),
-        value: username,
-        required: true
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-user"
-      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-      }), /*#__PURE__*/_reactDefault.default.createElement("circle", {
-        cx: "12",
-        cy: "7",
-        r: "4"
-      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
-        controlId: "password",
-        className: "form-group"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
-        className: "input-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        type: "password",
-        onBlur: e => _utilsHelpers.removeFocusedClass(e),
-        onFocus: e => _utilsHelpers.addFocusedClass(e),
-        onChange: e => setPassword(e.target.value),
-        placeholder: "Enter your password",
-        value: password,
-        required: true
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-lock"
-      }, /*#__PURE__*/_reactDefault.default.createElement("rect", {
-        x: "3",
-        y: "11",
-        width: "18",
-        height: "11",
-        rx: "2",
-        ry: "2"
-      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M7 11V7a5 5 0 0 1 10 0v4"
-      })))))), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "btn-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
-        type: "submit"
-      }, "Login"))), loginError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "There was an error. Please try again.") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "btn-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: "/register"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
-        type: "button"
-      }, "Register"))))
-    );
-  };
-  _s(LoginView, "Q0DOD4fIQaMtcr0yrRc4JqEd3vg=");
-  _c = LoginView;
-  LoginView.propTypes = {
-    onLoggedIn: _propTypesDefault.default.func.isRequired
-  };
-  exports.default = LoginView;
-  var _c;
-  $RefreshReg$(_c, "LoginView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./login-view.scss":"2Muu9","prop-types":"4dfy5","react-bootstrap":"4n7hB","../../utils/partials/_form.scss":"5D0uY","../../utils/helpers":"1nff4","axios":"7rA65","react-router-dom":"1PMSK"}],"2Muu9":[function() {},{}],"5D0uY":[function() {},{}],"3JwwG":[function() {},{}],"7nJwh":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactRouterDom = require('react-router-dom');
-  require('../../utils/partials/_view.scss');
-  require('./director-view.scss');
-  var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
-  var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
-  const DirectorView = ({selectedDirector, onBackClick, onItemClick, otherMovies}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "image-cover"
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "close-box"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        onClick: () => onBackClick('selectedDirector'),
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-x"
-      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "18",
-        y1: "6",
-        x2: "6",
-        y2: "18"
-      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "6",
-        y1: "6",
-        x2: "18",
-        y2: "18"
-      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "main-content"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedDirector.name), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Biography"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "description"
-      }, selectedDirector.bio)), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attributes"
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attribute"
-      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Birth Year"), /*#__PURE__*/_reactDefault.default.createElement("p", null, selectedDirector.birthYear)), selectedDirector.deathYear ? /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "attribute"
-      }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Death Year"), /*#__PURE__*/_reactDefault.default.createElement("p", null, selectedDirector.deathYear)) : null), otherMovies.length > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Other ", selectedDirector.name, " Movies"), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "related-attributes"
-      }, otherMovies.map((movie, i) => /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
-        key: i,
-        image: movie.image,
-        description: /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-          to: `/movies/${movie._id}`
-        }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-          onClick: () => onItemClick('selectedMovie', movie)
-        }, movie.name))
-      })))) : null)
-    );
-  };
-  _c = DirectorView;
-  DirectorView.propTypes = {
-    selectedDirector: _propTypesDefault.default.shape({
-      bio: _propTypesDefault.default.string.isRequired,
-      birthYear: _propTypesDefault.default.number.isRequired,
-      deathYear: _propTypesDefault.default.number,
-      name: _propTypesDefault.default.string.isRequired
-    }).isRequired,
-    onBackClick: _propTypesDefault.default.func.isRequired,
-    onItemClick: _propTypesDefault.default.func,
-    otherMovies: _propTypesDefault.default.array.isRequired
-  };
-  exports.default = DirectorView;
-  var _c;
-  $RefreshReg$(_c, "DirectorView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","prop-types":"4dfy5","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","./director-view.scss":"5RqqF","../../utils/partials/_view.scss":"552MA","react-router-dom":"1PMSK"}],"5RqqF":[function() {},{}],"552MA":[function() {},{}],"4kDeE":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactRouterDom = require('react-router-dom');
-  require('../../utils/partials/_view.scss');
-  require('./genre-view.scss');
-  var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
-  var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
-  const GenreView = ({selectedGenre, onBackClick, onItemClick, otherMovies}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "image-cover"
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "close-box"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        onClick: () => onBackClick(),
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-x"
-      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "18",
-        y1: "6",
-        x2: "6",
-        y2: "18"
-      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "6",
-        y1: "6",
-        x2: "18",
-        y2: "18"
-      })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "main-content"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, selectedGenre.name), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "label"
-      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "description"
-      }, selectedGenre.description)), otherMovies.length > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "related-attributes"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Other ", selectedGenre.name, " Movies"), otherMovies.map((movie, i) => {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
-            key: i,
-            image: movie.image,
-            description: /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-              to: `/movies/${movie._id}`
-            }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-              onClick: () => onItemClick('selectedMovie', movie)
-            }, movie.name))
-          })
-        );
-      }))) : null)
-    );
-  };
-  _c = GenreView;
-  GenreView.propTypes = {
-    selectedGenre: _propTypesDefault.default.object.isRequired,
-    onBackClick: _propTypesDefault.default.func.isRequired,
-    onItemClick: _propTypesDefault.default.func,
-    otherMovies: _propTypesDefault.default.array.isRequired
-  };
-  exports.default = GenreView;
-  var _c;
-  $RefreshReg$(_c, "GenreView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","prop-types":"4dfy5","../../utils/partials/_view.scss":"552MA","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./genre-view.scss":"56Be2","react-router-dom":"1PMSK"}],"552MA":[function() {},{}],"56Be2":[function() {},{}],"7iKJS":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _axios = require('axios');
-  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactBootstrap = require('react-bootstrap');
-  var _reactRedux = require('react-redux');
-  var _actionsActions = require('../../actions/actions');
-  var _UserListUserList = require('../UserList/UserList');
-  var _UserListUserListDefault = _parcelHelpers.interopDefault(_UserListUserList);
-  require('../../utils/partials/_form.scss');
-  require('./profile-view.scss');
-  var _s = $RefreshSig$();
-  const ProfileView = ({onLogout, user}) => {
-    _s();
-    // Make date appear in readable format (2021-05-01)
-    // const date = new Date(response.data.birthDate);
-    // const birthdate = `${
-    // date.getFullYear()}-${
-    // date.getMonth() < 10
-    // ? `0${date.getMonth()+1}`
-    // : date.getMonth()+1}-${date.getDate()}`;
-    const [birthDate, setBirthDate] = _react.useState(user.birthDate ? user.birthDate : '');
-    const [email, setEmail] = _react.useState(user.email);
-    const oldPassword = user.password;
-    const [username, setUsername] = _react.useState(user.username);
-    const [newPassword1, setNewPassword1] = _react.useState('');
-    const [newPassword2, setNewPassword2] = _react.useState('');
-    const [successfulUpdate, setSuccessfulUpdate] = _react.useState(false);
-    const [successfulRemoval, setSuccessfulRemoval] = _react.useState(false);
-    const [birthDateError, setBirthDateError] = _react.useState(false);
-    const [deleteUserError, setDeleteUserError] = _react.useState(false);
-    const [passwordMatchError, setPasswordMatchError] = _react.useState(false);
-    const [updateProfileError, setUpdateProfileError] = _react.useState(false);
-    const [usernameLengthError, setUsernameLengthError] = _react.useState(false);
-    const [usernameTypeError, setUsernameTypeError] = _react.useState(false);
-    const token = localStorage.getItem('token');
-    const deleteUser = () => {
-      confirm('Are you sure you want to delete your account') ? _axiosDefault.default({
-        method: 'delete',
-        url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(() => {
-        setSuccessfulRemoval(true);
-        setTimeout(() => {
-          onLogout();
-        }, 3000);
-      }).catch(() => {
-        setDeleteUserError(true);
-      }) : null;
-    };
-    const handleSubmit = e => {
-      e.preventDefault();
-      // Reset error values
-      setBirthDateError(false);
-      setPasswordMatchError(false);
-      const updatedUser = {
-        email,
-        password: oldPassword,
-        username
-      };
-      // Make sure passwords match
-      if ((newPassword1 !== '' || newPassword2 !== '') && newPassword1 !== newPassword2) {
-        setPasswordMatchError(false);
-        return;
-      } else if ((newPassword1 !== '' || newPassword2 !== '') && newPassword1 === newPassword2) updatedUser['password'] = newPassword1;
-      // Check if birthDate was entered and if it is valid
-      // if it is add it to user object
-      if (!validateBirthDate()) return;
-      updatedUser['birthDate'] = birthDate;
-      _axiosDefault.default({
-        method: 'patch',
-        url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
-        data: updatedUser,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(() => {
-        _actionsActions.setUserInfo(updatedUser);
-        if (newPassword1) {
-          _actionsActions.logoutUser();
-          window.open('/', '_self');
-        }
-        setSuccessfulUpdate(true);
-        setTimeout(() => {
-          setSuccessfulUpdate(false);
-        }, 3000);
-      }, err => {
-        setUpdateProfileError(err);
-      });
-    };
-    const onChangeBirthDate = e => {
-      setBirthDate(e.target.value);
-      validateBirthDate(e.target.value);
-    };
-    const onChangeNewPassword1 = e => {
-      setNewPassword1(e.target.value);
-      setPasswordMatchError(false);
-      if (newPassword2 !== '' && e.target.value !== newPassword2) setPasswordMatchError(true);
-    };
-    const onChangeNewPassword2 = e => {
-      setNewPassword2(e.target.value);
-      setPasswordMatchError(false);
-      if (newPassword1 !== '' && newPassword1 !== e.target.value) setPasswordMatchError(true);
-    };
-    const onChangeUsername = e => {
-      const value = e.target.value;
-      setUsername(value);
-      setUsernameLengthError(false);
-      setUsernameTypeError(false);
-      if (value !== '') {
-        if (value.length < 6) setUsernameLengthError(true);
-        const nonAlphaCharacters = value.match(/\W/g);
-        // If there are non alphabetical characters
-        // make sure that they are only numbers
-        // Username should only contain alphanumeric characters
-        if (nonAlphaCharacters) {
-          for (let i = 0; i < nonAlphaCharacters.length; i++) {
-            if (!nonAlphaCharacters[i].match(/\d/)) setUsernameTypeError(true);
-            return;
-          }
-        }
-      }
-    };
-    const validateBirthDate = (birthdate = birthDate) => {
-      const regex = /\d\d\d\d-\d\d-\d\d/;
-      // valid date format
-      if (!birthdate.match(regex)) {
-        setBirthDateError(`${birthdate} is not a valid date. 
-                Please enter a date in this format: yyyy-mm-dd`);
-        return false;
-      } else if (birthdate && birthdate.match(regex)) {
-        setBirthDateError(null);
-        return true;
-      }
-    };
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Personal Info"))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
-        id: "edit-profile-form",
-        onSubmit: e => handleSubmit(e)
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Username"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "username",
-        type: "text",
-        placeholder: "Enter your username",
-        onChange: e => onChangeUsername(e),
-        value: username,
-        required: true
-      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Birthday"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "birth-date",
-        className: `input-container 
-                                    ${birthDateError ? 'error' : ''}`,
-        type: "text",
-        placeholder: "2021-05-10",
-        onChange: e => onChangeBirthDate(e),
-        value: birthDate
-      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Email"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "email",
-        type: "email",
-        placeholder: "me@gmail.com",
-        onChange: e => setEmail(e.target.value),
-        value: email,
-        required: true
-      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Old Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "oldPassword",
-        className: "input-container",
-        type: "password",
-        onChange: e => onChangeNewPassword1(e),
-        placeholder: "Enter your password",
-        value: oldPassword,
-        disabled: true
-      })), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "New Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "newPassword1",
-        type: "password",
-        className: `input-container ${passwordMatchError ? 'error' : ''}`,
-        onChange: e => onChangeNewPassword1(e),
-        placeholder: "Enter your password again",
-        value: newPassword1
-      }))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
-        className: "form-label"
-      }, "Repeat Password"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        id: "newPassword2",
-        type: "password",
-        className: `input-container ${passwordMatchError ? 'error' : ''}`,
-        onChange: e => onChangeNewPassword2(e),
-        placeholder: "Enter your password again",
-        value: newPassword2
-      })))), usernameLengthError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "Username must be at least 6 characters long.") : null, usernameTypeError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "Username must only contain alphanumeric characters.") : null, birthDateError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, birthDateError) : null, passwordMatchError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "Passwords must match.") : null, updateProfileError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "There was an error updating your profile. Please try again.") : null, successfulUpdate ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "text-info"
-      }, "Your profile was updated successfully!") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "btn-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
-        type: "submit"
-      }, "Save Settings")))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
-        title: "Favorite Movies",
-        listType: "favorite-movies",
-        listTypeJS: "favoriteMovies",
-        userId: user.id,
-        itemIdType: "movie_id",
-        token: token
-      }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
-        title: "To Watch Movies",
-        listType: "to-watch-movies",
-        listTypeJS: "toWatchMovies",
-        userId: user.id,
-        itemIdType: "movie_id",
-        token: token
-      }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
-        title: "Favorite Actors",
-        listType: "favorite-actors",
-        listTypeJS: "favoriteActors",
-        userId: user.id,
-        itemIdType: "actor_id",
-        token: token
-      }))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-end"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-        xs: 12,
-        sm: 4,
-        md: 5
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "delete-user-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        onClick: () => deleteUser(),
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-trash"
-      }, /*#__PURE__*/_reactDefault.default.createElement("polyline", {
-        points: "3 6 5 6 21 6"
-      }), /*#__PURE__*/_reactDefault.default.createElement("path", {
-        d: "M19 6v14a2 2 0 0  1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2  2 0 0 1 2 2v2"
-      })), /*#__PURE__*/_reactDefault.default.createElement("span", null, "Delete Account")), successfulRemoval ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "text-info"
-      }, "Your account was successfully deleted!") : null, deleteUserError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "Your account could not be deleted. Please try again") : null)))
-    );
-  };
-  _s(ProfileView, "2+N52NXXkjIdNJKljSLKLJgCwFg=");
-  _c = ProfileView;
-  ProfileView.propTypes = {
-    onLogout: _propTypesDefault.default.func.isRequired,
-    user: _propTypesDefault.default.shape({
-      id: _propTypesDefault.default.string.isRequired,
-      birthDate: _propTypesDefault.default.string,
-      email: _propTypesDefault.default.string,
-      password: _propTypesDefault.default.string.isRequired,
-      username: _propTypesDefault.default.string.isRequired
-    })
-  };
-  const mapStateToProps = state => {
-    return {
-      user: state.user
-    };
-  };
-  exports.default = _reactRedux.connect(mapStateToProps, {
-    logoutUser: _actionsActions.logoutUser,
-    setUserInfo: _actionsActions.setUserInfo
-  })(ProfileView);
-  var _c;
-  $RefreshReg$(_c, "ProfileView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-bootstrap":"4n7hB","../UserList/UserList":"7D85R","../../utils/partials/_form.scss":"5D0uY","./profile-view.scss":"aH745","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","react-redux":"7GDa4","../../actions/actions":"5S6cN"}],"7D85R":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _axios = require('axios');
-  var _axiosDefault = _parcelHelpers.interopDefault(_axios);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactRouterDom = require('react-router-dom');
-  var _reactRedux = require('react-redux');
-  var _actionsActions = require('../../actions/actions');
-  var _utilsHelpers = require('../../utils/helpers');
-  require('./user-list.scss');
-  var _s = $RefreshSig$();
-  const UserList = ({actors, favoritedMovies, title, listType, listTypeJS, movies, token, itemIdType, setFavoritedMovies, user}) => {
-    _s();
-    const [list, setList] = _react.useState(null);
-    const [error, setError] = _react.useState(false);
-    _react.useEffect(() => {
-      if (listTypeJS.match(/movies/i)) {
-        setList(user[listTypeJS].map(movieId => {
-          const matchingMovie = movies.find(movie => {
-            return movie._id === movieId;
-          });
-          return {
-            id: matchingMovie._id,
-            description: matchingMovie.description,
-            image: matchingMovie.image,
-            name: matchingMovie.name
-          };
-        }));
-      } else if (listTypeJS.match(/actors/i)) {
-        setList(user[listTypeJS].map(actor => {
-          const matchingActor = actors.find(actorId => {
-            return actor._id === actorId;
-          });
-          return {
-            id: matchingActor._id,
-            bio: matchingActor.bio,
-            image: matchingActor.image,
-            name: matchingActor.name
-          };
-        }));
-      }
-    }, []);
-    const addItemsToListLink = () => {
-      const listTypeString = listType.replace(/-/g, ' ');
-      if (listTypeString.match(/movies/i)) {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-            to: "/"
-          }, "movies"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
-            className: "list-type"
-          }, listTypeString), " list!")
-        );
-      } else if (listTypeString.match(/actors/i)) {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-            to: "/actors"
-          }, "actors"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
-            className: "list-type"
-          }, listTypeString), " list!")
-        );
-      }
-    };
-    const removeListItem = (itemId, itemName) => {
-      const data = {};
-      data[itemIdType] = itemId;
-      _axiosDefault.default({
-        method: 'delete',
-        url: `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}/${itemId}`,
-        data,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(() => {
-        const newList = list.filter(listItem => {
-          return listItem._id !== itemId;
-        });
-        setList(newList);
-        if (listTypeJS === 'favoriteMovies') {
-          _actionsActions.removeUserFavoriteMovie(itemId);
-          setFavoritedMovies(favoritedMovies.map(movie => {
-            if (movie.name === itemName) {
-              return {
-                ...movie,
-                usersFavorited: movie.usersFavorited--
-              };
-            }
-            return movie;
-          }));
-        }
-        if (listTypeJS === 'favoriteActors') _actionsActions.removeUserFavoriteActor(itemId);
-        if (listTypeJS === 'toWatchMovies') _actionsActions.removeUserToWatchMovie(itemId);
-      }).catch(err => {
-        setError(err);
-      });
-    };
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "user-list"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h4", {
-        className: "heading"
-      }, title), /*#__PURE__*/_reactDefault.default.createElement("ul", null, list && list.length > 0 ? list.map(item => {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement("li", {
-            className: "user-list-item",
-            key: item.id
-          }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-            className: "details"
-          }, /*#__PURE__*/_reactDefault.default.createElement("p", null, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-            to: `${listType.match(/movies/i) ? `/movies/${item.id}` : `/actors/${item.id}`}`
-          }, item.name)), /*#__PURE__*/_reactDefault.default.createElement("p", {
-            className: "description"
-          }, _utilsHelpers.createExcerpt(item.description ? item.description : item.bio), " …")), /*#__PURE__*/_reactDefault.default.createElement("svg", {
-            onClick: () => removeListItem(item.id, item.name),
-            xmlns: "http://www.w3.org/2000/svg",
-            width: "24",
-            height: "24",
-            viewBox: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            strokeWidth: "2",
-            strokeLinecap: "round",
-            strokeLinejoin: "round",
-            className: "feather feather-trash"
-          }, /*#__PURE__*/_reactDefault.default.createElement("polyline", {
-            points: "3 6 5 6 21 6"
-          }), /*#__PURE__*/_reactDefault.default.createElement("path", {
-            d: "M19 6v14a2 2 0 0  1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2  2 0 0 1 2 2v2"
-          })))
-        );
-      }) : addItemsToListLink()), error ? /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "error"
-      }, "There was an error removing that item from your", listType.replace(/-/g, ' '), " list.") : null)
-    );
-  };
-  _s(UserList, "wqZ8XUITYSmvxIIOXK3f7cJazjA=");
-  _c = UserList;
-  UserList.propTypes = {
-    actors: _propTypesDefault.default.array.isRequired,
-    favoritedMovies: _propTypesDefault.default.array.isRequired,
-    movies: _propTypesDefault.default.array.isRequired,
-    title: _propTypesDefault.default.string.isRequired,
-    listType: _propTypesDefault.default.string.isRequired,
-    listTypeJS: _propTypesDefault.default.string,
-    setFavoritedMovies: _propTypesDefault.default.func.isRequired,
-    user: _propTypesDefault.default.shape({
-      id: _propTypesDefault.default.string.isRequired
-    }),
-    userId: _propTypesDefault.default.string.isRequired,
-    token: _propTypesDefault.default.string.isRequired,
-    itemIdType: _propTypesDefault.default.string.isRequired
-  };
-  const mapToStateProps = state => ({
-    actors: state.actors,
-    favoritedMovies: state.favoritedMovies,
-    movies: state.movies,
-    user: state.user
-  });
-  exports.default = _reactRedux.connect(mapToStateProps, {
-    removeUserFavoriteActor: _actionsActions.removeUserFavoriteActor,
-    removeUserFavoriteMovie: _actionsActions.removeUserFavoriteMovie,
-    removeUserToWatchMovie: _actionsActions.removeUserToWatchMovie,
-    setFavoritedMovies: _actionsActions.setFavoritedMovies
-  })(UserList);
-  var _c;
-  $RefreshReg$(_c, "UserList");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-router-dom":"1PMSK","../../utils/helpers":"1nff4","./user-list.scss":"3enCW","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","react-redux":"7GDa4","../../actions/actions":"5S6cN"}],"3enCW":[function() {},{}],"5D0uY":[function() {},{}],"aH745":[function() {},{}],"6h1DY":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _reactBootstrap = require('react-bootstrap');
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactRouterDom = require('react-router-dom');
-  var _reactRedux = require('react-redux');
-  var _actionsActions = require('../../actions/actions');
-  require('./main-navbar.scss');
-  var _s = $RefreshSig$();
-  const MainNavbar = ({setMoviesFilter}) => {
-    _s();
-    const [searchTerm, setSearchTerm] = _react.useState('');
-    const isUserLoggedIn = localStorage.getItem('token') ? true : false;
-    const onChangeSearchTerm = value => {
-      setSearchTerm(value);
-      setMoviesFilter(value);
-    };
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar, {
-        id: "main-navbar",
-        expand: "lg",
-        className: `${!isUserLoggedIn ? 'logged-out' : 'logged-in'}`
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Brand, {
-        to: "/",
-        className: `logo link ${!isUserLoggedIn ? 'logged-out' : 'logged-in'}`
-      }, "myFlix"), isUserLoggedIn ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Toggle, {
-        "aria-controls": "main-navbar-collapse"
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Collapse, {
-        id: "main-navbar-collapse"
-      }, window.location.pathname === '/' ? /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
-        className: "mx-auto",
-        inline: true
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup, {
-        className: "input-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Prepend, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, {
-        id: "search-bar"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: " http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather  feather-search"
-      }, /*#__PURE__*/_reactDefault.default.createElement("circle", {
-        cx: "11",
-        cy: "11",
-        r: "8"
-      }), /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "21",
-        y1: "21",
-        x2: "16.65",
-        y2: "16.65"
-      })))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
-        placeholder: "Search …",
-        onChange: e => onChangeSearchTerm(e.target.value),
-        value: searchTerm,
-        "aria-label": "Search …",
-        "aria-describedby": "search-bar"
-      }))) : null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav, null, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: "/logout",
-        className: "link nav-link logout"
-      }, "Logout")), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav, {
-        className: "nav-links"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: "/profile",
-        className: `link nav-link ${window.location.pathname === '/profile' ? 'active' : ''}`
-      }, "Profile"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: "/",
-        className: `link nav-link ${window.location.pathname === '/' ? 'active' : ''}`
-      }, "Movies"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: "/about",
-        className: "link nav-link"
-      }, "About")))) : null)
-    );
-  };
-  _s(MainNavbar, "a1cMJ8t0eYFnsCEdGcHtaGJdbCM=");
-  _c = MainNavbar;
-  MainNavbar.propTypes = {
-    user: _propTypesDefault.default.object.isRequired
-  };
-  const mapStateToProps = state => {
-    return {
-      user: state.user
-    };
-  };
-  exports.default = _reactRedux.connect(mapStateToProps, {
-    setMoviesFilter: _actionsActions.setMoviesFilter
-  })(MainNavbar);
-  var _c;
-  $RefreshReg$(_c, "MainNavbar");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","react-bootstrap":"4n7hB","prop-types":"4dfy5","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./main-navbar.scss":"RFYh5","react-redux":"7GDa4","react-router-dom":"1PMSK","../../actions/actions":"5S6cN"}],"RFYh5":[function() {},{}],"2FsjQ":[function(require,module,exports) {
+},{"react":"3b2NM","axios":"7rA65","react-bootstrap":"4n7hB","../../utils/helpers":"1nff4","../../utils/partials/_form.scss":"5D0uY","./registration-view.scss":"4BDo8","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"5D0uY":[function() {},{}],"4BDo8":[function() {},{}],"6zJdJ":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -49320,47 +51686,8 @@ try {
   var _reactDefault = _parcelHelpers.interopDefault(_react);
   var _reactBootstrap = require('react-bootstrap');
   var _reactRedux = require('react-redux');
-  var _actionsActions = require('../../actions/actions');
-  const ListTypeSelect = ({setMoviesListType}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
-        controlId: "list-type-select"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Select type of movies"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Control, {
-        as: "select",
-        onChange: e => setMoviesListType(e.target.value)
-      }, /*#__PURE__*/_reactDefault.default.createElement("option", {
-        value: "all"
-      }, "All movies"), /*#__PURE__*/_reactDefault.default.createElement("option", {
-        value: "featured"
-      }, "Featured movies"), /*#__PURE__*/_reactDefault.default.createElement("option", {
-        value: "favorited"
-      }, "Favorited movies")))
-    );
-  };
-  _c = ListTypeSelect;
-  exports.default = _reactRedux.connect(null, {
-    setMoviesListType: _actionsActions.setMoviesListType
-  })(ListTypeSelect);
-  var _c;
-  $RefreshReg$(_c, "ListTypeSelect");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"6zJdJ":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _reactBootstrap = require('react-bootstrap');
-  var _reactRedux = require('react-redux');
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
   var _actionsActions = require('../../actions/actions');
   const SortingFactorSelect = ({setActorsSortingFactor, setMoviesSortingFactor, options, type}) => {
     return (
@@ -49391,6 +51718,12 @@ try {
     );
   };
   _c = SortingFactorSelect;
+  SortingFactorSelect.propTypes = {
+    options: _propTypesDefault.default.array.isRequired,
+    setActorsSortingFactor: _propTypesDefault.default.func.isRequired,
+    setMoviesSortingFactor: _propTypesDefault.default.func.isRequired,
+    type: _propTypesDefault.default.string.isRequired
+  };
   exports.default = _reactRedux.connect(null, {
     setActorsSortingFactor: _actionsActions.setActorsSortingFactor,
     setMoviesSortingFactor: _actionsActions.setMoviesSortingFactor
@@ -49403,7 +51736,98 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"7panR":[function(require,module,exports) {
+},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","prop-types":"4dfy5"}],"3JwwG":[function() {},{}],"5PP2u":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRouterDom = require('react-router-dom');
+  var _utilsHelpers = require('../../utils/helpers');
+  require('./list-item-card.scss');
+  const ListItemCard = ({item, itemType}) => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card, {
+        className: "list-item-card"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Body, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Title, {
+        className: "header"
+      }, item.usersFavorited && item.usersFavorited > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.OverlayTrigger, {
+        trigger: "hover focus click",
+        placement: "top",
+        overlay: /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Tooltip, null, "Favorites by users: ", item.usersFavorited)
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-star"
+      }, /*#__PURE__*/_reactDefault.default.createElement("polygon", {
+        points: "12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+      }))) : null, item.name, itemType === 'movies' && item.featured ? /*#__PURE__*/_reactDefault.default.createElement("small", null, " (Featured)") : null), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Img, {
+        src: item.image
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Text, {
+        className: "description"
+      }, _utilsHelpers.createExcerpt(item.description ? item.description : item.bio), " …"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "read-more-link-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-arrow-right"
+      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "5",
+        y1: "12",
+        x2: "19",
+        y2: "12"
+      }), /*#__PURE__*/_reactDefault.default.createElement("polyline", {
+        points: "12 5 19 12 12 19"
+      })), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: `/${itemType === 'movies' ? 'movies' : 'actors'}/${item._id}`,
+        className: "read-more-link"
+      }, "Read More"))))
+    );
+  };
+  _c = ListItemCard;
+  ListItemCard.propTypes = {
+    item: _propTypesDefault.default.shape({
+      _id: _propTypesDefault.default.string.isRequired,
+      bio: _propTypesDefault.default.string,
+      description: _propTypesDefault.default.string,
+      featured: _propTypesDefault.default.bool,
+      image: _propTypesDefault.default.string.isRequired,
+      name: _propTypesDefault.default.string.isRequired,
+      usersFavorited: _propTypesDefault.default.number
+    }).isRequired,
+    itemType: _propTypesDefault.default.string.isRequired
+  };
+  exports.default = ListItemCard;
+  var _c;
+  $RefreshReg$(_c, "ListItemCard");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","prop-types":"4dfy5","react-bootstrap":"4n7hB","react-router-dom":"1PMSK","../../utils/helpers":"1nff4","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./list-item-card.scss":"3Gt0E"}],"3Gt0E":[function() {},{}],"7panR":[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, '__esModule', {
   value: true

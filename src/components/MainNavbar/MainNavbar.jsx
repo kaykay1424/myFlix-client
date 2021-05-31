@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {Form, FormControl,  InputGroup, Nav,Navbar} from 'react-bootstrap';
 import PropTypes from 'prop-types';
-import {Link} from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import {connect} from 'react-redux';
 
 import {setMoviesFilter} from '../../actions/actions';
@@ -9,7 +9,8 @@ import './main-navbar.scss';
 
 const MainNavbar = ({setMoviesFilter}) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const isUserLoggedIn = localStorage.getItem('token') ? true : false;
+    const isUserLoggedIn = localStorage.getItem('token') ? true : false,
+        pathname = useLocation().pathname;
 
     const onChangeSearchTerm = (value) => {
         setSearchTerm(value);
@@ -41,7 +42,7 @@ const MainNavbar = ({setMoviesFilter}) => {
                 
                 
              
-                        {window.location.pathname === '/' 
+                        {pathname === '/' || pathname === '/actors'
                             ?                                  
                             <Form className="mx-auto" inline>
                                 <InputGroup className="input-container">
@@ -100,16 +101,24 @@ const MainNavbar = ({setMoviesFilter}) => {
                             <Link 
                                 to="/profile" 
                                 className={
-                                    `link nav-link ${window.location.pathname === '/profile' 
+                                    `link nav-link ${pathname === '/profile' 
                                         ? 'active': ''}`}
                             >
                             Profile
                             </Link>
                             <Link to="/" className={
-                                `link nav-link ${window.location.pathname === '/' 
+                                `link nav-link ${
+                                    pathname === '/' 
+                                    || pathname.match('movies')
                                     ? 'active': ''}`}
                             >
                             Movies
+                            </Link>
+                            <Link to="/actors" className={
+                                `link nav-link ${pathname.match('actors') 
+                                    ? 'active': ''}`}
+                            >
+                            Actors
                             </Link>
                             <Link 
                                 to="/about" 
@@ -128,6 +137,7 @@ const MainNavbar = ({setMoviesFilter}) => {
 };
 
 MainNavbar.propTypes = {
+    setMoviesFilter: PropTypes.func.isRequired,
     user: PropTypes.object.isRequired
 };
 
