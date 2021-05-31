@@ -122,7 +122,8 @@ const MainNavbar = ({setMoviesFilter}) => {
                             </Link>
                             <Link 
                                 to="/about" 
-                                className="link nav-link"
+                                className={`link nav-link ${pathname === '/about'
+                                ? 'active': ''}`}
                             >
                                 About
                             </Link>

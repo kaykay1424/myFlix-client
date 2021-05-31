@@ -5,6 +5,7 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import {Col, Container, Form, Row} from 'react-bootstrap';
 import {
+    Link,
     BrowserRouter as Router, 
     Redirect, 
     Route
@@ -610,6 +611,26 @@ const MainView = ({
                 }} />
                 <Route path="/logout" render={() => {
                     showLogin('logout');
+                }} />
+
+                <Route path="/about" render={() => {
+                    return (<Row className="justify-content-md-center">
+                        <Col className="view" md={5}>
+                            <h1>Welcome to myFlix!</h1>
+                            <p>After you create a 
+                                <Link to="/register"> profile </Link> 
+                                or <Link to="/"> login </Link>,
+                                feel free to browse and sort 
+                                <Link to="/"> movies </Link> 
+                                and <Link to="/actors"> actors </Link>
+                                and add them to your favorites 
+                                or to-watch lists. You can visit your 
+                                <Link to="/profile"> profile </Link> 
+                                to view those lists 
+                                as well as edit your profile info.
+                            </p>
+                        </Col>                    
+                    </Row>);
                 }} />
             </Container>
         </Router>

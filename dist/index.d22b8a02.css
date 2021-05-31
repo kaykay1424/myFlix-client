@@ -38,6 +38,7 @@ button {
 .view {
   background-color: #1e2127;
   color: #fff;
+  margin-top: 4em;
   padding: 0;
 }
 .view .attribute {

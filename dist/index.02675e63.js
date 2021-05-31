@@ -26935,6 +26935,28 @@ try {
         render: () => {
           showLogin('logout');
         }
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        path: "/about",
+        render: () => {
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+              className: "justify-content-md-center"
+            }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+              className: "view",
+              md: 5
+            }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Welcome to myFlix!"), /*#__PURE__*/_reactDefault.default.createElement("p", null, "After you create a", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+              to: "/register"
+            }, " profile "), "or ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+              to: "/"
+            }, " login "), ", feel free to browse and sort", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+              to: "/"
+            }, " movies "), "and ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+              to: "/actors"
+            }, " actors "), "and add them to your favorites or to-watch lists. You can visit your", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+              to: "/profile"
+            }, " profile "), "to view those lists as well as edit your profile info.")))
+          );
+        }
       })))
     );
   };
@@ -50482,7 +50504,7 @@ try {
         className: `link nav-link ${pathname.match('actors') ? 'active' : ''}`
       }, "Actors"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
         to: "/about",
-        className: "link nav-link"
+        className: `link nav-link ${pathname === '/about' ? 'active' : ''}`
       }, "About")))) : null)
     );
   };
