@@ -1,3 +1,7 @@
-#registration-form button {
-    width: 124px;
+@import '../../utils/partials/variables';
+#registration-view {
+    background-color: $logged-out-color;
+    #registration-form button {
+        width: 124px;
+    }
 }

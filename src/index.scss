@@ -1,15 +1,43 @@
 @import './utils/partials/variables';
-body {
+body,
+html {
     background-color: $main-background-color !important;
+    height: 100%;
 }
-.my-flix {
+.app-container {
+    height: 100%;
+}
+.container-fluid.my-flix {
     background-color: $main-background-color;
     font-family: 'Calibri';
+    height: 100%;
     margin: 0;
     padding: 0;
     a {
         color: $link-color;
         text-decoration: none;
+    }
+    button {
+        cursor: pointer;
+    }
+    h1 {
+        color: #fff;
+    }
+    .error {
+        color: #f5866f;
+    }
+    .view-row--form {
+        height: 100%;
+        margin: 0;
+    }
+    .label {
+        color: $label-color;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+    [class*="container"].row,
+    .view.row {
+        margin: 0;
     }
 }
 html {
@@ -19,14 +47,4 @@ html {
 * {
     box-sizing: border-box;
     max-width: 100%;
-}
-button {
-    cursor: pointer;
-}
-.error {
-    color: #f5866f;
-}
-.label {
-    color: $label-color;
-    font-size: 15px;
 }

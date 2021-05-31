@@ -14,7 +14,7 @@ const ListItemCard = ({item, itemType}) => {
                     {
                         item.usersFavorited && item.usersFavorited > 0
                             ? (<OverlayTrigger
-                                trigger="hover focus click"
+                                trigger={['hover','focus', 'click']}
                                 placement="top"
                                 overlay={
                                     <Tooltip>

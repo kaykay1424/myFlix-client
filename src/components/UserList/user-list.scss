@@ -9,6 +9,7 @@
         padding-left: 0 !important;
     }
     .heading {
+        color: #fff;
         font-size: 20px;
     }
     .user-list-item {
@@ -20,6 +21,8 @@
             }
             .description {
                 color: $label-color;
+                font-size: 13px;
+                line-height: 1.5;
             }
         }
         .list-type {
@@ -27,7 +30,9 @@
         }
         svg {
             align-self: flex-end;
+            color: $form-label-color;
             cursor: pointer;
+            height: 18px;
         }
     }
 }

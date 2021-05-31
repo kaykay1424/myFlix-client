@@ -3,9 +3,8 @@
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import {Col, Container, Form, Row} from 'react-bootstrap';
+import {Container} from 'react-bootstrap';
 import {
-    Link,
     BrowserRouter as Router, 
     Redirect, 
     Route
@@ -14,17 +13,17 @@ import {connect} from 'react-redux';
 
 /************ Components ************/
 
+import AboutView from '../AboutView/AboutView';
 import ActorView from '../ActorView/ActorView';
+import ActorsView from '../ActorsView/ActorsView';
 import GenreView from '../GenreView/GenreView';
 import DirectorView from '../DirectorView/DirectorView';
-import ListTypeSelect from '../ListTypeSelect/ListTypeSelect';
 import MainNavbar from '../MainNavbar/MainNavbar';
-import ListItemCard from '../ListItemCard/ListItemCard';
 import MovieView from '../MovieView/MovieView';
+import MoviesView from '../MoviesView/MoviesView';
 import LoginView from '../LoginView/LoginView';
 import ProfileView from '../ProfileView/ProfileView';
 import RegistrationView from '../RegistrationView/RegistrationView';
-import SortingFactorSelect from '../SortingFactorSelect/SortingFactorSelect';
 
 import {
     logoutUser,
@@ -39,16 +38,7 @@ import {
 import './main-view.scss';
 
 const MainView = ({
-    actors, 
-    actorsFilter,
-    actorsSortingFactor,
-    favoritedMovies,
-    featuredMovies,
-    movies, 
-    moviesFilter,
-    moviesListType,
-    moviesSortingFactor,
-    selectedMovie, 
+    movies,  
     logoutUser,
     setActors, 
     setMovies, 
@@ -66,6 +56,7 @@ const MainView = ({
         }
         if (token && !user.id) {
             axios.get(
+                // eslint-disable-next-line max-len
                 `https://my-flix-2021.herokuapp.com/users/${localStorage.getItem('user')}`,
                 {
                     headers: {Authorization: `Bearer ${token}`}
@@ -87,7 +78,8 @@ const MainView = ({
     
     const token = localStorage.getItem('token');
 
-    const [error, setError] = useState(false);
+    const [actorsError, setActorsError] = useState(false);
+    const [moviesError, setMoviesError] = useState(false);
 
     const getActors = (token) => {
         axios.get('https://my-flix-2021.herokuapp.com/actors',{
@@ -97,7 +89,7 @@ const MainView = ({
                 setActors(response.data);
             })
             .catch(error => {
-                setError(error);
+                setActorsError(error);
             });
     };
 
@@ -107,7 +99,7 @@ const MainView = ({
         }).then(response => {
             setFavoritedMovies(response.data);
         }).catch(error => {
-            setError(error);
+            setMoviesError(error);
         });
     };
 
@@ -122,7 +114,7 @@ const MainView = ({
                     (movie.featured)));
             })
             .catch(error => {
-                setError(error);
+                setMoviesError(error);
             });
     };
 
@@ -154,421 +146,70 @@ const MainView = ({
     const showLogin = (path) => {
         if (path == 'logout')
             onLogout();
-        return (
-            <>
-                    
-                <Row className="justify-content-md-center">
-                    <Col className="form-container" md={5}>
-                        <LoginView 
-                            onLoggedIn={onLoggedIn} 
-                        />
-                    </Col>
-                </Row>
-            </>
-        );
+        return <LoginView onLoggedIn={onLoggedIn} />;
     };
         
     return (
-        <Router>
+        <Router>    
             <MainNavbar /> 
-            <Container className="my-flix" fluid>             
+            <Container className={`my-flix`} fluid>             
                 <Route exact path="/" render={() => {
                     // If user is not logged in, show login view
-                    if (!token) return showLogin();
-                    // if there is an error loading the movies
-                    if (error) {
-                        return (
-                            <>
-                                    
-                                <Row className="justify-content-md-center">
-                                    <Col md="5"> 
-                                        <div>
-                                            An error has occurred. 
-                                            Please try again.
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </>
-                        );
-                    } 
-                    
-                    let selectedMovies;
-                    if (moviesListType === 'all') 
-                        selectedMovies = [...movies];
-                    if (moviesListType === 'featured') 
-                        selectedMovies = featuredMovies;
-                    if (moviesListType === 'favorited') {
-                        selectedMovies = favoritedMovies;
-                        selectedMovies = movies.filter(movie => {
-                            for (let i = 0; i < selectedMovies.length; i++) {
-                                if (Object.values(
-                                    selectedMovies[i]).indexOf(movie.name) > -1)
-                                    return true;
-                            }
-                            return false;
-                        });
-                    }
-    
-                    if (moviesSortingFactor === 'rating') 
-                        selectedMovies.sort((movie1, movie2) => {
-                            return movie2.rating - movie1.rating;
-                        });
-                    if (moviesSortingFactor === 'releaseYear')
-                        selectedMovies.sort((movie1, movie2) => {
-                            return movie2.releaseYear - movie1.releaseYear;
-                        });
+                    if (!token) return <Redirect to="/login" />;
 
-                    if (moviesFilter !== '') {
-                        selectedMovies = selectedMovies.filter(movie => {
-                            const regExp = new RegExp(moviesFilter, 'i');
-                            return movie.name.match(regExp);
-                        });
-                    }
-
-                    selectedMovies = selectedMovies.map(movie => {
-                        let usersFavorited = 0;
-                        for (let i = 0; i < favoritedMovies.length; i++) {
-                            if (favoritedMovies[i].name === movie.name) 
-                                usersFavorited = 
-                                favoritedMovies[i].usersFavorited;
-                        }
-                        return {
-                            ...movie,
-                            usersFavorited
-                        };
-                    });
-
-
-                    // If there are no movies to display    
-                    if (selectedMovies.length === 0) 
-                        return (
-                            <>
-                                    
-                                <div className="movies-container" />
-                            </>
-                        );
-
-                    return (
-                        <>
-                                
-                            <Row 
-                                className="movies-container 
-                                justify-content-md-center"
-                            >
-                                <Col md={4}>
-                                    <Form>
-                                        <Form.Row>
-                                            <Col>
-                                                <ListTypeSelect />
-                                            </Col>
-                                            <Col>
-                                                <SortingFactorSelect 
-                                                    options={
-                                                        [
-                                                            {
-                                                                text: 'None',
-                                                                value: 'none',
-                                                                selected: true
-                                                            },
-                                                            {
-                                                                text: 'Rating',
-                                                                value: 'rating',
-                                                                selected: false
-                                                            },
-                                                            {
-                                                                text: 'Release year',
-                                                                value: 'releaseYear',
-                                                                selected: false
-                                                            }
-                                                        ]
-                                                    }
-                                                    type="movies"
-                                                />
-                                            </Col>
-                                        </Form.Row>
-                                        
-                                        
-                                    </Form>
-                                    
-                                </Col>
-                            </Row>
-                            <Row>
-                                {selectedMovies.map((movie) => {
-                                    return (
-                                        <Col key={movie._id}  md={4}>
-                                            <ListItemCard 
-                                                item={movie} 
-                                                itemType="movies"
-                                            />
-                                        </Col>
-                                    );
-                                })};
-                            </Row>;
-                        </>
-                    );
+                    return <MoviesView error={moviesError} />;
                 }} />
-                             
+
                 <Route path="/movies/:id" render={({history, match}) => {
-                    // If user is not logged in, show login view
-                    if (!token) return showLogin();
-                    const fullSelectedMovies = movies.map(movie => {
-                        let usersFavorited = 0;
-                        for (let i = 0; i < favoritedMovies.length; i++) {
-                            if (favoritedMovies[i].name === movie.name) 
-                                usersFavorited = 
-                                favoritedMovies[i].usersFavorited;
-                        }
-                        return {
-                            ...movie,
-                            usersFavorited
-                        };
-                    });
-                    const movie = fullSelectedMovies.find(
-                        
-                        movie => {
-                            // console.log(movie)
-                            return movie._id === match.params.id;
-                        }); 
-
-                    const movieActors = movie.stars.map((star) => {
-                        const matchingActor = actors.find((actor) => {
-                            return star.actor === actor.name;
-                        });
-                        
-                        
-                        return {
-                            ...star,
-                            id: matchingActor._id,
-                            image: matchingActor.image
-                        };
-                    });
-
-                    return (
-                        <>
-                                
-                            <Row className="justify-content-md-center">
-                                <Col 
-                                    id="movie-view" 
-                                    className="view" md={6}>    
-                                    <MovieView 
-                                        movie={movie} 
-                                        movieActors={movieActors} 
-                                        onBackClick={() => history.goBack()} 
-                                    />
-                                </Col>
-                            </Row>
-                        </>
-                    );
-                }} />
+                // If user is not logged in, show login view
+                    if (!token) return <Redirect to="/login" />;
+                    
+                    return <MovieView 
+                        match={match} 
+                        onBackClick={() => history.goBack()} 
+                    />;
+                }}/>
 
                 <Route exact path="/actors" render={() => {
                     // If user is not logged in, show login view
-                    if (!token) return showLogin();
-                    // if there is an error loading the movies
-                    if (error) {
-                        return (
-                            <>
-                                
-                                <Row className="justify-content-md-center">
-                                    <Col md="5"> 
-                                        <div>
-                                            An error has occurred. 
-                                            Please try again.
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </>
-                        );
-                    } 
-                
-                    let selectedActors = [...actors];
-
-                    // if (actorsSortingFactor === 'none') 
-                    //     selectedActors = [...actors];
-
-                    if (actorsSortingFactor === 'birthCountry') {
-                        selectedActors.sort((actor1, actor2) => {
-                            if (actor1.birthCountry > actor2.birthCountry)
-                                return 1;
-                            if (actor1.birthCountry === actor2.birthCountry)
-                                return 0;
-                            if (actor1.birthCountry < actor2.birthCountry)
-                                return -1;
-                        });
-                    }
-
-                    if (actorsSortingFactor === 'birthDate')
-                        selectedActors.sort((actor1, actor2) => {
-                            const actor1BirthYear = new Date(
-                                actor1.birthDate).getFullYear();
-                            const actor2BirthYear = new Date(
-                                actor2.birthDate).getFullYear();
-                            return actor2BirthYear - actor1BirthYear;
-                        });
-
-                    if (actorsFilter !== '') {
-                        selectedActors = selectedActors.filter(actor => {
-                            const regExp = new RegExp(actorsFilter, 'i');
-                            return actor.name.match(regExp);
-                        });
-                    }
-
-                    // If there are no actors to display    
-                    if (selectedActors.length === 0) 
-                        return (
-                            <>
-                                
-                                <div className="actors-container" />
-                            </>
-                        );
-
-                    return (
-                        <>
-                            
-                            <Row 
-                                className="actors-container 
-                                movies-container
-                                justify-content-md-center"
-                            >
-                                <Col md={2}>
-                                    <Form>
-                                        <Form.Row>
-                                            <Col>
-                                                <SortingFactorSelect 
-                                                    options={
-                                                        [
-                                                            {
-                                                                text: 'None',
-                                                                value: 'none',
-                                                                selected: true
-                                                            },
-                                                            {
-                                                                text: 'Birth date',
-                                                                value: 'birthDate',
-                                                                selected: false
-                                                            },
-                                                            {
-                                                                text: 'Birth country',
-                                                                value: 'birthCountry',
-                                                                selected: false
-                                                            }
-                                                        ]
-                                                    }
-                                                    type="actors"
-                                                />
-                                            </Col>
-                                        </Form.Row>
-
-                                    </Form>
-                                
-                                </Col>
-                            </Row>
-                            <Row>
-                                {selectedActors.map((actor) => {
-                                    
-                                    return (
-                                        <Col key={actor._id}  md={4}>
-                                            <ListItemCard 
-                                                item={actor} 
-                                                itemType="actors"
-                                            />
-                                        </Col>
-                                    );
-                                })};
-                            </Row>;
-                        </>
-                    );
+                    if (!token) return <Redirect to="/login" />;
+                    
+                    return <ActorsView error={actorsError} />;
                 }} />
 
                 <Route path="/actors/:id" render={({history, match}) => {
                     // If user is not logged in, show login view
-                    if (!token) return showLogin();
-
-                    const actor = actors.find(
-                        
-                        actor => {
-                            // console.log(movie)
-                            return actor._id === match.params.id;
-                        }); 
+                    if (!token) return <Redirect to="/login" />;
 
                     return (
-                        <>
-                                
-                            <Row className="justify-content-md-center">
-                                <Col 
-                                    id="actor-view" 
-                                    className="view" md={6}>    
-                                    <ActorView 
-                                        actor={actor}  
-                                        onBackClick={() => history.goBack()} 
-                                    />
-                                </Col>
-                            </Row>
-                        </>
+                        <ActorView  
+                            onBackClick={() => history.goBack()} 
+                            match={match}
+                        />        
                     );
                 }} />
 
                 <Route path="/genres/:name" render={({history, match}) => {
                     // If user is not logged in, show login view
-                    if (!token) return showLogin();
-                    const selectedGenre = movies.find(
-                        ({genre}) => {
-                            return genre.name 
-                                === match.params.name;
-                        }).genre;
-                    return (
-                        <>
-                                
-                            <Row className="justify-content-md-center">
-                                <Col 
-                                    id="genre-view" 
-                                    className="view" 
-                                    md={6}
-                                >    
-                                    <GenreView 
-                                        selectedGenre={selectedGenre} 
-                                        otherMovies={movies.filter((movie) => {
-                                            return movie.name 
-                                            !== selectedMovie.name 
-                                        && movie.genre.name === 
-                                            selectedGenre.name;
-                                        })}
-                                        onBackClick={() => history.goBack()} 
-                                    />
-                                </Col>
-                            </Row>
-                        </>
+                    if (!token) return <Redirect to="/login" />;
+                    
+                    return (                         
+                        <GenreView 
+                            match={match}
+                            onBackClick={() => history.goBack()} 
+                        />
                     );
                 }} />
 
                 <Route path="/directors/:name" render={({history, match}) => {
                     // If user is not logged in, show login view
-                    if (!token) return showLogin();
-                    const selectedDirector = movies.find(
-                        ({director}) => 
-                            director.name === match.params.name).director;
+                    if (!token) return <Redirect to="/login" />;
                     
                     return (
-                        <>
-                            <Row className="justify-content-md-center">
-                                <Col 
-                                    id="director-view" 
-                                    className="view" 
-                                    md={6}
-                                >    
-                                    <DirectorView
-                                        selectedDirector={selectedDirector} 
-                                        otherMovies={movies.filter((movie) => {
-                                            return movie.name 
-                                            !== selectedMovie.name 
-                                        && movie.director.name === 
-                                            selectedDirector.name;
-                                        })}
-                                        onBackClick={() => history.goBack()} 
-                                    />
-                                </Col>
-                            </Row>;
-                        </>
+                        <DirectorView  
+                            match={match}
+                            onBackClick={() => history.goBack()} 
+                        />
                     );
                 }} />     
 
@@ -577,60 +218,34 @@ const MainView = ({
                     if (token) 
                         return <Redirect to="/" />;
 
-                    return (
-                        <>
-                                
-                            <Row className="justify-content-md-center">
-                                <Col className="form-container" md={5}>
-                                    <RegistrationView />
-                                </Col>                    
-                            </Row>
-                        </>
-                    );
+                    return (<RegistrationView />);
                 }} />
 
                 <Route path="/profile" render={() => {
                     // If user is not logged in, show login view
-                    if (!token) return showLogin();
+                    if (!token) return <Redirect to="/login" />;
                     return (
-                        <>
-                                
-                            <Row className="justify-content-md-center">
-                                <Col 
-                                    id="profile-view" 
-                                    className="form-container" 
-                                    md={8}
-                                >
-                                    <ProfileView 
-                                        onLogout={onLogout} 
-                                    />
-                                </Col>
-                            </Row>
-                        </>
+                        <ProfileView 
+                            onLogout={onLogout} 
+                        />
                     );
                 }} />
+
+                <Route path="/login" render={() => {
+                    // if user is already logged in redirect to home page
+                    if (token) 
+                        return <Redirect to="/" />;
+
+                    return <LoginView onLoggedIn={onLoggedIn} />;
+                }} />
+                
                 <Route path="/logout" render={() => {
                     showLogin('logout');
                 }} />
 
                 <Route path="/about" render={() => {
-                    return (<Row className="justify-content-md-center">
-                        <Col className="view" md={5}>
-                            <h1>Welcome to myFlix!</h1>
-                            <p>After you create a 
-                                <Link to="/register"> profile </Link> 
-                                or <Link to="/"> login </Link>,
-                                feel free to browse and sort 
-                                <Link to="/"> movies </Link> 
-                                and <Link to="/actors"> actors </Link>
-                                and add them to your favorites 
-                                or to-watch lists. You can visit your 
-                                <Link to="/profile"> profile </Link> 
-                                to view those lists 
-                                as well as edit your profile info.
-                            </p>
-                        </Col>                    
-                    </Row>);
+                    if (!token) return <Redirect to="/login" />;
+                    return <AboutView />;
                 }} />
             </Container>
         </Router>

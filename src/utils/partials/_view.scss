@@ -1,10 +1,21 @@
 @import './variables';
+.actors-container,
+.movies-container {
+    form {
+        margin-top: 2rem;
+    }  
+    .row.view-row {
+        margin: auto;
+        width: 90%;
+    }
+}
 .view {
     background-color: $secondary-background-color;
     color: #fff;
     margin-top: 4em;
     // max-width: 100%;
     padding: 0;
+    padding-bottom: 2rem;
     // width: 700px;
     .attribute {
         margin-right: 4em;
@@ -20,6 +31,13 @@
         margin-top: 4em;
         padding: 1em 10% 1em 10%;
     }
+    .card-body {
+        padding-left: 0;
+        padding-top: 0;
+    }
+    .label {
+        font-size: 15px;
+    }
     .close-box {
         background-color: $main-background-color;
         border-radius: 50%;
@@ -32,9 +50,15 @@
         text-align: center;
         top: 20px;
         // width: 36px;
+        svg {
+            color: $form-icon-color;
+        }
     }
     .description {
-        color: #b0b5bf;
+        color: $form-label-color;
+    }
+    .label {
+        margin-bottom: 0.5rem;
     }
     .image-cover {
         background-color: #fff;

@@ -16,15 +16,18 @@ import './profile-view.scss';
 const ProfileView = ({onLogout, user}) => {
 
     // Make date appear in readable format (2021-05-01)
-    // const date = new Date(response.data.birthDate);
-    // const birthdate = `${
-    //     date.getFullYear()}-${
-    //     date.getMonth() < 10 
-    //         ? `0${date.getMonth()+1}`
-    //         : date.getMonth()+1}-${date.getDate()}`;
+    let birthdate = '';
+    if (user.birthDate) {
+        const date = new Date(user.birthDate);
+        birthdate = `${
+            date.getFullYear()}-${
+            date.getMonth() < 10 
+                ? `0${date.getMonth()+1}`
+                : date.getMonth()+1}-${date.getDate()}`;
+        
+    }
 
-    const [birthDate, setBirthDate] = useState(
-        user.birthDate ? user.birthDate : '');    
+    const [birthDate, setBirthDate] = useState(birthdate);    
     const [email, setEmail] = useState(user.email);
     const oldPassword = user.password;
     const [username, setUsername] = useState(user.username);
@@ -165,240 +168,250 @@ const ProfileView = ({onLogout, user}) => {
     };
 
     return (
-        <>
-            <Row>
-                <Col>
-                    <h1>Personal Info</h1>
-                </Col>
-            </Row>
-            <Row>
+        <Row className="justify-content-md-center">
+            <Col 
+                id="profile-view" 
+                className="form-container" 
+                md={8}
+            >
+                <Row>
+                    <Col>
+                        <h1>Personal Info</h1>
+                    </Col>
+                </Row>
+                <Row>
                 
-                <Col>
+                    <Col>
                 
-                    <Form 
-                        id="edit-profile-form" 
-                        onSubmit={(e) => handleSubmit(e)}
-                    >                
-                        <Form.Group>
-                            <Form.Label className="form-label">
+                        <Form 
+                            id="edit-profile-form" 
+                            onSubmit={(e) => handleSubmit(e)}
+                        >                
+                            <Form.Group>
+                                <Form.Label className="form-label">
                                 Username
-                            </Form.Label>
-                            <FormControl
-                                id="username"
-                                type="text" 
-                                placeholder="Enter your username" 
-                                onChange={(e) => onChangeUsername(e)} 
-                                value={username} 
-                                required
-                            />      
-                        </Form.Group>
-                        <Form.Group>
-                            <Form.Label 
-                                className="form-label"
-                            >
+                                </Form.Label>
+                                <FormControl
+                                    id="username"
+                                    type="text" 
+                                    placeholder="Enter your username" 
+                                    onChange={(e) => onChangeUsername(e)} 
+                                    value={username} 
+                                    required
+                                />      
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label 
+                                    className="form-label"
+                                >
                                 Birthday
-                            </Form.Label>
-                            <FormControl
-                                id="birth-date"
-                                className={`input-container 
+                                </Form.Label>
+                                <FormControl
+                                    id="birth-date"
+                                    className={`input-container 
                                     ${birthDateError ? 'error' : ''}`
-                                }
-                                type="text" 
-                                placeholder="2021-05-10" 
-                                onChange={(e) => onChangeBirthDate(e)} 
-                                value={birthDate} 
-                            />
-                        </Form.Group>
-                        <Form.Group>
-                            <Form.Label>Email</Form.Label>
-                            <FormControl 
-                                id="email"
-                                type="email" 
-                                placeholder="me@gmail.com" 
-                                onChange={(e) => setEmail(e.target.value)} 
-                                value={email} 
-                                required
-                            />   
-                        </Form.Group>
-                        <Form.Group>
-                            <Form.Label 
-                                className="form-label"
-                            >
+                                    }
+                                    type="text" 
+                                    placeholder="2021-05-10" 
+                                    onChange={(e) => onChangeBirthDate(e)} 
+                                    value={birthDate} 
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Email</Form.Label>
+                                <FormControl 
+                                    id="email"
+                                    type="email" 
+                                    placeholder="me@gmail.com" 
+                                    onChange={(e) => setEmail(e.target.value)} 
+                                    value={email} 
+                                    required
+                                />   
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label 
+                                    className="form-label"
+                                >
                                 Old Password
-                            </Form.Label> 
-                            <FormControl 
-                                id="oldPassword"
-                                className="input-container" 
-                                type="password" 
-                                onChange={(e) => onChangeNewPassword1(e)} 
-                                placeholder="Enter your password"
-                                value={oldPassword}
-                                disabled 
-                            />
-                        </Form.Group>
-                        <Form.Row>
-                            <Col>
-                                <Form.Group>
-                                    <Form.Label 
-                                        className="form-label"
-                                    >
+                                </Form.Label> 
+                                <FormControl 
+                                    id="oldPassword"
+                                    className="input-container" 
+                                    type="password" 
+                                    onChange={(e) => onChangeNewPassword1(e)} 
+                                    placeholder="Enter your password"
+                                    value={oldPassword}
+                                    disabled 
+                                />
+                            </Form.Group>
+                            <Form.Row>
+                                <Col>
+                                    <Form.Group>
+                                        <Form.Label 
+                                            className="form-label"
+                                        >
                                         New Password
-                                    </Form.Label>
-                                    <FormControl 
-                                        id="newPassword1"
-                                        type="password" 
-                                        className={
-                                            `input-container ${
-                                                passwordMatchError 
-                                                    ? 'error' : ''
-                                            }`
-                                        } 
-                                        onChange={
-                                            (e) => onChangeNewPassword1(e)
-                                        } 
-                                        placeholder="Enter your password again"
-                                        value={newPassword1}
+                                        </Form.Label>
+                                        <FormControl 
+                                            id="newPassword1"
+                                            type="password" 
+                                            className={
+                                                `input-container ${
+                                                    passwordMatchError 
+                                                        ? 'error' : ''
+                                                }`
+                                            } 
+                                            onChange={
+                                                (e) => onChangeNewPassword1(e)
+                                            } 
+                                            placeholder="
+                                            Enter your password again"
+                                            value={newPassword1}
                                          
-                                    />                            
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group>
-                                    <Form.Label 
-                                        className="form-label"
-                                    >
+                                        />                            
+                                    </Form.Group>
+                                </Col>
+                                <Col>
+                                    <Form.Group>
+                                        <Form.Label 
+                                            className="form-label"
+                                        >
                                         Repeat Password
-                                    </Form.Label>
-                                    <FormControl 
-                                        id="newPassword2"
-                                        type="password" 
-                                        className={
-                                            `input-container ${
-                                                passwordMatchError 
-                                                    ? 'error' : ''
-                                            }`
-                                        } 
-                                        onChange={
-                                            (e) => onChangeNewPassword2(e)
-                                        } 
-                                        placeholder="Enter your password again"
-                                        value={newPassword2}
+                                        </Form.Label>
+                                        <FormControl 
+                                            id="newPassword2"
+                                            type="password" 
+                                            className={
+                                                `input-container ${
+                                                    passwordMatchError 
+                                                        ? 'error' : ''
+                                                }`
+                                            } 
+                                            onChange={
+                                                (e) => onChangeNewPassword2(e)
+                                            } 
+                                            placeholder="
+                                            Enter your password again"
+                                            value={newPassword2}
                                          
-                                    />                            
-                                </Form.Group>
-                            </Col>
-                        </Form.Row>
-                        {usernameLengthError 
-                            ? (<p className="error">
+                                        />                            
+                                    </Form.Group>
+                                </Col>
+                            </Form.Row>
+                            {usernameLengthError 
+                                ? (<p className="error">
                                 Username must be at least 6 characters long.
-                            </p>)
-                            : null
-                        }
-                        {usernameTypeError 
-                            ? (<p className="error">
+                                </p>)
+                                : null
+                            }
+                            {usernameTypeError 
+                                ? (<p className="error">
                                 Username must only contain 
                                 alphanumeric characters.
-                            </p>)
-                            : null
-                        }
-                        {birthDateError 
-                            ? (<p className="error">{birthDateError}</p>)
-                            : null
-                        }
-                        {passwordMatchError 
-                            ? (<p className="error">Passwords must match.</p>)
-                            : null
-                        } 
-                        {updateProfileError 
-                            ? (<p className="error">
+                                </p>)
+                                : null
+                            }
+                            {birthDateError 
+                                ? (<p className="error">{birthDateError}</p>)
+                                : null
+                            }
+                            {passwordMatchError 
+                                ? (<p className="error">
+                                    Passwords must match.
+                                </p>)
+                                : null
+                            } 
+                            {updateProfileError 
+                                ? (<p className="error">
                                 There was an error updating your profile. 
                                 Please try again.</p>)
-                            : null
-                        } 
-                        {successfulUpdate 
-                            ? 
-                            (<p className="text-info">
+                                : null
+                            } 
+                            {successfulUpdate 
+                                ? 
+                                (<p className="text-info">
                                     Your profile was updated successfully!
-                            </p>
-                            )   
-                            : null
-                        }            
-                        <div className="btn-container">
-                            <Button type="submit">Save Settings</Button>
-                        </div>            
-                    </Form>
-                </Col>
-                <Col>
-                    <UserList 
-                        title="Favorite Movies" 
-                        listType='favorite-movies'
-                        listTypeJS='favoriteMovies' 
-                        userId={user.id} 
-                        itemIdType="movie_id" 
-                        token={token} 
-                    />
-                    <UserList 
-                        title="To Watch Movies" 
-                        listType='to-watch-movies' 
-                        listTypeJS='toWatchMovies'
-                        userId={user.id} 
-                        itemIdType="movie_id" 
-                        token={token} 
-                    />
-                    <UserList 
-                        title="Favorite Actors" 
-                        listType='favorite-actors' 
-                        listTypeJS='favoriteActors'
-                        userId={user.id} 
-                        itemIdType="actor_id" 
-                        token={token} 
-                    />
-                </Col>
-            </Row> 
-            <Row className="justify-content-end">
-                <Col xs={12} sm={4} md={5}>
-                    <div className="delete-user-container">
-                        <svg 
-                            onClick={() => deleteUser()}
-                            xmlns="http://www.w3.org/2000/svg" 
-                            width="24" 
-                            height="24" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round" 
-                            className="feather feather-trash"
-                        >
-                            <polyline points="3 6 5 6 21 6">
-                            </polyline>
-                            <path 
-                                d="M19 6v14a2 2 0 0 
+                                </p>
+                                )   
+                                : null
+                            }            
+                            <div className="btn-container">
+                                <Button type="submit">Save Settings</Button>
+                            </div>            
+                        </Form>
+                    </Col>
+                    <Col>
+                        <UserList 
+                            title="Favorite Movies" 
+                            listType='favorite-movies'
+                            listTypeJS='favoriteMovies' 
+                            userId={user.id} 
+                            itemIdType="movie_id" 
+                            token={token} 
+                        />
+                        <UserList 
+                            title="To Watch Movies" 
+                            listType='to-watch-movies' 
+                            listTypeJS='toWatchMovies'
+                            userId={user.id} 
+                            itemIdType="movie_id" 
+                            token={token} 
+                        />
+                        <UserList 
+                            title="Favorite Actors" 
+                            listType='favorite-actors' 
+                            listTypeJS='favoriteActors'
+                            userId={user.id} 
+                            itemIdType="actor_id" 
+                            token={token} 
+                        />
+                    </Col>
+                </Row> 
+                <Row className="justify-content-end">
+                    <Col xs={12} sm={4} md={5}>
+                        <div className="delete-user-container">
+                            <svg 
+                                onClick={() => deleteUser()}
+                                xmlns="http://www.w3.org/2000/svg" 
+                                width="24" 
+                                height="24" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                className="feather feather-trash"
+                            >
+                                <polyline points="3 6 5 6 21 6">
+                                </polyline>
+                                <path 
+                                    d="M19 6v14a2 2 0 0 
                                 1-2 2H7a2 2 0 0 1-2-2V6m3
                                 0V4a2 2 0 0 1 2-2h4a2 
                                 2 0 0 1 2 2v2"
-                            >
-                            </path>
-                        </svg>
-                        <span>Delete Account</span>
-                    </div>
-                    {successfulRemoval 
-                        ? 
-                        (<p className="text-info">
+                                >
+                                </path>
+                            </svg>
+                            <span>Delete Account</span>
+                        </div>
+                        {successfulRemoval 
+                            ? 
+                            (<p className="text-info">
                             Your account was successfully deleted!</p>)   
-                        : null
-                    } 
-                    {deleteUserError
-                        ? 
-                        (<p className="error">
+                            : null
+                        } 
+                        {deleteUserError
+                            ? 
+                            (<p className="error">
                                 Your account could not be deleted. 
                                 Please try again</p>)   
-                        : null
-                    }
-                </Col>
-            </Row> 
-        </>
+                            : null
+                        }
+                    </Col>
+                </Row> 
+            </Col>
+        </Row>
     );
 };
 

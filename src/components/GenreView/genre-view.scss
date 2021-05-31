@@ -1,3 +1,12 @@
-#genre-view .image-cover {
-    height: auto;
+@import '../../utils/partials/variables';
+#genre-view {
+    .image-cover {
+        height: auto;
+    }
+    .related-attributes {
+        border-top: 1px solid $border-color;
+        // display: flex;
+        margin-top: 3rem;
+        padding-top: 3rem;
+    }
 }

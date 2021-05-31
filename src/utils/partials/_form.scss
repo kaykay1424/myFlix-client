@@ -1,12 +1,11 @@
 @import 'variables';
 .form-container {
+    align-self: flex-start;
     background-color: $secondary-background-color;
     border-radius: 2px;
     color: $form-icon-color;
-    margin-bottom: 2em;
-    margin-top: 2em;
-    // margin: 2em auto;
-    padding: 2em 0;
+    margin: 5vh auto;
+    padding: 2em 0 0 0;
     text-align: center;
     // width: 430px;
     button {
@@ -16,12 +15,19 @@
         color: #fff;
         font-size: 15px;
         height: 36px;
-        margin-top: 2em;
+        margin-bottom: 2rem;
+        margin-top: 2rem;
         width: 154px;
     }    
     form {
         margin: auto;
         width: 80%;
+        h1 {
+            color: #fff;
+            font-size: 38px;
+            font-weight: 500;
+            line-height: 1.3;
+        }
         .btn-container {
             border-top: none;
             display: flex;
@@ -32,6 +38,8 @@
         background-color: $secondary-background-color;
         border: 0 !important;
         color: $form-label-color;
+        font-size: 15px;
+        line-height: 1.6;
         outline: 0 !important;
     }  
 } // .form-container
@@ -47,6 +55,7 @@
 .form-label {
     color: $form-label-color;
     font-size: 15px;
+    line-height: 1.6;
 }
 .input-container {
     border: 1px solid $border-color;    

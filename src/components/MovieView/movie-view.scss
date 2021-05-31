@@ -5,6 +5,7 @@
     // margin: 4em auto 0 auto;
     // max-width: 100%;
     padding: 0;
+    padding-bottom: 2rem;
     // width: 700px;
     h1 {
         display: flex;
@@ -14,11 +15,12 @@
             margin-left: 10px;
         }
         svg {
+            color: $form-icon-color;
             cursor: pointer;
             height: 18px;
             &:hover,
             &.added-to-list {
-                fill: #fff;
+                fill: $form-icon-color;
             }
         }
     }

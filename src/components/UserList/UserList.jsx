@@ -90,11 +90,11 @@ const UserList = ({
         data[itemIdType] = itemId;
         axios({
             method: 'delete',
+            // eslint-disable-next-line max-len
             url: `https://my-flix-2021.herokuapp.com/users/${user.id}/${listType}/${itemId}`,
             data,
             headers:  {Authorization: `Bearer ${token}`}
         }).then(() => {
-            console.log('removed');
             const newList = list.filter(listItem => {
                 return listItem.id !== itemId;
             });
@@ -126,7 +126,6 @@ const UserList = ({
             <h4 className="heading">{title}</h4>
             <ul>
                 {list && (list.length > 0) ? list.map((item) => {
-                    console.log(user)
                     return (
                         <li className="user-list-item" key={item.id}>
                             <div className="details">
@@ -139,10 +138,13 @@ const UserList = ({
                                         {item.name}
                                     </Link>
                                 </p>
-                                <p className="description">{
-                                    createExcerpt(
-                                        item.description 
-                                        ? item.description: item.bio)} &hellip;
+                                <p 
+                                    className="description"
+                                >
+                                    {
+                                        createExcerpt(item.description 
+                                            ? item.description: item.bio)
+                                    } &hellip;
                                 </p>
                             </div>
                             <svg 

@@ -4,7 +4,11 @@
 }
 .list-item-card {
     background-color: $secondary-background-color;
-    color: $label-color;
+    color: $form-label-color;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
     // display: flex;
     // flex-direction: column;
     // padding: 1em;
@@ -26,6 +30,9 @@
     .feather-star {
         fill: gold;
         margin-right: 1em;
+    }
+    .header {
+        color: #fff;
     }
     .read-more-link {
         align-self: center;
