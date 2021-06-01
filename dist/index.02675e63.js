@@ -47520,7 +47520,7 @@ try {
     birthDate = birthDate.slice(3, birthDate.length);
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-md-center"
+        className: "justify-content-center"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
         id: "actor-view",
         className: "view",
@@ -50007,7 +50007,7 @@ try {
     });
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-md-center"
+        className: "justify-content-center"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
         id: "genre-view",
         className: "view",
@@ -50154,7 +50154,7 @@ try {
     });
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-md-center"
+        className: "justify-content-center"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
         id: "director-view",
         className: "view",
@@ -50437,7 +50437,7 @@ try {
     };
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-md-center"
+        className: "justify-content-center"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
         id: "movie-view",
         className: "view",
@@ -50662,7 +50662,7 @@ try {
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
         id: "login-view",
-        className: "justify-content-md-center view-row--form"
+        className: "justify-content-center view-row--form"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
         className: "form-container",
         md: 4
@@ -50914,12 +50914,16 @@ try {
     };
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-md-center"
+        className: "justify-content-center profile-container"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
         id: "profile-view",
         className: "form-container",
+        sm: 12,
         md: 8
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Personal Info"))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement("h1", null, "Personal Info"))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+        sm: 6,
+        md: 6
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
         id: "edit-profile-form",
         onSubmit: e => handleSubmit(e)
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, {
@@ -50992,7 +50996,10 @@ try {
         className: "btn-container"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Button, {
         type: "submit"
-      }, "Save Settings")))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
+      }, "Save Settings")))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+        sm: 6,
+        md: 6
+      }, /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
         title: "Favorite Movies",
         listType: "favorite-movies",
         listTypeJS: "favoriteMovies",
@@ -51365,7 +51372,7 @@ try {
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
         id: "registration-view",
-        className: "justify-content-md-center view-row--form"
+        className: "justify-content-center view-row--form"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
         className: "form-container",
         md: 4
@@ -51644,9 +51651,12 @@ try {
         };
       });
       content = /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "  justify-content-md-center "
+        className: "justify-content-center"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-        md: 4
+        md: 5,
+        sm: 6,
+        lg: 4,
+        xl: 4
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_ListTypeSelectListTypeSelectDefault.default, null)), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_SortingFactorSelectSortingFactorSelectDefault.default, {
         options: [{
           text: 'None',
@@ -51663,12 +51673,13 @@ try {
         }],
         type: "movies"
       })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "view-row"
+        className: "view-row justify-content-center"
       }, selectedMovies.map(movie => {
         return (
           /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
             key: movie._id,
-            md: 4
+            md: 6,
+            lg: 4
           }, /*#__PURE__*/_reactDefault.default.createElement(_ListItemCardListItemCardDefault.default, {
             item: movie,
             itemType: "movies"
@@ -51678,7 +51689,7 @@ try {
     }
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "movies-container  justify-content-md-center"
+        className: "movies-container  justify-content-center"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, content))
     );
   };
@@ -51864,7 +51875,7 @@ try {
   const ErrorMessage = ({message, type}) => {
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-md-center"
+        className: "justify-content-center"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
         md: "5"
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
@@ -52003,9 +52014,11 @@ try {
         });
       }
       content = /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: " justify-content-md-center"
+        className: " justify-content-center"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-        md: 2
+        sm: 4,
+        md: 3,
+        lg: 2
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_SortingFactorSelectSortingFactorSelectDefault.default, {
         options: [{
           text: 'None',
@@ -52022,12 +52035,13 @@ try {
         }],
         type: "actors"
       })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "view-row"
+        className: "view-row justify-content-center"
       }, selectedActors.map(actor => {
         return (
           /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
             key: actor._id,
-            md: 4
+            md: 6,
+            lg: 4
           }, /*#__PURE__*/_reactDefault.default.createElement(_ListItemCardListItemCardDefault.default, {
             item: actor,
             itemType: "actors"
@@ -52037,7 +52051,7 @@ try {
     }
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "actors-container  movies-container justify-content-md-center"
+        className: "actors-container  movies-container justify-content-center"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, content))
     );
   };
@@ -52077,7 +52091,7 @@ try {
   const AboutView = () => {
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-md-center"
+        className: "justify-content-center"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
         className: "view",
         md: 5

@@ -37,8 +37,7 @@ html {
   font-size: 15px;
   line-height: 1.6;
 }
-.container-fluid.my-flix [class*=container].row,
-.container-fluid.my-flix .view.row {
+.container-fluid.my-flix .row {
   margin: 0;
 }
 
@@ -55,10 +54,12 @@ html {
 .movies-container form {
   margin-top: 2rem;
 }
-.actors-container .row.view-row,
-.movies-container .row.view-row {
-  margin: auto;
-  width: 90%;
+.actors-container .row.view-row [class*=col],
+.movies-container .row.view-row [class*=col] {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  max-width: 350px;
 }
 
 .view {
@@ -202,10 +203,10 @@ html {
 }
 .related-attribute-card.card {
   background-color: #1e2127;
-  margin: 1em 2em 1em 0;
+  margin: 1rem 1rem 1rem 1rem;
 }
 .related-attribute-card.card img {
-  margin-bottom: 1em;
+  margin-bottom: 1rem;
 }
 #director-view .image-cover {
   height: auto;
@@ -229,10 +230,6 @@ html {
   margin-bottom: 2rem;
   margin-top: 2rem;
   width: 154px;
-}
-.form-container form {
-  margin: auto;
-  width: 80%;
 }
 .form-container form h1 {
   color: #fff;
@@ -297,6 +294,12 @@ form svg {
   color: inherit;
 }
 
+@media screen and (min-width: 992px) {
+  .form-container form {
+    margin: auto;
+    width: 80%;
+  }
+}
 #main-navbar.navbar {
   align-items: flex-start;
   background-color: #1b1d24;
@@ -406,6 +409,7 @@ form svg {
 }
 #movie-view h1 {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
 }
 #movie-view h1 small {
@@ -463,6 +467,57 @@ form svg {
 }
 #movie-view .related-attributes-card-container {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media screen and (min-width: 992px) {
+  .actor-container .row.view-row,
+.movies-container .row.view-row {
+    margin: auto;
+    width: 90%;
+  }
+
+  .form-container form {
+    margin: auto;
+    width: 80%;
+  }
+
+  .view#movie-view .related-attributes-card-container {
+    flex-wrap: nowrap;
+  }
+  .view .related-attribute-card.card {
+    margin-left: 0;
+  }
+
+  #profile h1 {
+    margin-left: 1em;
+    text-align: left;
+  }
+}
+@media screen and (min-width: 992px) {
+  .actor-container .row.view-row,
+.movies-container .row.view-row {
+    margin: auto;
+    width: 90%;
+  }
+
+  .form-container form {
+    margin: auto;
+    width: 80%;
+  }
+
+  .view#movie-view .related-attributes-card-container {
+    flex-wrap: nowrap;
+  }
+  .view .related-attribute-card.card {
+    margin-left: 0;
+  }
+
+  #profile h1 {
+    margin-left: 1em;
+    text-align: left;
+  }
 }
 .form-container {
   align-self: flex-start;
@@ -483,10 +538,6 @@ form svg {
   margin-bottom: 2rem;
   margin-top: 2rem;
   width: 154px;
-}
-.form-container form {
-  margin: auto;
-  width: 80%;
 }
 .form-container form h1 {
   color: #fff;
@@ -538,6 +589,9 @@ form svg {
   color: #1e2127;
 }
 
+form .form-row [class*=col] {
+  align-self: flex-end;
+}
 form svg {
   color: #f5f5f5;
 }
@@ -585,31 +639,58 @@ form svg {
   justify-content: space-between;
 }
 .user-list .user-list-item .details p {
-  margin: 5px 0 5px 0;
+  margin: 5px 0;
+}
+.user-list .user-list-item .details p:first-child {
+  margin-top: 0;
 }
 .user-list .user-list-item .details .description {
   color: #828d99;
   font-size: 13px;
   line-height: 1.5;
+  margin-bottom: 10px;
 }
 .user-list .user-list-item .list-type {
   text-transform: capitalize;
 }
 .user-list .user-list-item svg {
-  align-self: flex-end;
+  align-self: flex-start;
   color: #bec2cc;
   cursor: pointer;
   height: 18px;
 }
+@media screen and (min-width: 992px) {
+  .actor-container .row.view-row,
+.movies-container .row.view-row {
+    margin: auto;
+    width: 90%;
+  }
+
+  .form-container form {
+    margin: auto;
+    width: 80%;
+  }
+
+  .view#movie-view .related-attributes-card-container {
+    flex-wrap: nowrap;
+  }
+  .view .related-attribute-card.card {
+    margin-left: 0;
+  }
+
+  #profile h1 {
+    margin-left: 1em;
+    text-align: left;
+  }
+}
 #profile-view {
   margin-top: 4rem;
 }
+#profile-view h1 {
+  text-align: left;
+}
 #profile-view form .btn-container {
   justify-content: flex-start;
-}
-#profile-view h1 {
-  margin-left: 1em;
-  text-align: left;
 }
 #profile-view .delete-user-container {
   margin-bottom: 2rem;
@@ -644,6 +725,7 @@ form svg {
   color: #bec2cc;
   margin-bottom: 2rem;
   margin-top: 2rem;
+  max-width: 350px;
   padding-bottom: 1rem;
   padding-top: 1rem;
 }
@@ -678,5 +760,90 @@ form svg {
 .list-item-card .read-more-link-container {
   display: flex;
 }
+.actors-container form,
+.movies-container form {
+  margin-top: 2rem;
+}
+.actors-container .row.view-row [class*=col],
+.movies-container .row.view-row [class*=col] {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  max-width: 350px;
+}
 
+.view {
+  background-color: #1e2127;
+  color: #fff;
+  margin-top: 4em;
+  padding: 0;
+  padding-bottom: 2rem;
+}
+.view .attribute {
+  margin-right: 4em;
+}
+.view .attribute .label + p {
+  color: #117dce;
+}
+.view .attributes {
+  border-bottom: 1px solid #30333a;
+  border-top: 1px solid #30333a;
+  display: flex;
+  margin-bottom: 4em;
+  margin-top: 4em;
+  padding: 1em 10% 1em 10%;
+}
+.view .card-body {
+  padding-left: 0;
+  padding-top: 0;
+}
+.view .label {
+  font-size: 15px;
+}
+.view .close-box {
+  background-color: #1b1d24;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  padding: 3px;
+  position: absolute;
+  right: 30px;
+  text-align: center;
+  top: 20px;
+}
+.view .close-box svg {
+  color: #f5f5f5;
+}
+.view .description {
+  color: #bec2cc;
+}
+.view .label {
+  margin-bottom: 0.5rem;
+}
+.view .image-cover {
+  background-color: #fff;
+  background-position: top center;
+  background-repeat: no-repeat;
+  height: 200px;
+  position: relative;
+}
+.view .main-content {
+  margin-top: 4em;
+  padding-left: 10%;
+  padding-right: 10%;
+}
+.view .related-attributes {
+  padding-left: 10%;
+  padding-right: 10%;
+}
+.view .related-attributes img {
+  max-width: 100%;
+}
+.view .related-attributes .card {
+  display: inline-block;
+}
+.view .source-container {
+  padding-left: 10%;
+  padding-right: 10%;
+}
 /*# sourceMappingURL=index.d22b8a02.css.map */

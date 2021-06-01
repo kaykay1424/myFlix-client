@@ -96,7 +96,7 @@ const MovieView = ({
     };
 
     return (
-        <Row className="justify-content-md-center">
+        <Row className="justify-content-center">
             <Col 
                 id="movie-view" 
                 className="view" md={6}>

@@ -28,7 +28,7 @@ const GenreView = ({
                 selectedGenre.name;
     });
     return (
-        <Row className="justify-content-md-center">
+        <Row className="justify-content-center">
             <Col 
                 id="genre-view" 
                 className="view" 

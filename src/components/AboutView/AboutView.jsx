@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom';
 
 const AboutView = () => {
     return (
-        <Row className="justify-content-md-center">
+        <Row className="justify-content-center">
             <Col className="view" md={5}>
                 <h1 className="text-center">Welcome to myFlix!</h1>
                 <p className="description">

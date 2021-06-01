@@ -3,10 +3,14 @@
 .movies-container {
     form {
         margin-top: 2rem;
-    }  
+    } 
     .row.view-row {
-        margin: auto;
-        width: 90%;
+        [class*="col"] {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            max-width: 350px;
+        }
     }
 }
 .view {

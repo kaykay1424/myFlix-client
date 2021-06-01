@@ -42,7 +42,7 @@ const ActorView = ({
     birthDate = birthDate.slice(3,birthDate.length); 
 
     return (
-        <Row className="justify-content-md-center">
+        <Row className="justify-content-center">
             <Col 
                 id="actor-view" 
                 className="view" md={6}>    

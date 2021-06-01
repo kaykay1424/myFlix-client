@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'variables', 'media-queries';
 .form-container {
     align-self: flex-start;
     background-color: $secondary-background-color;
@@ -20,8 +20,6 @@
         width: 154px;
     }    
     form {
-        margin: auto;
-        width: 80%;
         h1 {
             color: #fff;
             font-size: 38px;
@@ -70,8 +68,15 @@
         }
     }    
 }
-form svg {
-    color: $form-icon-color;
+form {
+    .form-row {
+        [class*="col"] {
+            align-self: flex-end;
+        }
+    }
+    svg {
+        color: $form-icon-color;
+    }
 }
 [class*="input-group"].focused {
     background-color: #fff;

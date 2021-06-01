@@ -1,12 +1,11 @@
-@import '../../utils/partials/variables';
+@import '../../utils/partials/variables', '../../utils/partials/media-queries';
 #profile-view {
     margin-top: 4rem;
+    h1 {
+        text-align: left;
+    }
     form .btn-container {
         justify-content: flex-start;
-    }
-    h1 {
-        margin-left: 1em;
-        text-align: left;
     }
     .delete-user-container { 
         margin-bottom: 2rem;

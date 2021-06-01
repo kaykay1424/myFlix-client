@@ -28,7 +28,7 @@ const LoginView = ({onLoggedIn}) => {
     };
 
     return (  
-        <Row id="login-view" className="justify-content-md-center view-row--form">
+        <Row id="login-view" className="justify-content-center view-row--form">
             <Col className="form-container" md={4}>
                 <>            
                     <Form 

@@ -4,7 +4,7 @@ import {Col, Row} from 'react-bootstrap';
 
 const ErrorMessage = ({message, type}) => {
     return (
-        <Row className="justify-content-md-center">
+        <Row className="justify-content-center">
             <Col md="5"> 
                 <div 
                     className={`text-${type}`}

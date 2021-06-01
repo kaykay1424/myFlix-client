@@ -1,0 +1,29 @@
+@media screen and (min-width: 992px) {
+    .actor-container,
+    .movies-container {
+        .row.view-row {
+            margin: auto;
+            width: 90%;
+        }
+    }
+    .form-container {
+        form {
+            margin: auto;
+            width: 80%;
+        }
+    }
+    .view {
+        &#movie-view .related-attributes-card-container {
+            flex-wrap: nowrap;
+        }
+        .related-attribute-card.card {
+            margin-left: 0;
+        }
+    }
+    #profile {
+        h1 {
+            margin-left: 1em;
+            text-align: left;
+        }
+    }
+}

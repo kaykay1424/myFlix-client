@@ -81,11 +81,9 @@ const MoviesView = ({
             <>
                         
                 <Row 
-                    className=" 
-            justify-content-md-center
-            "
+                    className="justify-content-center"
                 >
-                    <Col md={4}>
+                    <Col md={5} sm={6} lg={4} xl={4}>
                         <Form>
                             <Form.Row>
                                 <Col>
@@ -122,10 +120,10 @@ const MoviesView = ({
                             
                     </Col>
                 </Row>
-                <Row className="view-row">
+                <Row className="view-row justify-content-center">
                     {selectedMovies.map((movie) => {
                         return (
-                            <Col key={movie._id}  md={4}>
+                            <Col key={movie._id} md={6} lg={4}>
                                 <ListItemCard 
                                     item={movie} 
                                     itemType="movies"
@@ -140,7 +138,7 @@ const MoviesView = ({
 
     return (
         <Row className="movies-container 
-    justify-content-md-center"
+    justify-content-center"
         >
             <Col>
                 {content}

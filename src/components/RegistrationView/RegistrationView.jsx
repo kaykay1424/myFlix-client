@@ -115,7 +115,7 @@ const RegistrationView = () => {
         }
     };
 
-    return (<Row id="registration-view" className="justify-content-md-center view-row--form">
+    return (<Row id="registration-view" className="justify-content-center view-row--form">
         <Col className="form-container" md={4}>
             <Form 
                 id="registration-form" 

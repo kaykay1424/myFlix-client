@@ -17,19 +17,23 @@
         justify-content: space-between;
         .details {
             p {
-                margin: 5px 0 5px 0;
+                margin: 5px 0;
+            }
+            p:first-child {
+                margin-top: 0;
             }
             .description {
                 color: $label-color;
                 font-size: 13px;
                 line-height: 1.5;
+                margin-bottom: 10px;
             }
         }
         .list-type {
             text-transform: capitalize;
         }
         svg {
-            align-self: flex-end;
+            align-self: flex-start;
             color: $form-label-color;
             cursor: pointer;
             height: 18px;

@@ -1,4 +1,5 @@
 @import '../../utils/partials/variables';
+
 #movie-view {
     background-color: $secondary-background-color;
     color: #fff;
@@ -9,6 +10,7 @@
     // width: 700px;
     h1 {
         display: flex;
+        flex-wrap: wrap;
         justify-content: space-between;
         small {
             font-size: 40%;
@@ -70,5 +72,8 @@
     }
     .related-attributes-card-container {
         display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
+@import '../../utils/partials/media-queries';

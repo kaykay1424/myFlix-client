@@ -168,10 +168,11 @@ const ProfileView = ({onLogout, user}) => {
     };
 
     return (
-        <Row className="justify-content-md-center">
+        <Row className="justify-content-center profile-container">
             <Col 
                 id="profile-view" 
                 className="form-container" 
+                sm={12}
                 md={8}
             >
                 <Row>
@@ -181,7 +182,7 @@ const ProfileView = ({onLogout, user}) => {
                 </Row>
                 <Row>
                 
-                    <Col>
+                    <Col sm={6} md={6}>
                 
                         <Form 
                             id="edit-profile-form" 
@@ -340,7 +341,7 @@ const ProfileView = ({onLogout, user}) => {
                             </div>            
                         </Form>
                     </Col>
-                    <Col>
+                    <Col sm={6} md={6}>
                         <UserList 
                             title="Favorite Movies" 
                             listType='favorite-movies'

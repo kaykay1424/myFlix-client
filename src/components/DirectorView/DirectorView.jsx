@@ -26,7 +26,7 @@ const DirectorView = ({
                 selectedDirector.name;
     });
     return (
-        <Row className="justify-content-md-center">
+        <Row className="justify-content-center">
             <Col 
                 id="director-view" 
                 className="view" 
