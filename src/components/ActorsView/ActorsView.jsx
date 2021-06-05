@@ -1,35 +1,41 @@
+/************* Modules ***************/
+
 import React from 'react';
 import {Col, Form, Row} from 'react-bootstrap';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 
+/************** Components ************/
+
 import ListItemCard from '../ListItemCard/ListItemCard';
 import Message from '../Message/Message';
 import SortingFactorSelect from '../SortingFactorSelect/SortingFactorSelect';
+
 import '../../utils/partials/_view.scss';
 
 const ActorsView = ({
     actors,
     actorsFilter,
     actorsSortingFactor,
-    error
+    error,
+    errorType
 }) => {
     let content;
     // if there is an error loading the actors
-    if (error) {
+    if (error && errorType === 'error') {
         content = (
             <Message 
-                message="The list of actors could not be loaded. 
-                Please try again" 
-                type="error" />
+                message={error} type={errorType} />
         );
-        // If there are no actors to display    
-    } else if (actors.length === 0) {
+    // If there are no actors to display    
+    } else if (error && errorType === 'info') {
         content = (<Message 
-            message="There are no actors to display." type="info" />);
+            message={error} type={errorType} />);
+    // If there are actors to display    
     } else {             
         let selectedActors = [...actors];
-   
+        
+        // Sort actors by their birth country
         if (actorsSortingFactor === 'birthCountry') {
             selectedActors.sort((actor1, actor2) => {
                 if (actor1.birthCountry > actor2.birthCountry)
@@ -41,6 +47,7 @@ const ActorsView = ({
             });
         }
 
+        // Sort actors by their birthday
         if (actorsSortingFactor === 'birthDate')
             selectedActors.sort((actor1, actor2) => {
                 const actor1BirthYear = new Date(
@@ -50,6 +57,7 @@ const ActorsView = ({
                 return actor2BirthYear - actor1BirthYear;
             });
 
+        // Filter actors by search term     
         if (actorsFilter !== '') {
             selectedActors = selectedActors.filter(actor => {
                 const regExp = new RegExp(actorsFilter, 'i');
@@ -58,8 +66,7 @@ const ActorsView = ({
         }
 
         content = (
-            <>
-                            
+            <>                            
                 <Row 
                     className="
                 justify-content-center"
@@ -92,23 +99,22 @@ const ActorsView = ({
                                     />
                                 </Col>
                             </Form.Row>
-
-                        </Form>
-                                
+                        </Form>                                
                     </Col>
                 </Row>
                 <Row className="view-row justify-content-center">
-                    {selectedActors.map((actor) => {
-                                    
-                        return (
-                            <Col key={actor._id} md={6} lg={4}>
-                                <ListItemCard 
-                                    item={actor} 
-                                    itemType="actors"
-                                />
-                            </Col>
-                        );
-                    })};
+                    {/* Display list of actors */}
+                    {selectedActors.map(
+                        (actor) => {                                    
+                            return (
+                                <Col key={actor._id} md={6} lg={4}>
+                                    <ListItemCard 
+                                        item={actor} 
+                                        itemType="actors"
+                                    />
+                                </Col>
+                            );
+                        })};
                 </Row>;
             </>
         );
@@ -131,7 +137,14 @@ ActorsView.propTypes = {
     actors: PropTypes.array.isRequired,
     actorsFilter: PropTypes.string.isRequired,
     actorsSortingFactor: PropTypes.string.isRequired,
-    error: PropTypes.string.isRequired
+    error: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.bool
+    ]).isRequired,
+    errorType: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.bool
+    ]).isRequired,
 };
 
 const mapStateToProps = state => ({

@@ -1,3 +1,5 @@
+/************ Modules *************/
+
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
@@ -13,7 +15,6 @@ import {
 import {makeTextReadable} from '../../utils/helpers';
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
 import {addToList} from '../../utils/helpers';
-import '../../utils/partials/_view.scss';
 import './movie-view.scss';
 
 const MovieView = ({
@@ -23,9 +24,20 @@ const MovieView = ({
     favoritedMovies,
     match,
     movies,
-    setSelectedMovie, 
+    setSelectedMovie,
+    setFavoritedMovies, 
     onBackClick, 
-    user}) => {   
+    user}) => { 
+    // If the list of actors or movies is empty
+    // stop execution of function
+    // as is is needed for component to function properly   
+    if (movies.length === 0 || actors.length === 0) 
+        return null;
+    
+    // These variables determine whether user icons (heart/bookmark) should be 
+    // filled (movie has been added to favoriteMovies/toWatchMovies list) 
+    // or empty (movie has not been added to 
+    // favoriteMovies/toWatchMovies list)    
     const [favorited, setFavorited] = useState(false);
     const [willWatch, setWillWatch] = useState(false);
 
@@ -33,6 +45,7 @@ const MovieView = ({
         setSelectedMovie(movie);
     },[]);
 
+    // Get list of movies with usersFavorited property added for each movie
     const fullSelectedMovies = movies.map(movie => {
         let usersFavorited = 0;
         for (let i = 0; i < favoritedMovies.length; i++) {
@@ -45,12 +58,15 @@ const MovieView = ({
             usersFavorited
         };
     });
-    const movie = fullSelectedMovies.find(
-                
+
+    // Find movie based on id param in url
+    const movie = fullSelectedMovies.find(      
         movie => {
             return movie._id === match.params.id;
         }); 
-        
+    
+    // Get list of movie's stars with actor's id/image properties
+    // for each star
     const movieActors = movie.stars.map((star) => {
         const matchingActor = actors.find((actor) => {
             return star.actor === actor.name;
@@ -63,7 +79,7 @@ const MovieView = ({
         };
     });
     
-
+    // Add movie to user's favorite movies list
     const addToFavoritesList = () => {
         addToList(
             user.id, 
@@ -72,18 +88,37 @@ const MovieView = ({
             'movie_id').then(() => {
             setFavorited(true);
             addUserFavoriteMovie(movie._id);
-            setFavoritedMovies(favoritedMovies.map(favoritedMovie => {
-                if (favoritedMovie.name === movie.name) {
+            let newFavoritedMovies;
+
+            // If movie is already in favoritedMovies list
+            // get list of favoritedMovies with movie's usersFavorited property
+            // increased by 1
+            if (favoritedMovies.find(favoritedMovie => {
+                return favoritedMovie.name === movie.name;
+            })) {
+                newFavoritedMovies = favoritedMovies.map(favoritedMovie => {
+                    let usersFavorited = favoritedMovie.usersFavorited;
+                    if (favoritedMovie.name == movie.name) {
+                        usersFavorited++;
+                        
+                    }
                     return {
-                        ...movie,
-                        usersFavorited: favoritedMovie.usersFavorited++
+                        ...favoritedMovie,
+                        usersFavorited: usersFavorited 
                     };
-                }
-                return movie;
-            }));
+                });
+            // Otherwise add movie to favoritedMovies 
+            // with a usersFavorited property of 1    
+            } else {
+                const newFavoriteMovie = {...movie};
+                newFavoriteMovie.usersFavorited = 1;
+                newFavoritedMovies = [...favoritedMovies, newFavoriteMovie];
+            }
+            setFavoritedMovies(newFavoritedMovies);
         });
     };
 
+    // Add movie to user's to-watch movies list
     const addToWatchList = () => {
         addToList(
             user.id, 
@@ -101,7 +136,7 @@ const MovieView = ({
                 id="movie-view" 
                 className="view" md={6}>
                 <div 
-                    className="image-cover" 
+                    className="heading-box" 
                     style={
                         {
                             backgroundImage: `url(${movie.image})`
@@ -109,7 +144,7 @@ const MovieView = ({
                     }
                 >
                     <div className="close-box">
-                        <svg 
+                        <svg /* X icon */
                             onClick={
                                 () => onBackClick()
                             }                            
@@ -130,9 +165,10 @@ const MovieView = ({
                     </div>
                 </div>
                 <div className="main-content">
-                    <h1>
+                    <h1 className="main-heading">
                         <span>
                             {movie.name}
+                            {/* Show 'Featured' text if movie is featured */}
                             {movie.featured 
                                 ? (<small> (Featured)</small>)
                                 : null
@@ -140,7 +176,7 @@ const MovieView = ({
                         </span>
                     
                         <div className="user-list-icons">
-                            <svg 
+                            <svg /* Heart icon */
                                 onClick={() => addToFavoritesList()}
                                 xmlns="http://www.w3.org/2000/svg" 
                                 width="24" 
@@ -172,7 +208,7 @@ const MovieView = ({
                                 >
                                 </path>
                             </svg>
-                            <svg 
+                            <svg /* Bookmark icon */
                                 onClick={() => addToWatchList()}
                                 xmlns="http://www.w3.org/2000/svg" 
                                 width="24" 
@@ -204,23 +240,25 @@ const MovieView = ({
                         </div>
                     </h1>
                     <p className="label">Description</p>
-                    <p 
+                    <div 
                         className="description"
                     >
                         {makeTextReadable(movie.description)}
-                    </p>
+                    </div>
                     <p className="label">Release Year</p>
                     <p className="description">{movie.releaseYear}</p>
                     <p className="label">Rating</p>
                     <p className="description">{movie.rating}</p>
+                    {/* Only show favorites section 
+                    if movie has been favorited by at least 1 user */}
                     {movie.usersFavorited > 0
                         ? (<>
                             <p className="label">Favorites by users</p>
-                            <p 
+                            <div 
                                 className="description"
                             >
                                 {movie.usersFavorited}
-                            </p>
+                            </div>
                         </>)
                         : null}
                 </div>                      
@@ -239,17 +277,18 @@ const MovieView = ({
                         </Link>
                     </div>
                 </div> 
+                {/* Only show movie's stars section 
+                   if list of movie's stars is not empty  */}
                 {movie.stars.length > 0
                     ? (<>
                         <div className="related-attributes">
                             <h3>Stars of <i>{movie.name}</i> </h3>
                             <div className="related-attributes-card-container">
-
-                        
+                                {/* Display list of movie's stars */}
                                 {
                                     movieActors.map((actor, i) => 
-                                    
                                     {
+                                        const actorLink = `/actors/${actor.id}`;
                                         return <RelatedAttributeCard 
                                             key={i}
                                             image={actor.image} 
@@ -258,10 +297,11 @@ const MovieView = ({
                                                     <p className="label">
                                                         <b>Actor: </b> <br/>
                                                         <span 
-                                                            className="description"
+                                                            className=
+                                                                "description"
                                                         >
                                                             <Link 
-                                                                to={`/actors/${actor.id}`} 
+                                                                to={actorLink} 
                                                             > 
                                                                 {actor.actor}
                                                             </Link>
@@ -270,14 +310,16 @@ const MovieView = ({
                                                     <p className="label">
                                                         <b>Character: </b> <br/>
                                                         <span 
-                                                            className="description"
+                                                            className=
+                                                                "description"
                                                         >
                                                             {actor.character}
                                                         </span>
                                                     </p>
                                                 </>
                                             } 
-                                        />;})  
+                                        />;
+                                    })  
                                 }
                             </div>
                         </div>
@@ -303,29 +345,9 @@ MovieView.propTypes = {
     addUserFavoriteMovie: PropTypes.func.isRequired,
     addUserToWatchMovie: PropTypes.func.isRequired,
     favoritedMovies: PropTypes.array.isRequired,
-    match: PropTypes.string.isRequired,
-    movie: PropTypes.shape({
-        _id: PropTypes.string.isRequired,
-        description: PropTypes.string.isRequired,
-        director: PropTypes.shape({
-            name: PropTypes.string.isRequired
-        }).isRequired,
-        featured: PropTypes.bool, 
-        genre: PropTypes.shape({
-            name: PropTypes.string.isRequired
-        }).isRequired,
-        image: PropTypes.string.isRequired,
-        imdbLink: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired,
-        rating: PropTypes.number,
-        releaseYear: PropTypes.number,
-        stars: PropTypes.array,
-        usersFavorited: PropTypes.number
-    }).isRequired,
-    movieActors: PropTypes.array.isRequired,
+    match: PropTypes.object.isRequired,
     movies: PropTypes.array.isRequired,
     onBackClick: PropTypes.func.isRequired,
-    onItemClick: PropTypes.func.isRequired,
     setSelectedMovie: PropTypes.func.isRequired,
     setFavoritedMovies: PropTypes.func.isRequired,
     user: PropTypes.shape({
@@ -346,5 +368,6 @@ export default connect(mapStateToProps, {
     addUserFavoriteMovie, 
     addUserToWatchMovie,
     setFavoritedMovies,
-    setSelectedMovie})(MovieView);
+    setSelectedMovie
+})(MovieView);
 

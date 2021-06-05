@@ -1,63 +1,86 @@
+/************ Modules *************/
+
 import React from 'react';
 import {Col, Form, Row} from 'react-bootstrap';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 
+/************ Components *************/
+
 import ListItemCard from '../ListItemCard/ListItemCard';
 import ListTypeSelect from '../ListTypeSelect/ListTypeSelect';
 import Message from '../Message/Message';
 import SortingFactorSelect from '../SortingFactorSelect/SortingFactorSelect';
-import './movies-view.scss';
+
+import '../../utils/partials/_view.scss';
 
 const MoviesView = ({
+    error,
+    errorType,
     favoritedMovies,
     featuredMovies,
     movies, 
     moviesFilter,
     moviesListType,
     moviesSortingFactor,
-    error
 }) => {
     
     let content;
-    // if there is an error loading the movies
-    if (error) {
+    // if there is an error loading the movies    
+    if (error && errorType === 'error') {
         content = (
             <Message 
-                message="The list of movies could not be loaded. 
-                Please try again" type="error" />
+                message={error} type={errorType} />
         );
-        // If there are no movies to display    
-    } else if (movies.length === 0) {
+    // If there are no movies to display    
+    } else if (error && errorType === 'info') {
         content = (<Message 
-            message="There are no movies to display." type="info" />);
+            message={error} type={errorType} />);
+    // If there are movies to display          
     } else {   
+        let originalSelectedMovies; // will not be sorted
         let selectedMovies;
-        if (moviesListType === 'all') 
+
+        // Select list type
+
+        // Select all movies
+        if (moviesListType === 'all') {
+            originalSelectedMovies = [...movies];
             selectedMovies = [...movies];
-        if (moviesListType === 'featured') 
-            selectedMovies = featuredMovies;
+        }
+
+        // Select featured movies
+        if (moviesListType === 'featured') {
+            originalSelectedMovies = [...featuredMovies];
+            selectedMovies = [...featuredMovies];
+        }
+
+        // Select favorited movies
         if (moviesListType === 'favorited') {
-            selectedMovies = favoritedMovies;
-            selectedMovies = movies.filter(movie => {
-                for (let i = 0; i < selectedMovies.length; i++) {
-                    if (Object.values(
-                        selectedMovies[i]).indexOf(movie.name) > -1)
-                        return true;
-                }
-                return false;
-            });
+            originalSelectedMovies = [...favoritedMovies];
+            selectedMovies = [...favoritedMovies];
+        }
+
+        // Sort list if needed
+
+        // If no sorting factor is selected, use original selected list
+        if (moviesSortingFactor === 'none') {
+            selectedMovies = [...originalSelectedMovies];
         }
     
+        // Sort movies by rating
         if (moviesSortingFactor === 'rating') 
             selectedMovies.sort((movie1, movie2) => {
                 return movie2.rating - movie1.rating;
             });
+        
+        // Sort movies by releaseYear    
         if (moviesSortingFactor === 'releaseYear')
             selectedMovies.sort((movie1, movie2) => {
                 return movie2.releaseYear - movie1.releaseYear;
             });
 
+        // Filter movies by search term
         if (moviesFilter !== '') {
             selectedMovies = selectedMovies.filter(movie => {
                 const regExp = new RegExp(moviesFilter, 'i');
@@ -65,6 +88,8 @@ const MoviesView = ({
             });
         }
 
+        // Add usersFavorited property to selected movies
+        // (not needed for favoritedMovies)
         selectedMovies = selectedMovies.map(movie => {
             let usersFavorited = 0;
             for (let i = 0; i < favoritedMovies.length; i++) {
@@ -77,6 +102,7 @@ const MoviesView = ({
                 usersFavorited
             };
         }); 
+
         content = (
             <>
                         
@@ -113,14 +139,12 @@ const MoviesView = ({
                                         type="movies"
                                     />
                                 </Col>
-                            </Form.Row>
-                                
-                                
-                        </Form>
-                            
+                            </Form.Row>   
+                        </Form> 
                     </Col>
                 </Row>
                 <Row className="view-row justify-content-center">
+                    {/* Display list of movies */}
                     {selectedMovies.map((movie) => {
                         return (
                             <Col key={movie._id} md={6} lg={4}>
@@ -150,13 +174,21 @@ const MoviesView = ({
 };
 
 MoviesView.propTypes = {
+    error: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.bool
+    ]).isRequired,
+    errorType: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.bool
+    ]).isRequired,
     favoritedMovies: PropTypes.array.isRequired,
     featuredMovies: PropTypes.array.isRequired,
     movies: PropTypes.array.isRequired, 
     moviesFilter: PropTypes.string.isRequired,
     moviesListType: PropTypes.string.isRequired,
     moviesSortingFactor: PropTypes.string.isRequired,
-    error: PropTypes.string.isRequired
+    
 };
 
 const mapStateToProps = state => {

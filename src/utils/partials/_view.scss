@@ -1,9 +1,6 @@
 @import './variables';
 .actors-container,
 .movies-container {
-    form {
-        margin-top: 2rem;
-    } 
     .row.view-row {
         [class*="col"] {
             align-items: center;
@@ -16,14 +13,11 @@
 .view {
     background-color: $secondary-background-color;
     color: #fff;
-    margin-top: 4em;
-    // max-width: 100%;
     padding: 0;
     padding-bottom: 2rem;
-    // width: 700px;
     .attribute {
         margin-right: 4em;
-        .label + p {
+        .label + a {
             color: $link-color;
         }
     }
@@ -47,13 +41,11 @@
         border-radius: 50%;
         cursor: pointer;
         display: flex;
-        // height: 36px;
         padding: 3px;
         position: absolute;
         right: 30px;
         text-align: center;
         top: 20px;
-        // width: 36px;
         svg {
             color: $form-icon-color;
         }
@@ -64,21 +56,39 @@
     .label {
         margin-bottom: 0.5rem;
     }
-    .image-cover {
+    .heading-box {
         background-color: #fff;
         // background-size: cover; 
         background-position: top center; 
         background-repeat: no-repeat; 
         height: 200px;
         position: relative;
+        &.heading-box--no-image {
+            height: auto;
+        }
     }
     .main-content {
         margin-top: 4em;
         padding-left: 10%;
         padding-right: 10%;
     }
+    .main-heading {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        svg {
+            height: 18px;
+            &:hover,
+            &.added-to-list {
+                cursor: pointer;
+                fill: #fff;
+            } 
+        }
+        svg.added-to-list:hover {
+            cursor: not-allowed;
+        }
+    }
     .related-attributes {
-        // display: flex;
         padding-left: 10%;
         padding-right: 10%;
         img {

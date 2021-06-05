@@ -1,35 +1,36 @@
-import React, {useState, useEffect} from 'react';
+/************ Modules *************/
+
+import React, {useState} from 'react';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 import {Button, Col, Form, FormControl, InputGroup, Row} from 'react-bootstrap';
 
 import {addFocusedClass, removeFocusedClass} from '../../utils/helpers';
-import '../../utils/partials/_form.scss';
+
 import './registration-view.scss';
 
-const RegistrationView = () => {
+const RegistrationView = ({history}) => {
     const [birthDate, setBirthDate] = useState('');
-    const [birthDateError, setBirthDateError] = useState(false);
     const [email, setEmail] = useState('');
     const [password1, setPassword1] = useState('');
     const [password2, setPassword2] = useState('');
+    const [username, setUsername] = useState('');
+
+    const [birthDateError, setBirthDateError] = useState(false);
     const [passwordMatchError, setPasswordMatchError] = useState(false);
     const [usernameLengthError, setUsernameLengthError] = useState(false);
     const [usernameTypeError, setUsernameTypeError] = useState(false);
     const [registrationError, setRegistrationError] = useState(false);
-    const [username, setUsername] = useState('');
     
-    useEffect(() => {
-        document.body.style.backgroundColor = '#0376E3';
-        return () => {
-            document.body.style.backgroundColor = '#1B1D24';
-        };
-    });
-
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Reset error values
+        // Reset error values so errors will be removed, 
+        // until the errors occur again
         setBirthDateError(false);
         setPasswordMatchError(false);
+        setUsernameLengthError(false);
+        setUsernameTypeError(false);
+        setRegistrationError(false);
 
         // Make sure passwords match
         if (password1 !== password2) {
@@ -37,20 +38,22 @@ const RegistrationView = () => {
             return;
         }
 
-        const user = {
+        const newUser = {
             password: password1,
             email,
             username            
         };
 
         // Check if birthDate was entered and if it is valid
-        // if it is add it to user object       
-        if (!validateBirthDate()) return;
-        user['birthDate'] = birthDate;
-
-        axios.post('https://my-flix-2021.herokuapp.com/users', user)
+        // if it is add it to newUser object       
+        if (birthDate !== '') {
+            if (!validateBirthDate()) return;
+            newUser['birthDate'] = birthDate;
+        }
+ 
+        axios.post('https://my-flix-2021.herokuapp.com/users', newUser)
             .then(() => {
-                window.open('/', '_self');               
+                history.push('/login');               
             }, (err) => {
                 setRegistrationError(err);
             });
@@ -102,21 +105,25 @@ const RegistrationView = () => {
     };
 
     const validateBirthDate = (birthdate=birthDate) => {   
-        if (birthdate === '') return true;     
         const regex = /\d\d\d\d-\d\d-\d\d/; // valid date format
+
+        // If birthday is not valid
         if (!birthdate.match(regex)) {            
             setBirthDateError(`${birthdate} is not a valid date. 
                 Please enter a date in this format: yyyy-mm-dd`
             );
             return false;
+        // If birthday is valid
         } else if (birthdate && birthdate.match(regex)) {
-            setBirthDateError(null);
+            setBirthDateError(false);
             return true;
         }
     };
 
-    return (<Row id="registration-view" className="justify-content-center view-row--form">
-        <Col className="form-container" md={4}>
+    return (<Row 
+        id="registration-view" 
+        className="justify-content-center view-row--form">
+        <Col className="form-container" sm={6} md={4}>
             <Form 
                 id="registration-form" 
                 onSubmit={(e) => handleSubmit(e)}
@@ -144,7 +151,7 @@ const RegistrationView = () => {
                         />
                         <InputGroup.Append>
                             <InputGroup.Text>
-                                <svg 
+                                <svg /* User icon */
                                     xmlns="http://www.w3.org/2000/svg" 
                                     width="24" 
                                     height="24" 
@@ -154,7 +161,7 @@ const RegistrationView = () => {
                                     strokeWidth="2" 
                                     strokeLinecap="round" 
                                     strokeLinejoin="round" 
-                                    className="feather feather-user"
+                                    className="feather feather-newUser"
                                 >
                                     <path 
                                         d="M20 21v-2a4
@@ -189,7 +196,7 @@ const RegistrationView = () => {
                         />
                         <InputGroup.Append>
                             <InputGroup.Text>
-                                <svg 
+                                <svg /* Calendar icon */ 
                                     xmlns="http://www.w3.org/2000/svg" 
                                     width="24" 
                                     height="24" 
@@ -236,7 +243,7 @@ const RegistrationView = () => {
                         />
                         <InputGroup.Append>
                             <InputGroup.Text>
-                                <svg 
+                                <svg /* Mail icon */
                                     xmlns="http://www.w3.org/2000/svg" 
                                     width="24" 
                                     height="24" 
@@ -255,7 +262,9 @@ const RegistrationView = () => {
                                     0-2-.9-2-2V6c0-1.1.9-2
                                     2-2z">
                                     </path>
-                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                    <polyline 
+                                        points="22,6 12,13 2,6">
+                                    </polyline>
                                 </svg>
                             </InputGroup.Text>
                         </InputGroup.Append>
@@ -286,7 +295,7 @@ const RegistrationView = () => {
                         />
                         <InputGroup.Append>
                             <InputGroup.Text>
-                                <svg 
+                                <svg /* Lock icon */
                                     xmlns="http://www.w3.org/2000/svg" 
                                     width="24" 
                                     height="24" 
@@ -327,6 +336,7 @@ const RegistrationView = () => {
                     >
                         <FormControl 
                             type="password" 
+                            aria-label="retype password"
                             onBlur={
                                 (e) => removeFocusedClass(e)
                             } 
@@ -340,7 +350,7 @@ const RegistrationView = () => {
                         />
                         <InputGroup.Append>
                             <InputGroup.Text>
-                                <svg 
+                                <svg /* Lock icon */
                                     xmlns="http://www.w3.org/2000/svg" 
                                     width="24" 
                                     height="24" 
@@ -386,7 +396,7 @@ const RegistrationView = () => {
                     : null
                 }
                 {passwordMatchError 
-                    ? (<p className="error">Passwords must match</p>)
+                    ? (<p className="error">Passwords must match.</p>)
                     : null
                 } 
                 {registrationError 
@@ -401,6 +411,10 @@ const RegistrationView = () => {
         </Col>                    
     </Row>
     );
+};
+
+RegistrationView.propTypes = {
+    history: PropTypes.object.isRequired
 };
 
 export default RegistrationView;

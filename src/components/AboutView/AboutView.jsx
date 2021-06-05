@@ -5,7 +5,7 @@ import {Link} from 'react-router-dom';
 const AboutView = () => {
     return (
         <Row className="justify-content-center">
-            <Col className="view" md={5}>
+            <Col className="view" sm={8} md={5}>
                 <h1 className="text-center">Welcome to myFlix!</h1>
                 <p className="description">
                 Feel free to browse and sort 

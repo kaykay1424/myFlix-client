@@ -7,7 +7,8 @@ import {Container} from 'react-bootstrap';
 import {
     BrowserRouter as Router, 
     Redirect, 
-    Route
+    Route,
+    Switch
 } from 'react-router-dom';
 import {connect} from 'react-redux';
 
@@ -35,11 +36,10 @@ import {
     setSelectedMovie, 
     setUserInfo
 } from '../../actions/actions';
-import './main-view.scss';
 
 const MainView = ({
-    movies,  
     logoutUser,
+    movies,  
     setActors, 
     setMovies, 
     setFavoritedMovies,
@@ -47,13 +47,20 @@ const MainView = ({
     setUserInfo,
     user
 }) => {
+    const [actorsError, setActorsError] = useState(false);
+    const [moviesError, setMoviesError] = useState(false);
 
-    useEffect(() => {
-        if (token && movies.length === 0) {
+    const token = localStorage.getItem('token');
+    
+    // Set necessary info after page refresh
+    useEffect(() => {    
+        // If user is logged in but movies haven't been set    
+        if (Object.keys(user).length > 0 && movies.length === 0) {
             getActors(token);
-            getMovies(token);
-            getFavoritedMovies(token);
+            getMovies(token).then((data) => getFavoritedMovies(token, data));
+            
         }
+        // If user is logged in but user info hasn't been set
         if (token && !user.id) {
             axios.get(
                 // eslint-disable-next-line max-len
@@ -61,66 +68,119 @@ const MainView = ({
                 {
                     headers: {Authorization: `Bearer ${token}`}
                 }).then(response => {
-                const currentUser = response.data;
+                const loggedInUser = response.data;
+                
                 setUserInfo({
-                    birthDate: currentUser.birthDate,
-                    favoriteActors: currentUser.favoriteActors,
-                    favoriteMovies: currentUser.favoriteMovies,
-                    email: currentUser.email,
+                    birthDate: loggedInUser.birthDate,
+                    favoriteActors: loggedInUser.favoriteActors,
+                    favoriteMovies: loggedInUser.favoriteMovies,
+                    email: loggedInUser.email,
                     id: localStorage.getItem('user'),
-                    password: currentUser.password,
-                    toWatchMovies: currentUser.toWatchMovies,
-                    username: currentUser.username
+                    password: loggedInUser.password,
+                    toWatchMovies: loggedInUser.toWatchMovies,
+                    username: loggedInUser.username
                 });
             });
         }
-    },[]);
-    
-    const token = localStorage.getItem('token');
+    },[user, movies]);
 
-    const [actorsError, setActorsError] = useState(false);
-    const [moviesError, setMoviesError] = useState(false);
-
+    // Get list of actors from API
     const getActors = (token) => {
         axios.get('https://my-flix-2021.herokuapp.com/actors',{
             headers: {Authorization: `Bearer ${token}`}
         })
             .then(response => {
-                setActors(response.data);
+                const actorsList = response.data;
+                setActors(actorsList);
+                
+                if (actorsList.length === 0) {
+                    setActorsError({
+                        message: 'There are no actors to display.',
+                        type: 'info'
+                    });
+                }
             })
-            .catch(error => {
-                setActorsError(error);
+            .catch(() => {
+                setActorsError({
+                    message: `The list of actors could not be loaded. 
+                    Please try again`,
+                    type: 'error'
+                });
             });
     };
 
-    const getFavoritedMovies = (token) => {
+    // Get list of favoritedMovies from API
+    const getFavoritedMovies = (token, moviesList) => {
         axios.get('https://my-flix-2021.herokuapp.com/favorite-movies',{
             headers: {Authorization: `Bearer ${token}`}
         }).then(response => {
-            setFavoritedMovies(response.data);
-        }).catch(error => {
-            setMoviesError(error);
+            const favMovies = response.data;
+            // Get list of movies and add usersFavorited property
+            // to the ones that have been favorited by users
+            moviesList = moviesList.map((movie) => {
+                for (let i = 0; i < favMovies.length; i++) {
+                    if (favMovies[i].name === movie.name) { 
+                        const usersFavorited = 
+                        favMovies[i].usersFavorited;
+                        return {
+                            ...movie,
+                            usersFavorited
+                        };
+                    }
+                }
+                return false;
+            });
+
+            // Filter out the movies that haven't been favorited by users
+            // and set favoritedMovies to that list
+            setFavoritedMovies(moviesList.filter(movie => {
+                return movie; 
+            }));
+           
+        }).catch(() => {
+            setMoviesError({
+                message: `The list of movies could not be loaded. 
+                Please try again.`,
+                type: 'error'
+            });
         });
     };
 
+    // Get list of all movies from API
     const getMovies = (token) => {
-        axios.get('https://my-flix-2021.herokuapp.com/movies',{
+        return axios.get('https://my-flix-2021.herokuapp.com/movies',{
             headers: {Authorization: `Bearer ${token}`}
         })
             .then(response => {
-                const movies = response.data;
-                setMovies(movies);
-                setFeaturedMovies(movies.filter(movie =>
+                const moviesList = response.data;
+                setMovies(moviesList);
+                // Filter out the movies that aren't featured
+                // and set featuredMovies to that list
+                setFeaturedMovies(moviesList.filter(movie =>
                     (movie.featured)));
+                
+                if (moviesList.length === 0) {
+                    setMoviesError({
+                        message: 'There are no movies to display.',
+                        type: 'info'
+                    });
+                }
+
+                return moviesList;
             })
-            .catch(error => {
-                setMoviesError(error);
+            .catch(() => {
+                setMoviesError({
+                    message: `The list of movies could not be loaded. 
+                    Please try again.`,
+                    type: 'error'
+                });
             });
     };
 
-    const onLoggedIn = ({token, user}) => {   
-        setUserInfo({
-            birthDate: user.birthDate,
+    // Set user info and get lists of movies/actors 
+    // after user is logged in
+    const onLoggedIn = ({token, user}) => {  
+        const userInfo = {
             favoriteActors: user.favoriteActors,
             favoriteMovies: user.favoriteMovies,
             email: user.email,
@@ -128,144 +188,155 @@ const MainView = ({
             password: user.password,
             toWatchMovies: user.toWatchMovies,
             username: user.username
-        });
+        };
+        if (user.birthDate) 
+            userInfo['birthDate'] = user.birthDate;
+            
+        setUserInfo(userInfo);
         localStorage.setItem('token', token);
         localStorage.setItem('user', user._id);
         getActors(token);
-        getMovies(token);
-        getFavoritedMovies(token);    
+        getMovies(token).then((data) => getFavoritedMovies(token, data));
     };
 
+    // Remove user info once user is logged out
     const onLogout = () => {
+        logoutUser();
         localStorage.removeItem('user');
         localStorage.removeItem('token');
-        logoutUser();
-        window.open('/', '_self');
-    };
-
-    const showLogin = (path) => {
-        if (path == 'logout')
-            onLogout();
-        return <LoginView onLoggedIn={onLoggedIn} />;
     };
         
     return (
         <Router>    
-            <MainNavbar /> 
-            <Container className={`my-flix`} fluid>             
-                <Route exact path="/" render={() => {
-                    // If user is not logged in, show login view
-                    if (!token) return <Redirect to="/login" />;
+            <MainNavbar onLogout={onLogout} /> 
+            <Container className={`my-flix`} fluid> 
+                <Switch>            
+                    <Route exact path="/" render={() => {                    
+                        // If user is not logged in, show login view
+                        if (Object.keys(user).length === 0) 
+                            return <Redirect to="/login" />;
 
-                    return <MoviesView error={moviesError} />;
-                }} />
+                        return <MoviesView 
+                            error={moviesError.message || false} 
+                            errorType={moviesError.type || false} />;
+                    }} />
 
-                <Route path="/movies/:id" render={({history, match}) => {
-                // If user is not logged in, show login view
-                    if (!token) return <Redirect to="/login" />;
+                    <Route path="/movies/:id" render={({history, match}) => {
+                        // If user is not logged in, show login view
+                        if (!token) 
+                            return <Redirect to="/login" />;
                     
-                    return <MovieView 
-                        match={match} 
-                        onBackClick={() => history.goBack()} 
-                    />;
-                }}/>
-
-                <Route exact path="/actors" render={() => {
-                    // If user is not logged in, show login view
-                    if (!token) return <Redirect to="/login" />;
-                    
-                    return <ActorsView error={actorsError} />;
-                }} />
-
-                <Route path="/actors/:id" render={({history, match}) => {
-                    // If user is not logged in, show login view
-                    if (!token) return <Redirect to="/login" />;
-
-                    return (
-                        <ActorView  
+                        return <MovieView 
+                            match={match} 
                             onBackClick={() => history.goBack()} 
-                            match={match}
-                        />        
-                    );
-                }} />
+                        />;                                        
+                    }}/>
 
-                <Route path="/genres/:name" render={({history, match}) => {
+                    <Route exact path="/actors" render={() => {
                     // If user is not logged in, show login view
-                    if (!token) return <Redirect to="/login" />;
+                        if (!token) 
+                            return <Redirect to="/login" />;
                     
-                    return (                         
-                        <GenreView 
-                            match={match}
-                            onBackClick={() => history.goBack()} 
-                        />
-                    );
-                }} />
+                        return <ActorsView 
+                            error={actorsError.message || false} 
+                            errorType={actorsError.type || false} />;
+                    }} />
 
-                <Route path="/directors/:name" render={({history, match}) => {
+                    <Route path="/actors/:id" render={({history, match}) => {
                     // If user is not logged in, show login view
-                    if (!token) return <Redirect to="/login" />;
-                    
-                    return (
-                        <DirectorView  
-                            match={match}
-                            onBackClick={() => history.goBack()} 
-                        />
-                    );
-                }} />     
+                        if (!token) 
+                            return <Redirect to="/login" />;
 
-                <Route path="/register" render={() => {
+                        return (
+                            <ActorView  
+                                onBackClick={() => history.goBack()} 
+                                match={match}
+                            />        
+                        );
+                    }} />
+
+                    <Route path="/genres/:name" render={({history, match}) => {
+                    // If user is not logged in, show login view
+                        if (!token) 
+                            return <Redirect to="/login" />;
+                    
+                        return (                         
+                            <GenreView 
+                                match={match}
+                                onBackClick={() => history.goBack()} 
+                            />
+                        );
+                    }} />
+
+                    <Route 
+                        path="/directors/:name" 
+                        render={({history, match}) => {
+                            // If user is not logged in, show login view
+                            if (!token) 
+                                return <Redirect to="/login" />;
+                    
+                            return (
+                                <DirectorView  
+                                    match={match}
+                                    onBackClick={() => history.goBack()} 
+                                />
+                            );
+                        }} />     
+
+                    <Route path="/register" render={({history}) => {
                     // if user is already logged in redirect to home page
-                    if (token) 
-                        return <Redirect to="/" />;
+                        if (Object.keys(user).length > 0) 
+                            return <Redirect to="/" />;
 
-                    return (<RegistrationView />);
-                }} />
+                        return (<RegistrationView history={history} />);
+                    }} />
 
-                <Route path="/profile" render={() => {
-                    // If user is not logged in, show login view
-                    if (!token) return <Redirect to="/login" />;
-                    return (
-                        <ProfileView 
-                            onLogout={onLogout} 
-                        />
-                    );
-                }} />
-
-                <Route path="/login" render={() => {
+                    <Route path="/login" render={({history}) => {
                     // if user is already logged in redirect to home page
-                    if (token) 
+                        if (Object.keys(user).length > 0) 
+                            return <Redirect to="/" />;
+
+                        return <LoginView 
+                            history={history} 
+                            onLoggedIn={onLoggedIn} 
+                        />;
+                    }} />
+
+                    <Route path="/logout" render={() => {
                         return <Redirect to="/" />;
+                    }} />
 
-                    return <LoginView onLoggedIn={onLoggedIn} />;
-                }} />
-                
-                <Route path="/logout" render={() => {
-                    showLogin('logout');
-                }} />
+                    <Route path="/profile" render={({history}) => {
+                    // If user is not logged in, show login view
+                        if (!token) 
+                            return <Redirect to="/login" />;
+                        return (
+                            <ProfileView 
+                                history={history}
+                                onLogout={onLogout} 
+                            />
+                        );
+                    }} />
 
-                <Route path="/about" render={() => {
-                    if (!token) return <Redirect to="/login" />;
-                    return <AboutView />;
-                }} />
+                    <Route path="/about" render={() => {
+                        if (!token) 
+                            return <Redirect to="/login" />;
+                        return <AboutView />;
+                    }} />
+
+                    {/* Catch all Route */}
+                    <Route path="*" render={() => {
+                        return <Redirect to="/" />;
+                    }} />
+                </Switch>
             </Container>
-        </Router>
-            
-    );               
-       
+        </Router>            
+    );                      
 };
 
 MainView.propTypes = {
-    actors: PropTypes.array.isRequired,
-    actorsFilter: PropTypes.string.isRequired,
-    actorsSortingFactor: PropTypes.string.isRequired,
-    favoritedMovies: PropTypes.array.isRequired,
-    featuredMovies: PropTypes.array.isRequired,
     logoutUser: PropTypes.func.isRequired,
     movies: PropTypes.array.isRequired,
-    moviesFilter: PropTypes.string,
-    moviesListType: PropTypes.string.isRequired,
-    moviesSortingFactor: PropTypes.string.isRequired,
-    selectedMovie: PropTypes.object.isRequired,
     setActors: PropTypes.func.isRequired,
     setFavoritedMovies: PropTypes.func.isRequired,
     setFeaturedMovies: PropTypes.func.isRequired,
@@ -276,16 +347,7 @@ MainView.propTypes = {
 
 const mapStateToProps = state => {
     return {
-        actors: state.actors,
-        actorsFilter: state.actorsFilter,
-        actorsSortingFactor: state.actorsSortingFactor,
-        favoritedMovies: state.favoritedMovies,
-        featuredMovies: state.featuredMovies,
         movies: state.movies,
-        moviesFilter: state.moviesFilter,
-        moviesListType: state.moviesListType,
-        moviesSortingFactor: state.moviesSortingFactor,
-        selectedMovie: state.selectedMovie,
         user: state.user
     };
 };

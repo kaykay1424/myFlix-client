@@ -1,4 +1,6 @@
-import React from 'react';
+/************ Modules *************/
+
+import React, {useState} from 'react';
 import {Form} from 'react-bootstrap';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
@@ -14,34 +16,36 @@ const SortingFactorSelect = ({
     options, 
     type
 }) => {
+    // Find option that should be the default selected option
+    // to later set the value attribute of select element
+    const defaultSelectedOption = options.find(option => {
+        return option.selected;
+        
+    }).value;
+
+    const [selectedOption, setSelectedOption] = useState(defaultSelectedOption);
+    
     return (
         <Form.Group controlId="list-type-select">
             <Form.Label>Sort by:</Form.Label>
             <Form.Control 
                 as="select"
                 onChange={(e) => {
+                    setSelectedOption(e.target.value);
                     type === 'movies' 
-                    ? setMoviesSortingFactor(e.target.value) 
-                    : setActorsSortingFactor(e.target.value);
+                        ? setMoviesSortingFactor(e.target.value) 
+                        : setActorsSortingFactor(e.target.value);
                 }}
+                value={selectedOption}
             >
-                {options.map(option => {
-                    const selected = option.selected ? true : false;
-                    if (selected) {
-                        return (<option 
-                            value={option.value} 
-                            selected
-                        >
-                            {option.text}
-                        </option>);
-                    } else {
-                        return (<option 
-                            value={option.value}
-                        >
-                            {option.text}
-                        </option>);
-                    }
-                    
+                {/* Add options for select element */}
+                {options.map((option, i) => {
+                    return (<option 
+                        key={i}
+                        value={option.value}
+                    >
+                        {option.text}
+                    </option>);                    
                 })}
             </Form.Control>
         </Form.Group>

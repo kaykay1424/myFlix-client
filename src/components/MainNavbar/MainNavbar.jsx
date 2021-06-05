@@ -1,20 +1,44 @@
-import React, {useState} from 'react';
+/************ Modules *************/
+
+import React, {useEffect, useState} from 'react';
 import {Form, FormControl,  InputGroup, Nav,Navbar} from 'react-bootstrap';
 import PropTypes from 'prop-types';
-import {Link, useLocation} from 'react-router-dom';
+import {Link, useLocation, useHistory} from 'react-router-dom';
 import {connect} from 'react-redux';
 
-import {setMoviesFilter} from '../../actions/actions';
+import {setActorsFilter, setMoviesFilter} from '../../actions/actions';
+
 import './main-navbar.scss';
 
-const MainNavbar = ({setMoviesFilter}) => {
+const MainNavbar = ({onLogout, setActorsFilter, setMoviesFilter, user}) => {
+    const loggedIn = Object.keys(user).length > 0 ? true : false;
+    
     const [searchTerm, setSearchTerm] = useState('');
-    const isUserLoggedIn = localStorage.getItem('token') ? true : false,
-        pathname = useLocation().pathname;
+    const [isUserLoggedIn, setIsUserLoggedIn] = useState(
+        Object.keys(user).length > 0 
+            ? true 
+            : false);
+    
+    const  pathname = useLocation().pathname,
+        history = useHistory();
+
+    // Clear search term from searchbar when page changes
+    useEffect(() => {
+        setSearchTerm('');
+        setActorsFilter('');
+        setMoviesFilter('');
+    },[pathname]);
+
+    useEffect(() => {
+        setIsUserLoggedIn(loggedIn);
+    },[user]);
 
     const onChangeSearchTerm = (value) => {
         setSearchTerm(value);
-        setMoviesFilter(value);
+        if (pathname === '/')
+            setMoviesFilter(value);
+        else if (pathname === '/actors')
+            setActorsFilter(value);
     };
 
     return (
@@ -39,16 +63,14 @@ const MainNavbar = ({setMoviesFilter}) => {
                     <Navbar.Collapse 
                         id="main-navbar-collapse"
                     > 
-                
-                
-             
+
                         {pathname === '/' || pathname === '/actors'
                             ?                                  
                             <Form className="mx-auto" inline>
                                 <InputGroup className="input-container">
                                     <InputGroup.Prepend>
                                         <InputGroup.Text id="search-bar">
-                                            <svg 
+                                            <svg /* Search icon */
                                                 xmlns="
                                                     http://www.w3.org/2000/svg" 
                                                 width="24" 
@@ -80,7 +102,10 @@ const MainNavbar = ({setMoviesFilter}) => {
                                     </InputGroup.Prepend>
                                     <FormControl
                                         placeholder="Search &hellip;" 
-                                        onChange={(e) => onChangeSearchTerm(e.target.value)} 
+                                        onChange={
+                                            (e) => onChangeSearchTerm(
+                                                e.target.value)
+                                        } 
                                         value={searchTerm} 
                                         aria-label="Search &hellip;"
                                         aria-describedby="search-bar"
@@ -90,12 +115,15 @@ const MainNavbar = ({setMoviesFilter}) => {
                             : null
                         }
                         <Nav> 
-                            <Link 
-                                to="/logout" 
+                            <Navbar.Text 
                                 className="link nav-link logout"
+                                onClick={() =>  {
+                                    onLogout();
+                                    history.push('/login');
+                                }}
                             >
                                 Logout
-                            </Link>
+                            </Navbar.Text>
                         </Nav>
                         <Nav className="nav-links">
                             <Link 
@@ -109,26 +137,27 @@ const MainNavbar = ({setMoviesFilter}) => {
                             <Link to="/" className={
                                 `link nav-link ${
                                     pathname === '/' 
-                                    || pathname.match('movies')
-                                    ? 'active': ''}`}
+                                        ? 'active': ''}`}
                             >
                             Movies
                             </Link>
                             <Link to="/actors" className={
-                                `link nav-link ${pathname.match('actors') 
+                                `link nav-link ${pathname === '/actors'
                                     ? 'active': ''}`}
                             >
                             Actors
                             </Link>
                             <Link 
                                 to="/about" 
-                                className={`link nav-link ${pathname === '/about'
-                                ? 'active': ''}`}
+                                className=
+                                    {
+                                        `link nav-link ${pathname === '/about'
+                                            ? 'active': ''}`
+                                    }
                             >
                                 About
                             </Link>
-                        </Nav>
-                   
+                        </Nav>                   
                     </Navbar.Collapse>
                 </>
                 : null
@@ -138,6 +167,8 @@ const MainNavbar = ({setMoviesFilter}) => {
 };
 
 MainNavbar.propTypes = {
+    onLogout: PropTypes.func.isRequired,
+    setActorsFilter: PropTypes.func.isRequired,
     setMoviesFilter: PropTypes.func.isRequired,
     user: PropTypes.object.isRequired
 };
@@ -148,4 +179,7 @@ const mapStateToProps = state => {
     };
 };
 
-export default connect(mapStateToProps, {setMoviesFilter})(MainNavbar);
+export default connect(mapStateToProps, {
+    setActorsFilter,
+    setMoviesFilter
+})(MainNavbar);

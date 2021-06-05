@@ -1,7 +1,11 @@
+/************ Modules *************/
+
 import React from 'react';
 import {Card} from 'react-bootstrap';
 import PropTypes from 'prop-types';
+
 import './related-attribute-card.scss';
+
 const RelatedAttributeCard = ({description, image}) => {
     return (
         <Card className="related-attribute-card">

@@ -1,4 +1,4 @@
-@import '../../utils/partials/variables';
+@import '../../utils/partials/variables', '../../utils/partials/_form.scss';
 #registration-view {
     background-color: $logged-out-color;
     #registration-form button {

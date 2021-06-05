@@ -1,4 +1,4 @@
-@import '../../utils/partials/variables';
+@import '../../utils/partials/variables', '../../utils/partials/_form.scss';
 #login-view {
     background-color: $logged-out-color;
     button[type="submit"] {

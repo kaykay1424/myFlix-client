@@ -1,16 +1,25 @@
+/************* Modules *************/
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import {Card, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
 
 import {createExcerpt} from '../../utils/helpers';
+
 import './list-item-card.scss';
 
 const ListItemCard = ({item, itemType}) => {
+    const excerpt = createExcerpt(
+            item.description ? item.description : item.bio),
+        pathname = itemType === 'movies' ? '/movies' : '/actors',
+        readMoreLink = `${pathname}/${item._id}`;    
     return (
         <Card className="list-item-card">
             <Card.Body>            
                 <Card.Title className="header">
+                    {/* Only show tooltip 
+                    if item is a movie and it has been favorited by a user*/}
                     {
                         item.usersFavorited && item.usersFavorited > 0
                             ? (<OverlayTrigger
@@ -22,7 +31,7 @@ const ListItemCard = ({item, itemType}) => {
                                     </Tooltip>
                                 }
                             >
-                                <svg 
+                                <svg /* Star icon */
                                     xmlns="http://www.w3.org/2000/svg" 
                                     width="24" 
                                     height="24" 
@@ -49,17 +58,18 @@ const ListItemCard = ({item, itemType}) => {
                             : null
                     }
                     {item.name}
+                    {/* Show 'Featured' text if item is a featured movie */}
                     {itemType === 'movies' && item.featured 
                         ? (<small> (Featured)</small>)
                         : null
                     }
                 </Card.Title>
-                <Card.Img src={item.image} />
+                <Card.Img src={item.image} alt={item.name} />
                 <Card.Text className="description">
-                    {createExcerpt(item.description ? item.description : item.bio)} &hellip;
+                    {excerpt} &hellip;
                 </Card.Text>
                 <div className="read-more-link-container">
-                    <svg 
+                    <svg /* Right arrow icon */
                         xmlns="http://www.w3.org/2000/svg" 
                         width="24" 
                         height="24" 
@@ -74,7 +84,7 @@ const ListItemCard = ({item, itemType}) => {
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
-                    <Link to={`/${itemType === 'movies' ? 'movies' : 'actors'}/${item._id}`} 
+                    <Link to={readMoreLink} 
                         className="read-more-link" 
                     >
                         Read More

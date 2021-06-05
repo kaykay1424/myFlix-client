@@ -13,21 +13,16 @@ import myFlixApp from './reducers/reducers';
 /*********** Components ************/
 
 import MainView from './components/MainView/MainView';
-import MainNavbar from './components/MainNavbar/MainNavbar';
 
 import './index.scss';
 
 const store = createStore(myFlixApp, devToolsEnhancer());
 
-// Main component (will eventually use all the others)
 class MyFlixApplication extends React.Component {      
     render() {
         return (
             <Provider store={store}>
-                
-                
-                <MainView />
-                
+                <MainView />    
             </Provider>
         );
     }

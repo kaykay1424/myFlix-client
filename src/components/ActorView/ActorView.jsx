@@ -1,31 +1,40 @@
+/************* Modules ***********/
+
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {Col, Row} from 'react-bootstrap';
 
+/************* Helpers ************/
+
+import {makeTextReadable} from '../../utils/helpers';
+import {addToList} from '../../utils/helpers';
+
 import {
     addUserFavoriteActor
 } from '../../actions/actions';
-import {makeTextReadable} from '../../utils/helpers';
-import {addToList} from '../../utils/helpers';
-import '../../utils/partials/_view.scss';
-import './actor-view.scss';
 
 const ActorView = ({
     actors,
     addUserFavoriteActor,
     match,
     onBackClick, 
-    user}) => {   
-
+    user
+}) => {   
+    // If the list of actors is empty
+    // stop execution of function
+    // as is is needed for component to function properly 
+    if (actors.length === 0) 
+        return null;
     const [favorited, setFavorited] = useState(false);
 
-    const actor = actors.find(
-                        
+    // Find actor based on id param in url
+    const actor = actors.find(                
         actor => {
             return actor._id === match.params.id;
         }); 
-    
+
+    // Add actor to user's favorite actors list
     const addToFavoritesList = () => {
         addToList(
             user.id, 
@@ -47,7 +56,7 @@ const ActorView = ({
                 id="actor-view" 
                 className="view" md={6}>    
                 <div 
-                    className="image-cover" 
+                    className="heading-box" 
                     style={
                         {
                             backgroundImage: `url(${actor.image})`
@@ -55,7 +64,7 @@ const ActorView = ({
                     }
                 >
                     <div className="close-box">
-                        <svg 
+                        <svg /* X icon */
                             onClick={
                                 () => onBackClick()
                             }                            
@@ -76,10 +85,10 @@ const ActorView = ({
                     </div>
                 </div>
                 <div className="main-content">
-                    <h1>
+                    <h1 className="main-heading">
                         {actor.name}
                         <div className="user-list-icons">
-                            <svg 
+                            <svg /* Heart icon */
                                 onClick={() => addToFavoritesList()}
                                 xmlns="http://www.w3.org/2000/svg" 
                                 width="24" 
@@ -95,10 +104,11 @@ const ActorView = ({
                                     && user.favoriteActors.indexOf(
                                         actor._id) > -1) 
                                     ? 'added-to-list': ''}`
-                                }
-                                title="Add this actor to your 
-                                Favorite Movies list"
+                                }                                
                             >
+                                <title>
+                                    Add this actor to your Favorite Actors list
+                                </title>
                                 <path 
                                     d="M20.84 4.61a5.5
                                 5.5 0 0 0-7.78 
@@ -112,13 +122,12 @@ const ActorView = ({
                             </svg>                        
                         </div>
                     </h1>
-                    <p className="label">Description</p>
-                    <p className="description">{makeTextReadable(actor.bio)}</p>
+                    <p className="label">Bio</p>
+                    <div className="description">
+                        {makeTextReadable(actor.bio)}
+                    </div>
                     <p className="label">Birthday</p>
-                    <p className="description">
-                        {
-                            birthDate
-                        }
+                    <p className="description">{birthDate}
                     </p>
                     <p className="label">Birth country</p>
                     <p className="description">{actor.birthCountry}</p>
@@ -152,33 +161,14 @@ const ActorView = ({
                 </div> 
             </Col>
         </Row>             
-    );
+    );    
 };
 
 ActorView.propTypes = {
     actors: PropTypes.array.isRequired,
     addUserFavoriteActor: PropTypes.func.isRequired,
-    match: PropTypes.string.isRequired,
-    movie: PropTypes.shape({
-        _id: PropTypes.string.isRequired,
-        description: PropTypes.string.isRequired,
-        director: PropTypes.shape({
-            name: PropTypes.string.isRequired
-        }).isRequired,
-        genre: PropTypes.shape({
-            name: PropTypes.string.isRequired
-        }).isRequired,
-        image: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired,
-        rating: PropTypes.number,
-        releaseYear: PropTypes.number,
-        stars: PropTypes.array
-    }).isRequired,
-    movieActors: PropTypes.array.isRequired,
+    match: PropTypes.object.isRequired,
     onBackClick: PropTypes.func.isRequired,
-    onItemClick: PropTypes.func.isRequired,
-    setSelectedMovie: PropTypes.func.isRequired,
-    setFavoritedMovies: PropTypes.func.isRequired,
     user: PropTypes.shape({
         id: PropTypes.string.isRequired,
         favoriteActors: PropTypes.array.isRequired

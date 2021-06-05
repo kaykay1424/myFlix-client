@@ -1,12 +1,13 @@
+/************* Modules *************/
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {Col, Row} from 'react-bootstrap';
 
-import '../../utils/partials/_view.scss';
-import './director-view.scss';
 import {makeTextReadable} from '../../utils/helpers';
+
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
 
 const DirectorView = ({
@@ -15,16 +16,25 @@ const DirectorView = ({
     movies,
     selectedMovie
 }) => { 
+    // If the list of movies is empty
+    // stop execution of function
+    // as is is needed for component to function properly 
+    if (movies.length === 0) 
+        return null;
+    
+    // Find director based on id param in url
     const selectedDirector = movies.find(
         ({director}) => 
             director.name === match.params.name).director; 
-                
+    
+    // Filter movies to find other movies directed by the director            
     const  otherMovies=movies.filter((movie) => {
         return movie.name 
                 !== selectedMovie.name 
             && movie.director.name === 
                 selectedDirector.name;
     });
+    
     return (
         <Row className="justify-content-center">
             <Col 
@@ -32,9 +42,9 @@ const DirectorView = ({
                 className="view" 
                 md={6}
             >    
-                <div className="image-cover" >
+                <div className="heading-box--no-image">
                     <div className="close-box">
-                        <svg 
+                        <svg /* X icon */
                             onClick={() => onBackClick('selectedDirector')} 
                             xmlns="http://www.w3.org/2000/svg" 
                             width="24" 
@@ -66,6 +76,8 @@ const DirectorView = ({
                         <p className="label">Born</p>
                         <p>{selectedDirector.birthYear}</p>
                     </div>
+                    {/* Only show death info 
+                    if director has deathYear attribute */}
                     {selectedDirector.deathYear 
                         ? 
                         <div className="attribute">
@@ -75,11 +87,15 @@ const DirectorView = ({
                         : null
                     }
                 </div> 
+                {/* Only show other movies section 
+                   if list of otherMovies directed by director is not empty  */}
                 {otherMovies.length > 0
                     ? (<>
                     
                         <div className="related-attributes">
                             <h3>Other {selectedDirector.name} Movies</h3>
+                            {/* Display list of other movies 
+                            directed by director */}
                             {
                                 otherMovies.map((movie, i) => 
                                     (
@@ -113,19 +129,10 @@ const DirectorView = ({
 };
 
 DirectorView.propTypes = {
-    match: PropTypes.string.isRequired,
+    match: PropTypes.object.isRequired,
     movies: PropTypes.array.isRequired,
-    selectedMovie: PropTypes.object.isRequired,
-    selectedDirector: PropTypes.shape({
-        bio: PropTypes.string.isRequired,
-        birthYear: PropTypes.number.isRequired,
-        deathYear: PropTypes.number,
-        imdbLink: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired
-    }).isRequired,
+    selectedMovie: PropTypes.object.isRequired,    
     onBackClick: PropTypes.func.isRequired,
-    onItemClick: PropTypes.func,
-    otherMovies: PropTypes.array.isRequired
 };
 
 const mapStateToProps = state => ({

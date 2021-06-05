@@ -7,6 +7,7 @@ export const addToList = (userId, listType, itemId, itemIdType) => {
     data[itemIdType] = itemId;
     return axios({
         method: 'patch',
+        // eslint-disable-next-line max-len
         url: `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}/${itemId}`,
         data,
         headers:  {Authorization: `Bearer ${token}`}

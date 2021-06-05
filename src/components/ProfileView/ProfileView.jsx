@@ -1,3 +1,5 @@
+/************ Modules *************/
+
 import React, {useState} from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
@@ -10,31 +12,41 @@ import {
 } from '../../actions/actions';
 
 import UserList from '../UserList/UserList';
-import '../../utils/partials/_form.scss';
+
 import './profile-view.scss';
 
-const ProfileView = ({onLogout, user}) => {
-
+const ProfileView = ({history, onLogout, setUserInfo, user}) => {
+    // If user has not been set
+    // stop execution of function
+    // as is is needed for component to function properly
+    if (Object.keys(user).length === 0)
+        return null;
+ 
+    // const history = useHistory();
     // Make date appear in readable format (2021-05-01)
-    let birthdate = '';
-    if (user.birthDate) {
-        const date = new Date(user.birthDate);
-        birthdate = `${
-            date.getFullYear()}-${
-            date.getMonth() < 10 
-                ? `0${date.getMonth()+1}`
-                : date.getMonth()+1}-${date.getDate()}`;
-        
-    }
+    const convertBirthDate = () => {
+        const birthdate = user.birthDate;
+        // If date hasn't been converted to readable format yet         
+        if (
+            birthdate 
+            && birthdate.match('Z')) { 
+            return birthdate.slice(0,10);
+        // If date has been converted to readable format yet         
+        } else if (birthdate 
+            && !birthdate.match('Z')) {
+            return birthdate;
+        }
+        // If user doesn't have birthday info
+        return '';
+    };
 
-    const [birthDate, setBirthDate] = useState(birthdate);    
+    const [birthDate, setBirthDate] = useState(convertBirthDate());    
     const [email, setEmail] = useState(user.email);
-    const oldPassword = user.password;
     const [username, setUsername] = useState(user.username);
     const [newPassword1, setNewPassword1] = useState('');
     const [newPassword2, setNewPassword2] = useState('');
     const [successfulUpdate, setSuccessfulUpdate] = useState(false);
-    const [successfulRemoval, setSuccessfulRemoval] = useState(false);
+    const [successfulUserRemoval, setSuccessfulUserRemoval] = useState(false);
 
     const [birthDateError, setBirthDateError] = useState(false);
     const [deleteUserError, setDeleteUserError] = useState(false);
@@ -43,19 +55,22 @@ const ProfileView = ({onLogout, user}) => {
     const [usernameLengthError, setUsernameLengthError] = useState(false);
     const [usernameTypeError, setUsernameTypeError] = useState(false);
 
-    const token = localStorage.getItem('token');
+    const oldPassword = user.password,
+        token = localStorage.getItem('token');
 
     const deleteUser = () => {
-        confirm('Are you sure you want to delete your account')
+        confirm('Are you sure you want to delete your account?')
             ?
             axios({
                 method: 'delete',
                 url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
                 headers:  {Authorization: `Bearer ${token}`}
             }).then(() => {
-                setSuccessfulRemoval(true);
+                setSuccessfulUserRemoval(true);
                 setTimeout(() => {
-                    onLogout();
+                    setSuccessfulUpdate(false);
+                    onLogout(); 
+                    history.push('/register');
                 }, 3000);
             }).catch(() => {
                 setDeleteUserError(true);
@@ -65,9 +80,14 @@ const ProfileView = ({onLogout, user}) => {
      
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Reset error values
+        // Reset error values so errors will be removed, 
+        // until the errors occur again
         setBirthDateError(false);
+        setDeleteUserError(false);
         setPasswordMatchError(false);
+        setUpdateProfileError(false);
+        setUsernameLengthError(false);
+        setUsernameTypeError(false);
 
         const updatedUser = {
             email,
@@ -86,9 +106,11 @@ const ProfileView = ({onLogout, user}) => {
 
         // Check if birthDate was entered and if it is valid
         // if it is add it to user object       
-        if (!validateBirthDate()) return;
-        updatedUser['birthDate'] = birthDate;
-
+        if (birthDate !== '') {
+            if (!validateBirthDate()) return;
+            updatedUser['birthDate'] = birthDate;
+        }
+            
         axios({
             method: 'patch',
             url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
@@ -97,14 +119,15 @@ const ProfileView = ({onLogout, user}) => {
         })
             .then(() => {
                 setUserInfo(updatedUser);
-                if (newPassword1) {
-                    logoutUser();
-                    window.open('/', '_self');                
-                }
-
-                setSuccessfulUpdate(true);  
+                setSuccessfulUpdate(true); 
+                
                 setTimeout(() => {
                     setSuccessfulUpdate(false);
+                    // If user updates their password, log them out
+                    if (newPassword1 !== '') {
+                        onLogout();     
+                        history.push('/login'); 
+                    }
                 }, 3000);            
             }, (err) => {
                 setUpdateProfileError(err);
@@ -119,6 +142,7 @@ const ProfileView = ({onLogout, user}) => {
     const onChangeNewPassword1 = (e) => {
         setNewPassword1(e.target.value);
         setPasswordMatchError(false);
+        // If both new passwords don't match
         if (newPassword2 !== '' && (e.target.value !== newPassword2)) 
             setPasswordMatchError(true);
     };
@@ -126,6 +150,7 @@ const ProfileView = ({onLogout, user}) => {
     const onChangeNewPassword2 = (e) => {
         setNewPassword2(e.target.value);
         setPasswordMatchError(false);
+        // If both new passwords don't match
         if (newPassword1 !== '' && (newPassword1 !== e.target.value)) 
             setPasswordMatchError(true);
     };
@@ -135,14 +160,16 @@ const ProfileView = ({onLogout, user}) => {
         setUsername(value);
         setUsernameLengthError(false);
         setUsernameTypeError(false);
+        // Check that username is at least 6 characters
+        // and only contains alphanumeric characters
         if (value  !== '') {
-            if (value .length < 6) 
+            if (value.length < 6) 
                 setUsernameLengthError(true);
 
             const nonAlphaCharacters = value.match(/\W/g);
+            
             // If there are non alphabetical characters 
             // make sure that they are only numbers
-            // Username should only contain alphanumeric characters
             if (nonAlphaCharacters) {
                 for (let i = 0; i < nonAlphaCharacters.length; i++) {
                     if (!nonAlphaCharacters[i].match(/\d/))
@@ -153,16 +180,18 @@ const ProfileView = ({onLogout, user}) => {
         }
     };
 
-    
     const validateBirthDate = (birthdate=birthDate) => {        
         const regex = /\d\d\d\d-\d\d-\d\d/; // valid date format
+
+        // If birthday is not valid
         if (!birthdate.match(regex)) {            
             setBirthDateError(`${birthdate} is not a valid date. 
                 Please enter a date in this format: yyyy-mm-dd`
             );
             return false;
+        // If birthday is valid
         } else if (birthdate && birthdate.match(regex)) {
-            setBirthDateError(null);
+            setBirthDateError(false);
             return true;
         }
     };
@@ -345,7 +374,7 @@ const ProfileView = ({onLogout, user}) => {
                         <UserList 
                             title="Favorite Movies" 
                             listType='favorite-movies'
-                            listTypeJS='favoriteMovies' 
+                            listTypeCamelCase='favoriteMovies' 
                             userId={user.id} 
                             itemIdType="movie_id" 
                             token={token} 
@@ -353,7 +382,7 @@ const ProfileView = ({onLogout, user}) => {
                         <UserList 
                             title="To Watch Movies" 
                             listType='to-watch-movies' 
-                            listTypeJS='toWatchMovies'
+                            listTypeCamelCase='toWatchMovies'
                             userId={user.id} 
                             itemIdType="movie_id" 
                             token={token} 
@@ -361,7 +390,7 @@ const ProfileView = ({onLogout, user}) => {
                         <UserList 
                             title="Favorite Actors" 
                             listType='favorite-actors' 
-                            listTypeJS='favoriteActors'
+                            listTypeCamelCase='favoriteActors'
                             userId={user.id} 
                             itemIdType="actor_id" 
                             token={token} 
@@ -371,7 +400,7 @@ const ProfileView = ({onLogout, user}) => {
                 <Row className="justify-content-end">
                     <Col xs={12} sm={4} md={5}>
                         <div className="delete-user-container">
-                            <svg 
+                            <svg /* Trash icon */
                                 onClick={() => deleteUser()}
                                 xmlns="http://www.w3.org/2000/svg" 
                                 width="24" 
@@ -396,7 +425,7 @@ const ProfileView = ({onLogout, user}) => {
                             </svg>
                             <span>Delete Account</span>
                         </div>
-                        {successfulRemoval 
+                        {successfulUserRemoval 
                             ? 
                             (<p className="text-info">
                             Your account was successfully deleted!</p>)   
@@ -417,7 +446,9 @@ const ProfileView = ({onLogout, user}) => {
 };
 
 ProfileView.propTypes = {
+    history: PropTypes.object.isRequired,
     onLogout: PropTypes.func.isRequired,
+    setUserInfo: PropTypes.func.isRequired,
     user: PropTypes.shape({
         id: PropTypes.string.isRequired,
         birthDate: PropTypes.string,

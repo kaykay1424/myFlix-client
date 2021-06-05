@@ -1,6 +1,9 @@
+/************ Modules *************/
+
 import React from 'react';
 import {Form} from 'react-bootstrap';
 import {connect} from 'react-redux';
+import PropTypes from 'prop-types';
 
 import {setMoviesListType} from '../../actions/actions';
 
@@ -18,6 +21,10 @@ const ListTypeSelect = ({setMoviesListType}) => {
             </Form.Control>
         </Form.Group>
     );
+};
+
+ListTypeSelect.propTypes = {
+    setMoviesListType: PropTypes.func.isRequired
 };
 
 export default connect(null, {setMoviesListType})(ListTypeSelect);

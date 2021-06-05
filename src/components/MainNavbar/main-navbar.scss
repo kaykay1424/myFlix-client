@@ -1,5 +1,4 @@
-@import '../../utils/partials/variables';
-@import '../../utils/partials/form';
+@import '../../utils/partials/variables', '../../utils/partials/form';
 
 $font-size: 13px;
 #main-navbar.navbar {
@@ -12,94 +11,57 @@ $font-size: 13px;
         .navbar-brand {
             color: #fff;
         }
-    }     
-    form .input-group.input-container {
-        width: 100%;
-        input.form-control {
-            background-color: $secondary-background-color;
-            border: none;
-        }
-    }
-    form .input-group-text {
-        background-color: transparent;
-        border: 0;
-    }
-    a.link.nav-link {
+    } 
+    a.link.nav-link,
+    span.link.nav-link {
         color: #fff;
         font-size: $font-size;
         text-transform: uppercase;
         &:not(.navbar-brand):hover {
             color: $link-color;
         }
+    }        
+    form {
+        .input-group.input-container {
+            width: 100%;
+            input.form-control {
+                background-color: $secondary-background-color;
+                border: 0;
+            }
+        }
+        .input-group-text {
+            background-color: transparent;
+            border: 0;
+        }
     }    
+    .logout:hover {
+        cursor: pointer;
+    }
     .navbar-brand {
         font-size: 20px;
-    }
-    .navbar-brand.logged-in {
-        color: $link-color;
-    }
-    .navbar-brand.logged-out {
-        color: #fff;
-    }
-    .navbar-brand {
         text-transform: initial;
+        &.navbar-brand.logged-in {
+            color: $link-color;
+        }
     }
     .navbar-toggler {
         background-color: #fff;
+    }
+    .nav-links.navbar-nav {  
+        border-bottom: 1px solid $border-color;
+        border-top: 1px solid $border-color;   
+        a {
+            font-weight: 500;
+            line-height: 1.5;
+        }
+        .active {
+            border-bottom: 2px solid #0093ff;
+        }
     }
     #main-navbar-collapse {
         justify-content: flex-end;
         margin-top: 2em;
     }
 }
-.nav-links.navbar-nav {  
-    border-bottom: 1px solid $border-color;
-    border-top: 1px solid $border-color;   
-    a {
-        color: #fff;
-        font-weight: 500;
-        line-height: 1.5;
-    }
-    .active {
-        border-bottom: 2px solid #0093ff;
-    }
-}
 
-@media screen and (min-width: 992px) {
-    .nav-links.navbar-nav {
-        bottom: 0;
-        display: flex;
-        height: 5rem;
-        justify-content: flex-start;
-        left: 0;
-        padding-left: 1rem; 
-        padding-bottom: 2rem;
-        padding-top: 1.5rem;
-        position: absolute;
-        top: 4rem;
-        width: 100%;
-        a {
-            // height: 46px;
-            margin-right: 2.5rem;
-            padding-bottom: 2.8rem;
-        }
-    }
-    #main-navbar.navbar {
-        height: 128px;
-        a.link.nav-link {
-            // height: 30px;
-            min-width: 62px;
-            padding-left: 0;
-            padding-right: 0;
-        }
-        form {
-            width: 70%;
-        }
-        #main-navbar-collapse {
-            margin-top: 0;
-        }
-        .navbar-nav:not(.nav-links) a {
-            text-align: right;
-        }
-    }
-}
+@import '../../utils/partials/media-queries';

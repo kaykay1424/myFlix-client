@@ -1,8 +1,5 @@
-@import '../../utils/partials/variables';
+@import '../../utils/partials/variables', '../../utils/partials/_view.scss';
 #genre-view {
-    .image-cover {
-        height: auto;
-    }
     .related-attributes {
         border-top: 1px solid $border-color;
         // display: flex;

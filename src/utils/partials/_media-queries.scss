@@ -20,6 +20,40 @@
             margin-left: 0;
         }
     }
+    #main-navbar.navbar {
+        height: 128px;
+        a.link.nav-link {
+            min-width: 62px;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        form {
+            width: 70%;
+        }
+        .navbar-nav:not(.nav-links) a {
+            text-align: right;
+        }
+        .nav-links.navbar-nav {
+            bottom: 0;
+            display: flex;
+            height: 5rem;
+            justify-content: flex-start;
+            left: 0;
+            padding-left: 1rem; 
+            padding-bottom: 2rem;
+            padding-top: 1.5rem;
+            position: absolute;
+            top: 4rem;
+            width: 100%;
+            a {
+                margin-right: 2.5rem;
+                padding-bottom: 2.8rem;
+            }
+        }
+        #main-navbar-collapse {
+            margin-top: 0;
+        }
+    }
     #profile {
         h1 {
             margin-left: 1em;

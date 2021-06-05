@@ -1,18 +1,12 @@
 @import '../../utils/partials/variables';
 .card.list-item-card {
     background-color: $secondary-background-color;
-}
-.list-item-card {
-    background-color: $secondary-background-color;
     color: $form-label-color;
     margin-bottom: 2rem;
     margin-top: 2rem;
     max-width: 350px;
     padding-bottom: 1rem;
     padding-top: 1rem;
-    // display: flex;
-    // flex-direction: column;
-    // padding: 1em;
     button {
         align-self: flex-start;
         display: inline-block;
@@ -20,20 +14,20 @@
     img {
         margin: 1em 0;
     }
-    svg {
-        display: inline-block;
-        color: #f5f5f5;
+    .card-title {
+        color: #fff;
     }
     .description {
         border-bottom: 1px solid $border-color;
         height: 53px;
     }
+    .feather-arrow-right {
+        color: $form-icon-color;
+        display: inline-block;
+    }
     .feather-star {
         fill: gold;
         margin-right: 1em;
-    }
-    .header {
-        color: #fff;
     }
     .read-more-link {
         align-self: center;

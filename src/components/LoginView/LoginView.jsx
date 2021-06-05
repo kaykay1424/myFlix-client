@@ -1,35 +1,43 @@
+/************ Modules *************/
+
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
+import {connect} from 'react-redux';
 import axios from 'axios';
 import {Link} from 'react-router-dom';
 import {Button, Col, Form, FormControl, InputGroup, Row} from 'react-bootstrap';
 
 import {addFocusedClass, removeFocusedClass} from '../../utils/helpers';
-import '../../utils/partials/_form.scss';
+
 import './login-view.scss';
 
-const LoginView = ({onLoggedIn}) => {
-    const [username, setUsername] = useState('');
+const LoginView = ({history, onLoggedIn}) => {
     const [loginError, setLoginError] = useState(false);
     const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        // Reset value so error will be removed, 
+        // until the error occurs again
+        setLoginError(false); 
+        
         axios.post('https://my-flix-2021.herokuapp.com/login',{
             username,
             password
         })
-            .then(response => {
-                onLoggedIn(response.data);                
-            }, (err) => {
-                setLoginError(err);
+            .then(response => { 
+                onLoggedIn(response.data);               
+                history.push('/');
+                
+            }).catch(() => {
+                setLoginError(true);
             });
-        
     };
 
     return (  
         <Row id="login-view" className="justify-content-center view-row--form">
-            <Col className="form-container" md={4}>
+            <Col className="form-container" sm={6} md={4}>
                 <>            
                     <Form 
                         id="login-form" 
@@ -42,9 +50,11 @@ const LoginView = ({onLoggedIn}) => {
                         Login to your account
                         </Form.Text>
                         <Form.Group controlId="email">
-                            <Form.Label className="form-label">Username</Form.Label>
+                            <Form.Label 
+                                className="form-label">Username</Form.Label>
                             <InputGroup 
-                                className="input-container">                        
+                                className="input-container"
+                            >                        
                                 <FormControl 
                                     type="text" 
                                     placeholder="Enter your username"
@@ -62,7 +72,7 @@ const LoginView = ({onLoggedIn}) => {
                                 />
                                 <InputGroup.Append>
                                     <InputGroup.Text>
-                                        <svg 
+                                        <svg /* User icon */
                                             xmlns="http://www.w3.org/2000/svg" 
                                             width="24" 
                                             height="24" 
@@ -76,20 +86,30 @@ const LoginView = ({onLoggedIn}) => {
                                         >
                                             <path 
                                                 d="M20 21v-2a4
-                                            4 0 0 0-4-4H8a4 4
-                                            0 0 0-4 4v2"
+                                                4 0 0 0-4-4H8a4 4
+                                                0 0 0-4 4v2"
+                                            // eslint-disable-next-line max-len
                                             >                                    
                                             </path>
-                                            <circle cx="12" cy="7" r="4"></circle>
+                                            <circle 
+                                                cx="12" 
+                                                cy="7" 
+                                                r="4">
+                                            </circle>
                                         </svg>
                                     </InputGroup.Text>
                                 </InputGroup.Append>
                             </InputGroup>
                         </Form.Group>
                         <Form.Group controlId="password" className="form-group">
-                            <Form.Label className="form-label" >Password</Form.Label>
+                            <Form.Label 
+                                className="form-label"
+                            >
+                                Password
+                            </Form.Label>
                             <InputGroup 
-                                className="input-container">                        
+                                className="input-container"
+                            >                        
                                 <FormControl 
                                     type="password" 
                                     onBlur={
@@ -107,7 +127,7 @@ const LoginView = ({onLoggedIn}) => {
                                 />
                                 <InputGroup.Append>
                                     <InputGroup.Text>
-                                        <svg 
+                                        <svg /* Lock icon */
                                             xmlns="http://www.w3.org/2000/svg" 
                                             width="24" 
                                             height="24" 
@@ -163,7 +183,12 @@ const LoginView = ({onLoggedIn}) => {
 };
 
 LoginView.propTypes = {
+    history: PropTypes.object,
     onLoggedIn: PropTypes.func.isRequired
 };
 
-export default LoginView;
+const mapStateToProps = state => ({
+    user: state.user
+});
+
+export default connect(mapStateToProps)(LoginView);

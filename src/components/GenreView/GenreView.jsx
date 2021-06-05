@@ -1,32 +1,45 @@
+/************* Modules *************/
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {Col, Row} from 'react-bootstrap';
 
-import {makeTextReadable} from '../../utils/helpers';
-import '../../utils/partials/_view.scss';
-import './genre-view.scss';
+/************* Components **************/
+
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
+import {makeTextReadable} from '../../utils/helpers';
+
+import './genre-view.scss';
 
 const GenreView = ({
-    onBackClick, 
-    onItemClick, 
+    onBackClick,  
     match,
     movies,
     selectedMovie
-}) => {    
+}) => { 
+    // If the list of movies is empty
+    // stop execution of function
+    // as is is needed for component to function properly
+    if (movies.length === 0)
+        return null;  
+        
+    // Find genre based on id param in url    
     const selectedGenre = movies.find(
         ({genre}) => {
             return genre.name 
                     === match.params.name;
         }).genre;
+       
+    // Filter movies to find other movies from the same genre
     const otherMovies = movies.filter((movie) => {
         return movie.name 
                 !== selectedMovie.name 
             && movie.genre.name === 
                 selectedGenre.name;
     });
+
     return (
         <Row className="justify-content-center">
             <Col 
@@ -34,9 +47,9 @@ const GenreView = ({
                 className="view" 
                 md={6}
             >   
-                <div className="image-cover" >
+                <div className="heading-box--no-image" >
                     <div className="close-box">
-                        <svg 
+                        <svg /* X icon */
                             onClick={() => onBackClick()} 
                             xmlns="http://www.w3.org/2000/svg" 
                             width="24" 
@@ -62,14 +75,18 @@ const GenreView = ({
                     >
                         {makeTextReadable(selectedGenre.description)}
                     </p>
-                </div>                      
+                </div>   
+                {/* Only show other movies section 
+                   if list of otherMovies from the genre 
+                   is not empty  */}                   
                 {otherMovies.length > 0
                     ? (<>
                         <div className="related-attributes">
                             <h3>Other {selectedGenre.name} Movies</h3>
+                            {/* Display list of other movies 
+                            from the genre */}
                             {
-                                otherMovies.map((movie, i) => 
-                                    
+                                otherMovies.map((movie, i) =>    
                                 {
                                     return <RelatedAttributeCard 
                                         key={i}
@@ -77,16 +94,10 @@ const GenreView = ({
                                         description={<Link 
                                             to={`/movies/${movie._id}`}
                                         >
-                                            <p 
-                                                onClick={
-                                                    () => onItemClick(
-                                                        'selectedMovie', movie)
-                                                }
-                                            >
-                                                {movie.name}
-                                            </p>
+                                            <p>{movie.name}</p>
                                         </Link>} 
-                                    />;})  
+                                    />;
+                                })  
                             }
                         </div>
                     </>)
@@ -107,13 +118,10 @@ const GenreView = ({
 };
 
 GenreView.propTypes = {
-    match: PropTypes.string.isRequired,
+    match: PropTypes.object.isRequired,
     movies: PropTypes.array.isRequired,
     selectedMovie: PropTypes.object.isRequired,
-    selectedGenre: PropTypes.object.isRequired,
     onBackClick: PropTypes.func.isRequired,
-    onItemClick: PropTypes.func,
-    otherMovies: PropTypes.array.isRequired
 };
 
 const mapStateToProps = state => ({

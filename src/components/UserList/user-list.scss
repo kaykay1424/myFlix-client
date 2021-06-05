@@ -15,6 +15,12 @@
     .user-list-item {
         display: flex;
         justify-content: space-between;
+        svg {
+            align-self: flex-start;
+            color: $form-label-color;
+            cursor: pointer;
+            height: 18px;
+        }
         .details {
             p {
                 margin: 5px 0;
@@ -31,12 +37,6 @@
         }
         .list-type {
             text-transform: capitalize;
-        }
-        svg {
-            align-self: flex-start;
-            color: $form-label-color;
-            cursor: pointer;
-            height: 18px;
         }
     }
 }

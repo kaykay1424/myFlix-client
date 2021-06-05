@@ -59,8 +59,13 @@ function favoritedMovies(state = [], action) {
     switch(action.type) {
         case ADD_FAVORITED_MOVIE:
             return [...state, action.movieName];
-        case SET_FAVORITED_MOVIES:
-            return action.movies;
+        case SET_FAVORITED_MOVIES: {
+            const newFavoritedMovies = action.movies.sort((movie1, movie2) => {
+                return movie2.usersFavorited - movie1.usersFavorited;
+            });
+
+            return newFavoritedMovies;
+        }
         default:
             return state;
     }    
@@ -142,16 +147,20 @@ function user(state = {}, action) {
         case LOGOUT_USER:
             return {};    
         case SET_USER_INFO: {
+            
             const newState = {...state};
             Object.keys(action.info).forEach(property =>
                 (newState[property] = action.info[property]));
-
+            
             return newState;
         }
         case REMOVE_USER_FAVORITE_ACTOR: {
-            let favoriteActors = state.favoriteActors; 
-            favoriteActors = favoriteActors.filter((actorId) => 
-                (actorId === action.actorId));
+            const favoriteActors = [...state.favoriteActors]; 
+
+            for (let i = 0;i < favoriteActors.length;i++) {
+                if (favoriteActors[i] === action.actorId)
+                    favoriteActors.splice(i,1);
+            }
 
             return {
                 ...state,
@@ -159,9 +168,11 @@ function user(state = {}, action) {
             };
         }
         case REMOVE_USER_FAVORITE_MOVIE: {
-            let favoriteMovies = state.favoriteMovies;
-            favoriteMovies = favoriteMovies.filter((movieId) => 
-                (movieId === action.movieId));
+            const favoriteMovies = [...state.favoriteMovies];
+            for (let i = 0;i < favoriteMovies.length;i++) {
+                if (favoriteMovies[i] === action.movieId)
+                    favoriteMovies.splice(i,1);
+            }
 
             return {
                 ...state,
@@ -169,10 +180,11 @@ function user(state = {}, action) {
             };
         }
         case REMOVE_USER_TO_WATCH_MOVIE: {
-            let toWatchMovies = [...state.toWatchMovies];
-            toWatchMovies = toWatchMovies.filter((movieId) => 
-                (movieId !== action.movieId));
-		
+            const toWatchMovies = [...state.toWatchMovies];
+            for (let i = 0;i < toWatchMovies.length;i++) {
+                if (toWatchMovies[i] === action.movieId)
+                    toWatchMovies.splice(i,1);
+            }
             return {
                 ...state,
                 toWatchMovies

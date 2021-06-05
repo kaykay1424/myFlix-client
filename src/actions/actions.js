@@ -110,11 +110,6 @@ export const logoutUser = () => ({
     type: LOGOUT_USER
 });
 
-export const setUserInfo = info => ({
-    type: SET_USER_INFO,
-    info
-});
-
 export const removeUserFavoriteActor = actorId => ({
     type: REMOVE_USER_FAVORITE_ACTOR,
     actorId
@@ -128,6 +123,11 @@ export const removeUserFavoriteMovie = movieId => ({
 export const removeUserToWatchMovie = movieId => ({
     type: REMOVE_USER_TO_WATCH_MOVIE,
     movieId
+});
+
+export const setUserInfo = info => ({
+    type: SET_USER_INFO,
+    info
 });
 
 

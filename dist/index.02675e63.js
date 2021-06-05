@@ -1059,10 +1059,8 @@ try {
   var _reducersReducersDefault = _parcelHelpers.interopDefault(_reducersReducers);
   var _componentsMainViewMainView = require('./components/MainView/MainView');
   var _componentsMainViewMainViewDefault = _parcelHelpers.interopDefault(_componentsMainViewMainView);
-  require('./components/MainNavbar/MainNavbar');
   require('./index.scss');
   const store = _redux.createStore(_reducersReducersDefault.default, _reduxDevtoolsExtension.devToolsEnhancer());
-  // Main component (will eventually use all the others)
   class MyFlixApplication extends _reactDefault.default.Component {
     render() {
       return (
@@ -1080,7 +1078,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","react-dom":"2sg1U","./index.scss":"5iJih","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./components/MainView/MainView":"5VFKs","./components/MainNavbar/MainNavbar":"6h1DY","redux":"7panR","react-redux":"7GDa4","redux-devtools-extension":"3vUkb","./reducers/reducers":"2736c"}],"3b2NM":[function(require,module,exports) {
+},{"react":"3b2NM","react-dom":"2sg1U","./index.scss":"5iJih","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./components/MainView/MainView":"5VFKs","redux":"7panR","react-redux":"7GDa4","redux-devtools-extension":"3vUkb","./reducers/reducers":"2736c"}],"3b2NM":[function(require,module,exports) {
 "use strict";
 if ("development" === 'production') {
   module.exports = require('./cjs/react.production.min.js');
@@ -26512,16 +26510,20 @@ try {
   var _RegistrationViewRegistrationView = require('../RegistrationView/RegistrationView');
   var _RegistrationViewRegistrationViewDefault = _parcelHelpers.interopDefault(_RegistrationViewRegistrationView);
   var _actionsActions = require('../../actions/actions');
-  require('./main-view.scss');
   var _s = $RefreshSig$();
-  const MainView = ({movies, logoutUser, setActors, setMovies, setFavoritedMovies, setFeaturedMovies, setUserInfo, user}) => {
+  const MainView = ({logoutUser, movies, setActors, setMovies, setFavoritedMovies, setFeaturedMovies, setUserInfo, user}) => {
     _s();
+    const [actorsError, setActorsError] = _react.useState(false);
+    const [moviesError, setMoviesError] = _react.useState(false);
+    const token = localStorage.getItem('token');
+    // Set necessary info after page refresh
     _react.useEffect(() => {
-      if (token && movies.length === 0) {
+      // If user is logged in but movies haven't been set
+      if (Object.keys(user).length > 0 && movies.length === 0) {
         getActors(token);
-        getMovies(token);
-        getFavoritedMovies(token);
+        getMovies(token).then(data => getFavoritedMovies(token, data));
       }
+      // If user is logged in but user info hasn't been set
       if (token && !user.id) {
         _axiosDefault.default.get(// eslint-disable-next-line max-len
         `https://my-flix-2021.herokuapp.com/users/${localStorage.getItem('user')}`, {
@@ -26529,61 +26531,109 @@ try {
             Authorization: `Bearer ${token}`
           }
         }).then(response => {
-          const currentUser = response.data;
+          const loggedInUser = response.data;
           setUserInfo({
-            birthDate: currentUser.birthDate,
-            favoriteActors: currentUser.favoriteActors,
-            favoriteMovies: currentUser.favoriteMovies,
-            email: currentUser.email,
+            birthDate: loggedInUser.birthDate,
+            favoriteActors: loggedInUser.favoriteActors,
+            favoriteMovies: loggedInUser.favoriteMovies,
+            email: loggedInUser.email,
             id: localStorage.getItem('user'),
-            password: currentUser.password,
-            toWatchMovies: currentUser.toWatchMovies,
-            username: currentUser.username
+            password: loggedInUser.password,
+            toWatchMovies: loggedInUser.toWatchMovies,
+            username: loggedInUser.username
           });
         });
       }
-    }, []);
-    const token = localStorage.getItem('token');
-    const [actorsError, setActorsError] = _react.useState(false);
-    const [moviesError, setMoviesError] = _react.useState(false);
+    }, [user, movies]);
+    // Get list of actors from API
     const getActors = token => {
       _axiosDefault.default.get('https://my-flix-2021.herokuapp.com/actors', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       }).then(response => {
-        setActors(response.data);
-      }).catch(error => {
-        setActorsError(error);
+        const actorsList = response.data;
+        setActors(actorsList);
+        if (actorsList.length === 0) {
+          setActorsError({
+            message: 'There are no actors to display.',
+            type: 'info'
+          });
+        }
+      }).catch(() => {
+        setActorsError({
+          message: `The list of actors could not be loaded. 
+                    Please try again`,
+          type: 'error'
+        });
       });
     };
-    const getFavoritedMovies = token => {
+    // Get list of favoritedMovies from API
+    const getFavoritedMovies = (token, moviesList) => {
       _axiosDefault.default.get('https://my-flix-2021.herokuapp.com/favorite-movies', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       }).then(response => {
-        setFavoritedMovies(response.data);
-      }).catch(error => {
-        setMoviesError(error);
+        const favMovies = response.data;
+        // Get list of movies and add usersFavorited property
+        // to the ones that have been favorited by users
+        moviesList = moviesList.map(movie => {
+          for (let i = 0; i < favMovies.length; i++) {
+            if (favMovies[i].name === movie.name) {
+              const usersFavorited = favMovies[i].usersFavorited;
+              return {
+                ...movie,
+                usersFavorited
+              };
+            }
+          }
+          return false;
+        });
+        // Filter out the movies that haven't been favorited by users
+        // and set favoritedMovies to that list
+        setFavoritedMovies(moviesList.filter(movie => {
+          return movie;
+        }));
+      }).catch(() => {
+        setMoviesError({
+          message: `The list of movies could not be loaded. 
+                Please try again.`,
+          type: 'error'
+        });
       });
     };
+    // Get list of all movies from API
     const getMovies = token => {
-      _axiosDefault.default.get('https://my-flix-2021.herokuapp.com/movies', {
+      return _axiosDefault.default.get('https://my-flix-2021.herokuapp.com/movies', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       }).then(response => {
-        const movies = response.data;
-        setMovies(movies);
-        setFeaturedMovies(movies.filter(movie => movie.featured));
-      }).catch(error => {
-        setMoviesError(error);
+        const moviesList = response.data;
+        setMovies(moviesList);
+        // Filter out the movies that aren't featured
+        // and set featuredMovies to that list
+        setFeaturedMovies(moviesList.filter(movie => movie.featured));
+        if (moviesList.length === 0) {
+          setMoviesError({
+            message: 'There are no movies to display.',
+            type: 'info'
+          });
+        }
+        return moviesList;
+      }).catch(() => {
+        setMoviesError({
+          message: `The list of movies could not be loaded. 
+                    Please try again.`,
+          type: 'error'
+        });
       });
     };
+    // Set user info and get lists of movies/actors
+    // after user is logged in
     const onLoggedIn = ({token, user}) => {
-      setUserInfo({
-        birthDate: user.birthDate,
+      const userInfo = {
         favoriteActors: user.favoriteActors,
         favoriteMovies: user.favoriteMovies,
         email: user.email,
@@ -26591,44 +26641,40 @@ try {
         password: user.password,
         toWatchMovies: user.toWatchMovies,
         username: user.username
-      });
+      };
+      if (user.birthDate) userInfo['birthDate'] = user.birthDate;
+      setUserInfo(userInfo);
       localStorage.setItem('token', token);
       localStorage.setItem('user', user._id);
       getActors(token);
-      getMovies(token);
-      getFavoritedMovies(token);
+      getMovies(token).then(data => getFavoritedMovies(token, data));
     };
+    // Remove user info once user is logged out
     const onLogout = () => {
+      logoutUser();
       localStorage.removeItem('user');
       localStorage.removeItem('token');
-      logoutUser();
-      window.open('/', '_self');
-    };
-    const showLogin = path => {
-      if (path == 'logout') onLogout();
-      return (
-        /*#__PURE__*/_reactDefault.default.createElement(_LoginViewLoginViewDefault.default, {
-          onLoggedIn: onLoggedIn
-        })
-      );
     };
     return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.BrowserRouter, null, /*#__PURE__*/_reactDefault.default.createElement(_MainNavbarMainNavbarDefault.default, null), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Container, {
+      /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.BrowserRouter, null, /*#__PURE__*/_reactDefault.default.createElement(_MainNavbarMainNavbarDefault.default, {
+        onLogout: onLogout
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Container, {
         className: `my-flix`,
         fluid: true
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Switch, null, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
         exact: true,
         path: "/",
         render: () => {
           // If user is not logged in, show login view
-          if (!token) return (
+          if (Object.keys(user).length === 0) return (
             /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
               to: "/login"
             })
           );
           return (
             /*#__PURE__*/_reactDefault.default.createElement(_MoviesViewMoviesViewDefault.default, {
-              error: moviesError
+              error: moviesError.message || false,
+              errorType: moviesError.type || false
             })
           );
         }
@@ -26660,7 +26706,8 @@ try {
           );
           return (
             /*#__PURE__*/_reactDefault.default.createElement(_ActorsViewActorsViewDefault.default, {
-              error: actorsError
+              error: actorsError.message || false,
+              errorType: actorsError.type || false
             })
           );
         }
@@ -26714,20 +26761,47 @@ try {
         }
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
         path: "/register",
-        render: () => {
+        render: ({history}) => {
           // if user is already logged in redirect to home page
-          if (token) return (
+          if (Object.keys(user).length > 0) return (
             /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
               to: "/"
             })
           );
           return (
-            /*#__PURE__*/_reactDefault.default.createElement(_RegistrationViewRegistrationViewDefault.default, null)
+            /*#__PURE__*/_reactDefault.default.createElement(_RegistrationViewRegistrationViewDefault.default, {
+              history: history
+            })
+          );
+        }
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        path: "/login",
+        render: ({history}) => {
+          // if user is already logged in redirect to home page
+          if (Object.keys(user).length > 0) return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
+              to: "/"
+            })
+          );
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_LoginViewLoginViewDefault.default, {
+              history: history,
+              onLoggedIn: onLoggedIn
+            })
+          );
+        }
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        path: "/logout",
+        render: () => {
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
+              to: "/"
+            })
           );
         }
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
         path: "/profile",
-        render: () => {
+        render: ({history}) => {
           // If user is not logged in, show login view
           if (!token) return (
             /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
@@ -26736,29 +26810,10 @@ try {
           );
           return (
             /*#__PURE__*/_reactDefault.default.createElement(_ProfileViewProfileViewDefault.default, {
+              history: history,
               onLogout: onLogout
             })
           );
-        }
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
-        path: "/login",
-        render: () => {
-          // if user is already logged in redirect to home page
-          if (token) return (
-            /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
-              to: "/"
-            })
-          );
-          return (
-            /*#__PURE__*/_reactDefault.default.createElement(_LoginViewLoginViewDefault.default, {
-              onLoggedIn: onLoggedIn
-            })
-          );
-        }
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
-        path: "/logout",
-        render: () => {
-          showLogin('logout');
         }
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
         path: "/about",
@@ -26772,23 +26827,23 @@ try {
             /*#__PURE__*/_reactDefault.default.createElement(_AboutViewAboutViewDefault.default, null)
           );
         }
-      })))
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
+        path: "*",
+        render: () => {
+          return (
+            /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
+              to: "/"
+            })
+          );
+        }
+      }))))
     );
   };
-  _s(MainView, "Q7iycMJ4c3HqF5lmbXbWeeWm8cU=");
+  _s(MainView, "qzVafj+55IS1Gc2378ZAkKA3xWE=");
   _c = MainView;
   MainView.propTypes = {
-    actors: _propTypesDefault.default.array.isRequired,
-    actorsFilter: _propTypesDefault.default.string.isRequired,
-    actorsSortingFactor: _propTypesDefault.default.string.isRequired,
-    favoritedMovies: _propTypesDefault.default.array.isRequired,
-    featuredMovies: _propTypesDefault.default.array.isRequired,
     logoutUser: _propTypesDefault.default.func.isRequired,
     movies: _propTypesDefault.default.array.isRequired,
-    moviesFilter: _propTypesDefault.default.string,
-    moviesListType: _propTypesDefault.default.string.isRequired,
-    moviesSortingFactor: _propTypesDefault.default.string.isRequired,
-    selectedMovie: _propTypesDefault.default.object.isRequired,
     setActors: _propTypesDefault.default.func.isRequired,
     setFavoritedMovies: _propTypesDefault.default.func.isRequired,
     setFeaturedMovies: _propTypesDefault.default.func.isRequired,
@@ -26798,16 +26853,7 @@ try {
   };
   const mapStateToProps = state => {
     return {
-      actors: state.actors,
-      actorsFilter: state.actorsFilter,
-      actorsSortingFactor: state.actorsSortingFactor,
-      favoritedMovies: state.favoritedMovies,
-      featuredMovies: state.featuredMovies,
       movies: state.movies,
-      moviesFilter: state.moviesFilter,
-      moviesListType: state.moviesListType,
-      moviesSortingFactor: state.moviesSortingFactor,
-      selectedMovie: state.selectedMovie,
       user: state.user
     };
   };
@@ -26829,7 +26875,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-bootstrap":"4n7hB","react-router-dom":"1PMSK","react-redux":"7GDa4","../ActorView/ActorView":"3o4Df","../GenreView/GenreView":"4kDeE","../DirectorView/DirectorView":"7nJwh","../MainNavbar/MainNavbar":"6h1DY","../MovieView/MovieView":"6fxIo","../LoginView/LoginView":"1zhWx","../ProfileView/ProfileView":"7iKJS","../RegistrationView/RegistrationView":"4DfHF","../../actions/actions":"5S6cN","./main-view.scss":"3JwwG","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../MoviesView/MoviesView":"44kmi","../ActorsView/ActorsView":"6H4Vv","../AboutView/AboutView":"2a49I"}],"7rA65":[function(require,module,exports) {
+},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-bootstrap":"4n7hB","react-router-dom":"1PMSK","react-redux":"7GDa4","../AboutView/AboutView":"2a49I","../ActorView/ActorView":"3o4Df","../ActorsView/ActorsView":"6H4Vv","../GenreView/GenreView":"4kDeE","../DirectorView/DirectorView":"7nJwh","../MainNavbar/MainNavbar":"6h1DY","../MovieView/MovieView":"6fxIo","../MoviesView/MoviesView":"44kmi","../LoginView/LoginView":"1zhWx","../ProfileView/ProfileView":"7iKJS","../RegistrationView/RegistrationView":"4DfHF","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"7rA65":[function(require,module,exports) {
 module.exports = require('./lib/axios');
 },{"./lib/axios":"4qfhW"}],"4qfhW":[function(require,module,exports) {
 'use strict';
@@ -47484,7 +47530,50 @@ exports.unstable_batchedUpdates = void 0;
 var _reactDom = require("react-dom");
 
 exports.unstable_batchedUpdates = _reactDom.unstable_batchedUpdates;
-},{"react-dom":"2sg1U"}],"3o4Df":[function(require,module,exports) {
+},{"react-dom":"2sg1U"}],"2a49I":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRouterDom = require('react-router-dom');
+  const AboutView = () => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+        className: "justify-content-center"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+        className: "view",
+        sm: 8,
+        md: 5
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", {
+        className: "text-center"
+      }, "Welcome to myFlix!"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+        className: "description"
+      }, "Feel free to browse and sort", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/"
+      }, " movies "), "and ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/actors"
+      }, " actors "), "and add them to your favorites or to-watch lists. You can visit your", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: "/profile"
+      }, " profile "), "to view those lists as well as edit your profile info.")))
+    );
+  };
+  _c = AboutView;
+  exports.default = AboutView;
+  var _c;
+  $RefreshReg$(_c, "AboutView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","react-bootstrap":"4n7hB","react-router-dom":"1PMSK","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"3o4Df":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -47498,17 +47587,21 @@ try {
   var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
   var _reactRedux = require('react-redux');
   var _reactBootstrap = require('react-bootstrap');
-  var _actionsActions = require('../../actions/actions');
   var _utilsHelpers = require('../../utils/helpers');
-  require('../../utils/partials/_view.scss');
-  require('./actor-view.scss');
+  var _actionsActions = require('../../actions/actions');
   var _s = $RefreshSig$();
   const ActorView = ({actors, addUserFavoriteActor, match, onBackClick, user}) => {
     _s();
+    // If the list of actors is empty
+    // stop execution of function
+    // as is is needed for component to function properly
+    if (actors.length === 0) return null;
     const [favorited, setFavorited] = _react.useState(false);
+    // Find actor based on id param in url
     const actor = actors.find(actor => {
       return actor._id === match.params.id;
     });
+    // Add actor to user's favorite actors list
     const addToFavoritesList = () => {
       _utilsHelpers.addToList(user.id, 'favorite-actors', actor._id, 'actor_id').then(() => {
         setFavorited(true);
@@ -47526,13 +47619,14 @@ try {
         className: "view",
         md: 6
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "image-cover",
+        className: "heading-box",
         style: {
           backgroundImage: `url(${actor.image})`
         }
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "close-box"
       }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*X icon*/
         onClick: () => onBackClick(),
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
@@ -47556,9 +47650,12 @@ try {
         y2: "18"
       })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "main-content"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, actor.name, /*#__PURE__*/_reactDefault.default.createElement("div", {
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", {
+        className: "main-heading"
+      }, actor.name, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "user-list-icons"
       }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Heart icon*/
         onClick: () => addToFavoritesList(),
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
@@ -47569,13 +47666,12 @@ try {
         strokeWidth: "2",
         strokeLinecap: "round",
         strokeLinejoin: "round",
-        className: `feather feather-heart ${favorited || user.favoriteActors && user.favoriteActors.indexOf(actor._id) > -1 ? 'added-to-list' : ''}`,
-        title: "Add this actor to your  Favorite Movies list"
-      }, /*#__PURE__*/_reactDefault.default.createElement("path", {
+        className: `feather feather-heart ${favorited || user.favoriteActors && user.favoriteActors.indexOf(actor._id) > -1 ? 'added-to-list' : ''}`
+      }, /*#__PURE__*/_reactDefault.default.createElement("title", null, "Add this actor to your Favorite Actors list"), /*#__PURE__*/_reactDefault.default.createElement("path", {
         d: "M20.84 4.61a5.5 5.5 0 0 0-7.78  0L12 5.67l-1.06-1.06a5.5  5.5 0 0 0-7.78 7.78l1.06  1.06L12 21.23l7.78-7.78  1.06-1.06a5.5 5.5 0 0 0  0-7.78z"
       })))), /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "label"
-      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+      }, "Bio"), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "description"
       }, _utilsHelpers.makeTextReadable(actor.bio)), /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "label"
@@ -47613,27 +47709,8 @@ try {
   ActorView.propTypes = {
     actors: _propTypesDefault.default.array.isRequired,
     addUserFavoriteActor: _propTypesDefault.default.func.isRequired,
-    match: _propTypesDefault.default.string.isRequired,
-    movie: _propTypesDefault.default.shape({
-      _id: _propTypesDefault.default.string.isRequired,
-      description: _propTypesDefault.default.string.isRequired,
-      director: _propTypesDefault.default.shape({
-        name: _propTypesDefault.default.string.isRequired
-      }).isRequired,
-      genre: _propTypesDefault.default.shape({
-        name: _propTypesDefault.default.string.isRequired
-      }).isRequired,
-      image: _propTypesDefault.default.string.isRequired,
-      name: _propTypesDefault.default.string.isRequired,
-      rating: _propTypesDefault.default.number,
-      releaseYear: _propTypesDefault.default.number,
-      stars: _propTypesDefault.default.array
-    }).isRequired,
-    movieActors: _propTypesDefault.default.array.isRequired,
+    match: _propTypesDefault.default.object.isRequired,
     onBackClick: _propTypesDefault.default.func.isRequired,
-    onItemClick: _propTypesDefault.default.func.isRequired,
-    setSelectedMovie: _propTypesDefault.default.func.isRequired,
-    setFavoritedMovies: _propTypesDefault.default.func.isRequired,
     user: _propTypesDefault.default.shape({
       id: _propTypesDefault.default.string.isRequired,
       favoriteActors: _propTypesDefault.default.array.isRequired
@@ -47654,219 +47731,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","prop-types":"4dfy5","react-redux":"7GDa4","../../actions/actions":"5S6cN","../../utils/helpers":"1nff4","../../utils/partials/_view.scss":"552MA","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./actor-view.scss":"4OZHF","react-bootstrap":"4n7hB"}],"5S6cN":[function(require,module,exports) {
-var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-_parcelHelpers.defineInteropFlag(exports);
-_parcelHelpers.export(exports, "LOGOUT_USER", function () {
-  return LOGOUT_USER;
-});
-_parcelHelpers.export(exports, "SET_ACTORS_SORTING_FACTOR", function () {
-  return SET_ACTORS_SORTING_FACTOR;
-});
-_parcelHelpers.export(exports, "SET_ACTORS", function () {
-  return SET_ACTORS;
-});
-_parcelHelpers.export(exports, "SET_ACTORS_FILTER", function () {
-  return SET_ACTORS_FILTER;
-});
-_parcelHelpers.export(exports, "ADD_FAVORITED_MOVIE", function () {
-  return ADD_FAVORITED_MOVIE;
-});
-_parcelHelpers.export(exports, "SET_SELECTED_MOVIE", function () {
-  return SET_SELECTED_MOVIE;
-});
-_parcelHelpers.export(exports, "SET_FAVORITED_MOVIES", function () {
-  return SET_FAVORITED_MOVIES;
-});
-_parcelHelpers.export(exports, "SET_FEATURED_MOVIES", function () {
-  return SET_FEATURED_MOVIES;
-});
-_parcelHelpers.export(exports, "SET_MOVIES", function () {
-  return SET_MOVIES;
-});
-_parcelHelpers.export(exports, "SET_MOVIES_LIST_TYPE", function () {
-  return SET_MOVIES_LIST_TYPE;
-});
-_parcelHelpers.export(exports, "SET_MOVIES_FILTER", function () {
-  return SET_MOVIES_FILTER;
-});
-_parcelHelpers.export(exports, "SET_MOVIES_SORTING_FACTOR", function () {
-  return SET_MOVIES_SORTING_FACTOR;
-});
-_parcelHelpers.export(exports, "ADD_USER_FAVORITE_ACTOR", function () {
-  return ADD_USER_FAVORITE_ACTOR;
-});
-_parcelHelpers.export(exports, "ADD_USER_FAVORITE_MOVIE", function () {
-  return ADD_USER_FAVORITE_MOVIE;
-});
-_parcelHelpers.export(exports, "ADD_USER_TO_WATCH_MOVIE", function () {
-  return ADD_USER_TO_WATCH_MOVIE;
-});
-_parcelHelpers.export(exports, "SET_USER_INFO", function () {
-  return SET_USER_INFO;
-});
-_parcelHelpers.export(exports, "REMOVE_USER_FAVORITE_ACTOR", function () {
-  return REMOVE_USER_FAVORITE_ACTOR;
-});
-_parcelHelpers.export(exports, "REMOVE_USER_FAVORITE_MOVIE", function () {
-  return REMOVE_USER_FAVORITE_MOVIE;
-});
-_parcelHelpers.export(exports, "REMOVE_USER_TO_WATCH_MOVIE", function () {
-  return REMOVE_USER_TO_WATCH_MOVIE;
-});
-_parcelHelpers.export(exports, "setActors", function () {
-  return setActors;
-});
-_parcelHelpers.export(exports, "setActorsFilter", function () {
-  return setActorsFilter;
-});
-_parcelHelpers.export(exports, "setActorsSortingFactor", function () {
-  return setActorsSortingFactor;
-});
-_parcelHelpers.export(exports, "addFavoritedMovie", function () {
-  return addFavoritedMovie;
-});
-_parcelHelpers.export(exports, "setMovies", function () {
-  return setMovies;
-});
-_parcelHelpers.export(exports, "setFavoritedMovies", function () {
-  return setFavoritedMovies;
-});
-_parcelHelpers.export(exports, "setFeaturedMovies", function () {
-  return setFeaturedMovies;
-});
-_parcelHelpers.export(exports, "setMoviesListType", function () {
-  return setMoviesListType;
-});
-_parcelHelpers.export(exports, "setMoviesFilter", function () {
-  return setMoviesFilter;
-});
-_parcelHelpers.export(exports, "setMoviesSortingFactor", function () {
-  return setMoviesSortingFactor;
-});
-_parcelHelpers.export(exports, "setSelectedMovie", function () {
-  return setSelectedMovie;
-});
-_parcelHelpers.export(exports, "addUserFavoriteActor", function () {
-  return addUserFavoriteActor;
-});
-_parcelHelpers.export(exports, "addUserFavoriteMovie", function () {
-  return addUserFavoriteMovie;
-});
-_parcelHelpers.export(exports, "addUserToWatchMovie", function () {
-  return addUserToWatchMovie;
-});
-_parcelHelpers.export(exports, "logoutUser", function () {
-  return logoutUser;
-});
-_parcelHelpers.export(exports, "setUserInfo", function () {
-  return setUserInfo;
-});
-_parcelHelpers.export(exports, "removeUserFavoriteActor", function () {
-  return removeUserFavoriteActor;
-});
-_parcelHelpers.export(exports, "removeUserFavoriteMovie", function () {
-  return removeUserFavoriteMovie;
-});
-_parcelHelpers.export(exports, "removeUserToWatchMovie", function () {
-  return removeUserToWatchMovie;
-});
-const LOGOUT_USER = 'LOGOUT_USER';
-const SET_ACTORS_SORTING_FACTOR = 'SET_ACTORS_SORTING_FACTOR';
-const SET_ACTORS = 'SET_ACTORS';
-const SET_ACTORS_FILTER = 'SET_ACTORS_FILTER';
-const ADD_FAVORITED_MOVIE = 'ADD_FAVORITED_MOVIE';
-const SET_SELECTED_MOVIE = 'SET_SELECTED_MOVIE';
-const SET_FAVORITED_MOVIES = 'SET_FAVORITED_MOVIES';
-const SET_FEATURED_MOVIES = 'SET_FEATURED_MOVIES';
-const SET_MOVIES = 'SET_MOVIES';
-const SET_MOVIES_LIST_TYPE = 'SET_MOVIES_LIST_TYPE';
-const SET_MOVIES_FILTER = 'SET_MOVIES_FILTER';
-const SET_MOVIES_SORTING_FACTOR = 'SET_MOVIES_SORTING_FACTOR';
-const ADD_USER_FAVORITE_ACTOR = 'ADD_USER_FAVORITE_ACTOR';
-const ADD_USER_FAVORITE_MOVIE = 'ADD_USER_FAVORITE_MOVIE';
-const ADD_USER_TO_WATCH_MOVIE = 'ADD_USER_TO_WATCH_MOVIE';
-const SET_USER_INFO = 'SET_USER_INFO';
-const REMOVE_USER_FAVORITE_ACTOR = 'REMOVE_USER_FAVORITE_ACTOR';
-const REMOVE_USER_FAVORITE_MOVIE = 'REMOVE_USER_FAVORITE_MOVIE';
-const REMOVE_USER_TO_WATCH_MOVIE = 'REMOVE_USER_TO_WATCH_MOVIE';
-const setActors = actors => ({
-  type: SET_ACTORS,
-  actors
-});
-const setActorsFilter = filter => ({
-  type: SET_ACTORS_FILTER,
-  filter
-});
-const setActorsSortingFactor = sortingFactor => ({
-  type: SET_ACTORS_SORTING_FACTOR,
-  sortingFactor
-});
-const addFavoritedMovie = movieName => ({
-  type: ADD_FAVORITED_MOVIE,
-  movieName
-});
-const setMovies = movies => ({
-  type: SET_MOVIES,
-  movies
-});
-const setFavoritedMovies = movies => ({
-  type: SET_FAVORITED_MOVIES,
-  movies
-});
-const setFeaturedMovies = movies => ({
-  type: SET_FEATURED_MOVIES,
-  movies
-});
-const setMoviesListType = listType => ({
-  type: SET_MOVIES_LIST_TYPE,
-  listType
-});
-const setMoviesFilter = filter => ({
-  type: SET_MOVIES_FILTER,
-  filter
-});
-const setMoviesSortingFactor = sortingFactor => ({
-  type: SET_MOVIES_SORTING_FACTOR,
-  sortingFactor
-});
-const setSelectedMovie = movie => ({
-  type: SET_SELECTED_MOVIE,
-  movie
-});
-const addUserFavoriteActor = actorId => ({
-  type: ADD_USER_FAVORITE_ACTOR,
-  actorId
-});
-const addUserFavoriteMovie = movieId => ({
-  type: ADD_USER_FAVORITE_MOVIE,
-  movieId
-});
-const addUserToWatchMovie = movieId => ({
-  type: ADD_USER_TO_WATCH_MOVIE,
-  movieId
-});
-const logoutUser = () => ({
-  type: LOGOUT_USER
-});
-const setUserInfo = info => ({
-  type: SET_USER_INFO,
-  info
-});
-const removeUserFavoriteActor = actorId => ({
-  type: REMOVE_USER_FAVORITE_ACTOR,
-  actorId
-});
-const removeUserFavoriteMovie = movieId => ({
-  type: REMOVE_USER_FAVORITE_MOVIE,
-  movieId
-});
-const removeUserToWatchMovie = movieId => ({
-  type: REMOVE_USER_TO_WATCH_MOVIE,
-  movieId
-});
-
-},{"@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU"}],"1nff4":[function(require,module,exports) {
+},{"react":"3b2NM","prop-types":"4dfy5","react-redux":"7GDa4","react-bootstrap":"4n7hB","../../utils/helpers":"1nff4","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"1nff4":[function(require,module,exports) {
 var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
 _parcelHelpers.defineInteropFlag(exports);
 _parcelHelpers.export(exports, "addToList", function () {
@@ -47893,6 +47758,7 @@ const addToList = (userId, listType, itemId, itemIdType) => {
   data[itemIdType] = itemId;
   return _axiosDefault.default({
     method: 'patch',
+    // eslint-disable-next-line max-len
     url: `https://my-flix-2021.herokuapp.com/users/${userId}/${listType}/${itemId}`,
     data,
     headers: {
@@ -47936,7 +47802,7 @@ const removeFocusedClass = e => {
   element.nextSibling.firstChild.firstChild.classList.remove('focused');
 };
 
-},{"axios":"7rA65","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","html-react-parser":"7AuyE"}],"7AuyE":[function(require,module,exports) {
+},{"axios":"7rA65","html-react-parser":"7AuyE","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU"}],"7AuyE":[function(require,module,exports) {
 var domToReact = require('./lib/dom-to-react');
 var attributesToProps = require('./lib/attributes-to-props');
 var htmlToDOM = require('html-dom-parser');
@@ -49978,7 +49844,537 @@ function cloneChildren(childs) {
     return children;
 }
 
-},{}],"552MA":[function() {},{}],"4OZHF":[function() {},{}],"4kDeE":[function(require,module,exports) {
+},{}],"5S6cN":[function(require,module,exports) {
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+_parcelHelpers.export(exports, "LOGOUT_USER", function () {
+  return LOGOUT_USER;
+});
+_parcelHelpers.export(exports, "SET_ACTORS_SORTING_FACTOR", function () {
+  return SET_ACTORS_SORTING_FACTOR;
+});
+_parcelHelpers.export(exports, "SET_ACTORS", function () {
+  return SET_ACTORS;
+});
+_parcelHelpers.export(exports, "SET_ACTORS_FILTER", function () {
+  return SET_ACTORS_FILTER;
+});
+_parcelHelpers.export(exports, "ADD_FAVORITED_MOVIE", function () {
+  return ADD_FAVORITED_MOVIE;
+});
+_parcelHelpers.export(exports, "SET_SELECTED_MOVIE", function () {
+  return SET_SELECTED_MOVIE;
+});
+_parcelHelpers.export(exports, "SET_FAVORITED_MOVIES", function () {
+  return SET_FAVORITED_MOVIES;
+});
+_parcelHelpers.export(exports, "SET_FEATURED_MOVIES", function () {
+  return SET_FEATURED_MOVIES;
+});
+_parcelHelpers.export(exports, "SET_MOVIES", function () {
+  return SET_MOVIES;
+});
+_parcelHelpers.export(exports, "SET_MOVIES_LIST_TYPE", function () {
+  return SET_MOVIES_LIST_TYPE;
+});
+_parcelHelpers.export(exports, "SET_MOVIES_FILTER", function () {
+  return SET_MOVIES_FILTER;
+});
+_parcelHelpers.export(exports, "SET_MOVIES_SORTING_FACTOR", function () {
+  return SET_MOVIES_SORTING_FACTOR;
+});
+_parcelHelpers.export(exports, "ADD_USER_FAVORITE_ACTOR", function () {
+  return ADD_USER_FAVORITE_ACTOR;
+});
+_parcelHelpers.export(exports, "ADD_USER_FAVORITE_MOVIE", function () {
+  return ADD_USER_FAVORITE_MOVIE;
+});
+_parcelHelpers.export(exports, "ADD_USER_TO_WATCH_MOVIE", function () {
+  return ADD_USER_TO_WATCH_MOVIE;
+});
+_parcelHelpers.export(exports, "SET_USER_INFO", function () {
+  return SET_USER_INFO;
+});
+_parcelHelpers.export(exports, "REMOVE_USER_FAVORITE_ACTOR", function () {
+  return REMOVE_USER_FAVORITE_ACTOR;
+});
+_parcelHelpers.export(exports, "REMOVE_USER_FAVORITE_MOVIE", function () {
+  return REMOVE_USER_FAVORITE_MOVIE;
+});
+_parcelHelpers.export(exports, "REMOVE_USER_TO_WATCH_MOVIE", function () {
+  return REMOVE_USER_TO_WATCH_MOVIE;
+});
+_parcelHelpers.export(exports, "setActors", function () {
+  return setActors;
+});
+_parcelHelpers.export(exports, "setActorsFilter", function () {
+  return setActorsFilter;
+});
+_parcelHelpers.export(exports, "setActorsSortingFactor", function () {
+  return setActorsSortingFactor;
+});
+_parcelHelpers.export(exports, "addFavoritedMovie", function () {
+  return addFavoritedMovie;
+});
+_parcelHelpers.export(exports, "setMovies", function () {
+  return setMovies;
+});
+_parcelHelpers.export(exports, "setFavoritedMovies", function () {
+  return setFavoritedMovies;
+});
+_parcelHelpers.export(exports, "setFeaturedMovies", function () {
+  return setFeaturedMovies;
+});
+_parcelHelpers.export(exports, "setMoviesListType", function () {
+  return setMoviesListType;
+});
+_parcelHelpers.export(exports, "setMoviesFilter", function () {
+  return setMoviesFilter;
+});
+_parcelHelpers.export(exports, "setMoviesSortingFactor", function () {
+  return setMoviesSortingFactor;
+});
+_parcelHelpers.export(exports, "setSelectedMovie", function () {
+  return setSelectedMovie;
+});
+_parcelHelpers.export(exports, "addUserFavoriteActor", function () {
+  return addUserFavoriteActor;
+});
+_parcelHelpers.export(exports, "addUserFavoriteMovie", function () {
+  return addUserFavoriteMovie;
+});
+_parcelHelpers.export(exports, "addUserToWatchMovie", function () {
+  return addUserToWatchMovie;
+});
+_parcelHelpers.export(exports, "logoutUser", function () {
+  return logoutUser;
+});
+_parcelHelpers.export(exports, "removeUserFavoriteActor", function () {
+  return removeUserFavoriteActor;
+});
+_parcelHelpers.export(exports, "removeUserFavoriteMovie", function () {
+  return removeUserFavoriteMovie;
+});
+_parcelHelpers.export(exports, "removeUserToWatchMovie", function () {
+  return removeUserToWatchMovie;
+});
+_parcelHelpers.export(exports, "setUserInfo", function () {
+  return setUserInfo;
+});
+const LOGOUT_USER = 'LOGOUT_USER';
+const SET_ACTORS_SORTING_FACTOR = 'SET_ACTORS_SORTING_FACTOR';
+const SET_ACTORS = 'SET_ACTORS';
+const SET_ACTORS_FILTER = 'SET_ACTORS_FILTER';
+const ADD_FAVORITED_MOVIE = 'ADD_FAVORITED_MOVIE';
+const SET_SELECTED_MOVIE = 'SET_SELECTED_MOVIE';
+const SET_FAVORITED_MOVIES = 'SET_FAVORITED_MOVIES';
+const SET_FEATURED_MOVIES = 'SET_FEATURED_MOVIES';
+const SET_MOVIES = 'SET_MOVIES';
+const SET_MOVIES_LIST_TYPE = 'SET_MOVIES_LIST_TYPE';
+const SET_MOVIES_FILTER = 'SET_MOVIES_FILTER';
+const SET_MOVIES_SORTING_FACTOR = 'SET_MOVIES_SORTING_FACTOR';
+const ADD_USER_FAVORITE_ACTOR = 'ADD_USER_FAVORITE_ACTOR';
+const ADD_USER_FAVORITE_MOVIE = 'ADD_USER_FAVORITE_MOVIE';
+const ADD_USER_TO_WATCH_MOVIE = 'ADD_USER_TO_WATCH_MOVIE';
+const SET_USER_INFO = 'SET_USER_INFO';
+const REMOVE_USER_FAVORITE_ACTOR = 'REMOVE_USER_FAVORITE_ACTOR';
+const REMOVE_USER_FAVORITE_MOVIE = 'REMOVE_USER_FAVORITE_MOVIE';
+const REMOVE_USER_TO_WATCH_MOVIE = 'REMOVE_USER_TO_WATCH_MOVIE';
+const setActors = actors => ({
+  type: SET_ACTORS,
+  actors
+});
+const setActorsFilter = filter => ({
+  type: SET_ACTORS_FILTER,
+  filter
+});
+const setActorsSortingFactor = sortingFactor => ({
+  type: SET_ACTORS_SORTING_FACTOR,
+  sortingFactor
+});
+const addFavoritedMovie = movieName => ({
+  type: ADD_FAVORITED_MOVIE,
+  movieName
+});
+const setMovies = movies => ({
+  type: SET_MOVIES,
+  movies
+});
+const setFavoritedMovies = movies => ({
+  type: SET_FAVORITED_MOVIES,
+  movies
+});
+const setFeaturedMovies = movies => ({
+  type: SET_FEATURED_MOVIES,
+  movies
+});
+const setMoviesListType = listType => ({
+  type: SET_MOVIES_LIST_TYPE,
+  listType
+});
+const setMoviesFilter = filter => ({
+  type: SET_MOVIES_FILTER,
+  filter
+});
+const setMoviesSortingFactor = sortingFactor => ({
+  type: SET_MOVIES_SORTING_FACTOR,
+  sortingFactor
+});
+const setSelectedMovie = movie => ({
+  type: SET_SELECTED_MOVIE,
+  movie
+});
+const addUserFavoriteActor = actorId => ({
+  type: ADD_USER_FAVORITE_ACTOR,
+  actorId
+});
+const addUserFavoriteMovie = movieId => ({
+  type: ADD_USER_FAVORITE_MOVIE,
+  movieId
+});
+const addUserToWatchMovie = movieId => ({
+  type: ADD_USER_TO_WATCH_MOVIE,
+  movieId
+});
+const logoutUser = () => ({
+  type: LOGOUT_USER
+});
+const removeUserFavoriteActor = actorId => ({
+  type: REMOVE_USER_FAVORITE_ACTOR,
+  actorId
+});
+const removeUserFavoriteMovie = movieId => ({
+  type: REMOVE_USER_FAVORITE_MOVIE,
+  movieId
+});
+const removeUserToWatchMovie = movieId => ({
+  type: REMOVE_USER_TO_WATCH_MOVIE,
+  movieId
+});
+const setUserInfo = info => ({
+  type: SET_USER_INFO,
+  info
+});
+
+},{"@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU"}],"6H4Vv":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRedux = require('react-redux');
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _ListItemCardListItemCard = require('../ListItemCard/ListItemCard');
+  var _ListItemCardListItemCardDefault = _parcelHelpers.interopDefault(_ListItemCardListItemCard);
+  var _MessageMessage = require('../Message/Message');
+  var _MessageMessageDefault = _parcelHelpers.interopDefault(_MessageMessage);
+  var _SortingFactorSelectSortingFactorSelect = require('../SortingFactorSelect/SortingFactorSelect');
+  var _SortingFactorSelectSortingFactorSelectDefault = _parcelHelpers.interopDefault(_SortingFactorSelectSortingFactorSelect);
+  require('../../utils/partials/_view.scss');
+  const ActorsView = ({actors, actorsFilter, actorsSortingFactor, error, errorType}) => {
+    let content;
+    // if there is an error loading the actors
+    if (error && errorType === 'error') {
+      content = /*#__PURE__*/_reactDefault.default.createElement(_MessageMessageDefault.default, {
+        message: error,
+        type: errorType
+      });
+    } else if (error && errorType === 'info') {
+      content = /*#__PURE__*/_reactDefault.default.createElement(_MessageMessageDefault.default, {
+        message: error,
+        type: errorType
+      });
+    } else {
+      let selectedActors = [...actors];
+      // Sort actors by their birth country
+      if (actorsSortingFactor === 'birthCountry') {
+        selectedActors.sort((actor1, actor2) => {
+          if (actor1.birthCountry > actor2.birthCountry) return 1;
+          if (actor1.birthCountry === actor2.birthCountry) return 0;
+          if (actor1.birthCountry < actor2.birthCountry) return -1;
+        });
+      }
+      // Sort actors by their birthday
+      if (actorsSortingFactor === 'birthDate') selectedActors.sort((actor1, actor2) => {
+        const actor1BirthYear = new Date(actor1.birthDate).getFullYear();
+        const actor2BirthYear = new Date(actor2.birthDate).getFullYear();
+        return actor2BirthYear - actor1BirthYear;
+      });
+      // Filter actors by search term
+      if (actorsFilter !== '') {
+        selectedActors = selectedActors.filter(actor => {
+          const regExp = new RegExp(actorsFilter, 'i');
+          return actor.name.match(regExp);
+        });
+      }
+      content = /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+        className: " justify-content-center"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+        sm: 4,
+        md: 3,
+        lg: 2
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_SortingFactorSelectSortingFactorSelectDefault.default, {
+        options: [{
+          text: 'None',
+          value: 'none',
+          selected: true
+        }, {
+          text: 'Birth date',
+          value: 'birthDate',
+          selected: false
+        }, {
+          text: 'Birth country',
+          value: 'birthCountry',
+          selected: false
+        }],
+        type: "actors"
+      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+        className: "view-row justify-content-center"
+      }, selectedActors.map(actor => {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+            key: actor._id,
+            md: 6,
+            lg: 4
+          }, /*#__PURE__*/_reactDefault.default.createElement(_ListItemCardListItemCardDefault.default, {
+            item: actor,
+            itemType: "actors"
+          }))
+        );
+      }), ";"), ";");
+    }
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+        className: "actors-container  movies-container justify-content-center"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, content))
+    );
+  };
+  _c = ActorsView;
+  ActorsView.propTypes = {
+    actors: _propTypesDefault.default.array.isRequired,
+    actorsFilter: _propTypesDefault.default.string.isRequired,
+    actorsSortingFactor: _propTypesDefault.default.string.isRequired,
+    error: _propTypesDefault.default.oneOfType([_propTypesDefault.default.string, _propTypesDefault.default.bool]).isRequired,
+    errorType: _propTypesDefault.default.oneOfType([_propTypesDefault.default.string, _propTypesDefault.default.bool]).isRequired
+  };
+  const mapStateToProps = state => ({
+    actors: state.actors,
+    actorsFilter: state.actorsFilter,
+    actorsSortingFactor: state.actorsSortingFactor
+  });
+  exports.default = _reactRedux.connect(mapStateToProps)(ActorsView);
+  var _c;
+  $RefreshReg$(_c, "ActorsView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","prop-types":"4dfy5","../ListItemCard/ListItemCard":"5PP2u","../Message/Message":"4YlQk","../SortingFactorSelect/SortingFactorSelect":"6zJdJ","../../utils/partials/_view.scss":"552MA","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"5PP2u":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRouterDom = require('react-router-dom');
+  var _utilsHelpers = require('../../utils/helpers');
+  require('./list-item-card.scss');
+  const ListItemCard = ({item, itemType}) => {
+    const excerpt = _utilsHelpers.createExcerpt(item.description ? item.description : item.bio), pathname = itemType === 'movies' ? '/movies' : '/actors', readMoreLink = `${pathname}/${item._id}`;
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card, {
+        className: "list-item-card"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Body, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Title, {
+        className: "header"
+      }, item.usersFavorited && item.usersFavorited > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.OverlayTrigger, {
+        trigger: ['hover', 'focus', 'click'],
+        placement: "top",
+        overlay: /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Tooltip, null, "Favorites by users: ", item.usersFavorited)
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Star icon*/
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-star"
+      }, /*#__PURE__*/_reactDefault.default.createElement("polygon", {
+        points: "12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+      }))) : null, item.name, itemType === 'movies' && item.featured ? /*#__PURE__*/_reactDefault.default.createElement("small", null, " (Featured)") : null), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Img, {
+        src: item.image,
+        alt: item.name
+      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Text, {
+        className: "description"
+      }, excerpt, " …"), /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: "read-more-link-container"
+      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Right arrow icon*/
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className: "feather feather-arrow-right"
+      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
+        x1: "5",
+        y1: "12",
+        x2: "19",
+        y2: "12"
+      }), /*#__PURE__*/_reactDefault.default.createElement("polyline", {
+        points: "12 5 19 12 12 19"
+      })), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: readMoreLink,
+        className: "read-more-link"
+      }, "Read More"))))
+    );
+  };
+  _c = ListItemCard;
+  ListItemCard.propTypes = {
+    item: _propTypesDefault.default.shape({
+      _id: _propTypesDefault.default.string.isRequired,
+      bio: _propTypesDefault.default.string,
+      description: _propTypesDefault.default.string,
+      featured: _propTypesDefault.default.bool,
+      image: _propTypesDefault.default.string.isRequired,
+      name: _propTypesDefault.default.string.isRequired,
+      usersFavorited: _propTypesDefault.default.number
+    }).isRequired,
+    itemType: _propTypesDefault.default.string.isRequired
+  };
+  exports.default = ListItemCard;
+  var _c;
+  $RefreshReg$(_c, "ListItemCard");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","prop-types":"4dfy5","react-bootstrap":"4n7hB","react-router-dom":"1PMSK","../../utils/helpers":"1nff4","./list-item-card.scss":"3Gt0E","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"3Gt0E":[function() {},{}],"4YlQk":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactBootstrap = require('react-bootstrap');
+  const ErrorMessage = ({message, type}) => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+        className: "justify-content-center"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+        md: "5"
+      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
+        className: `text-${type}`
+      }, message)))
+    );
+  };
+  _c = ErrorMessage;
+  ErrorMessage.propTypes = {
+    message: _propTypesDefault.default.oneOfType([_propTypesDefault.default.string, _propTypesDefault.default.bool]).isRequired,
+    type: _propTypesDefault.default.oneOfType([_propTypesDefault.default.string, _propTypesDefault.default.bool]).isRequired
+  };
+  exports.default = ErrorMessage;
+  var _c;
+  $RefreshReg$(_c, "ErrorMessage");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","prop-types":"4dfy5","react-bootstrap":"4n7hB","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"6zJdJ":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRedux = require('react-redux');
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _actionsActions = require('../../actions/actions');
+  var _s = $RefreshSig$();
+  const SortingFactorSelect = ({setActorsSortingFactor, setMoviesSortingFactor, options, type}) => {
+    _s();
+    // Find option that should be the default selected option
+    // to later set the value attribute of select element
+    const defaultSelectedOption = options.find(option => {
+      return option.selected;
+    }).value;
+    const [selectedOption, setSelectedOption] = _react.useState(defaultSelectedOption);
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "list-type-select"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Sort by:"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Control, {
+        as: "select",
+        onChange: e => {
+          setSelectedOption(e.target.value);
+          type === 'movies' ? setMoviesSortingFactor(e.target.value) : setActorsSortingFactor(e.target.value);
+        },
+        value: selectedOption
+      }, options.map((option, i) => {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement("option", {
+            key: i,
+            value: option.value
+          }, option.text)
+        );
+      })))
+    );
+  };
+  _s(SortingFactorSelect, "gR6wW7tgxR3IcIobqopYFdsREpI=");
+  _c = SortingFactorSelect;
+  SortingFactorSelect.propTypes = {
+    options: _propTypesDefault.default.array.isRequired,
+    setActorsSortingFactor: _propTypesDefault.default.func.isRequired,
+    setMoviesSortingFactor: _propTypesDefault.default.func.isRequired,
+    type: _propTypesDefault.default.string.isRequired
+  };
+  exports.default = _reactRedux.connect(null, {
+    setActorsSortingFactor: _actionsActions.setActorsSortingFactor,
+    setMoviesSortingFactor: _actionsActions.setMoviesSortingFactor
+  })(SortingFactorSelect);
+  var _c;
+  $RefreshReg$(_c, "SortingFactorSelect");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","prop-types":"4dfy5","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"552MA":[function() {},{}],"4kDeE":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -49993,15 +50389,20 @@ try {
   var _reactRouterDom = require('react-router-dom');
   var _reactRedux = require('react-redux');
   var _reactBootstrap = require('react-bootstrap');
-  var _utilsHelpers = require('../../utils/helpers');
-  require('../../utils/partials/_view.scss');
-  require('./genre-view.scss');
   var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
   var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
-  const GenreView = ({onBackClick, onItemClick, match, movies, selectedMovie}) => {
+  var _utilsHelpers = require('../../utils/helpers');
+  require('./genre-view.scss');
+  const GenreView = ({onBackClick, match, movies, selectedMovie}) => {
+    // If the list of movies is empty
+    // stop execution of function
+    // as is is needed for component to function properly
+    if (movies.length === 0) return null;
+    // Find genre based on id param in url
     const selectedGenre = movies.find(({genre}) => {
       return genre.name === match.params.name;
     }).genre;
+    // Filter movies to find other movies from the same genre
     const otherMovies = movies.filter(movie => {
       return movie.name !== selectedMovie.name && movie.genre.name === selectedGenre.name;
     });
@@ -50013,10 +50414,11 @@ try {
         className: "view",
         md: 6
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "image-cover"
+        className: "heading-box--no-image"
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "close-box"
       }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*X icon*/
         onClick: () => onBackClick(),
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
@@ -50053,9 +50455,7 @@ try {
             image: movie.image,
             description: /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
               to: `/movies/${movie._id}`
-            }, /*#__PURE__*/_reactDefault.default.createElement("p", {
-              onClick: () => onItemClick('selectedMovie', movie)
-            }, movie.name))
+            }, /*#__PURE__*/_reactDefault.default.createElement("p", null, movie.name))
           })
         );
       }))) : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
@@ -50069,13 +50469,10 @@ try {
   };
   _c = GenreView;
   GenreView.propTypes = {
-    match: _propTypesDefault.default.string.isRequired,
+    match: _propTypesDefault.default.object.isRequired,
     movies: _propTypesDefault.default.array.isRequired,
     selectedMovie: _propTypesDefault.default.object.isRequired,
-    selectedGenre: _propTypesDefault.default.object.isRequired,
-    onBackClick: _propTypesDefault.default.func.isRequired,
-    onItemClick: _propTypesDefault.default.func,
-    otherMovies: _propTypesDefault.default.array.isRequired
+    onBackClick: _propTypesDefault.default.func.isRequired
   };
   const mapStateToProps = state => ({
     movies: state.movies,
@@ -50090,7 +50487,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","prop-types":"4dfy5","react-router-dom":"1PMSK","../../utils/partials/_view.scss":"552MA","./genre-view.scss":"56Be2","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../../utils/helpers":"1nff4","react-redux":"7GDa4","react-bootstrap":"4n7hB"}],"552MA":[function() {},{}],"56Be2":[function() {},{}],"1tzTm":[function(require,module,exports) {
+},{"react":"3b2NM","prop-types":"4dfy5","react-router-dom":"1PMSK","react-redux":"7GDa4","react-bootstrap":"4n7hB","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","../../utils/helpers":"1nff4","./genre-view.scss":"56Be2","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"1tzTm":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -50127,7 +50524,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","react-bootstrap":"4n7hB","prop-types":"4dfy5","./related-attribute-card.scss":"3D90e","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"3D90e":[function() {},{}],"7nJwh":[function(require,module,exports) {
+},{"react":"3b2NM","react-bootstrap":"4n7hB","prop-types":"4dfy5","./related-attribute-card.scss":"3D90e","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"3D90e":[function() {},{}],"56Be2":[function() {},{}],"7nJwh":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -50142,13 +50539,17 @@ try {
   var _reactRouterDom = require('react-router-dom');
   var _reactRedux = require('react-redux');
   var _reactBootstrap = require('react-bootstrap');
-  require('../../utils/partials/_view.scss');
-  require('./director-view.scss');
   var _utilsHelpers = require('../../utils/helpers');
   var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
   var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
   const DirectorView = ({onBackClick, match, movies, selectedMovie}) => {
+    // If the list of movies is empty
+    // stop execution of function
+    // as is is needed for component to function properly
+    if (movies.length === 0) return null;
+    // Find director based on id param in url
     const selectedDirector = movies.find(({director}) => director.name === match.params.name).director;
+    // Filter movies to find other movies directed by the director
     const otherMovies = movies.filter(movie => {
       return movie.name !== selectedMovie.name && movie.director.name === selectedDirector.name;
     });
@@ -50160,10 +50561,11 @@ try {
         className: "view",
         md: 6
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "image-cover"
+        className: "heading-box--no-image"
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "close-box"
       }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*X icon*/
         onClick: () => onBackClick('selectedDirector'),
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
@@ -50220,19 +50622,10 @@ try {
   };
   _c = DirectorView;
   DirectorView.propTypes = {
-    match: _propTypesDefault.default.string.isRequired,
+    match: _propTypesDefault.default.object.isRequired,
     movies: _propTypesDefault.default.array.isRequired,
     selectedMovie: _propTypesDefault.default.object.isRequired,
-    selectedDirector: _propTypesDefault.default.shape({
-      bio: _propTypesDefault.default.string.isRequired,
-      birthYear: _propTypesDefault.default.number.isRequired,
-      deathYear: _propTypesDefault.default.number,
-      imdbLink: _propTypesDefault.default.string.isRequired,
-      name: _propTypesDefault.default.string.isRequired
-    }).isRequired,
-    onBackClick: _propTypesDefault.default.func.isRequired,
-    onItemClick: _propTypesDefault.default.func,
-    otherMovies: _propTypesDefault.default.array.isRequired
+    onBackClick: _propTypesDefault.default.func.isRequired
   };
   const mapStateToProps = state => ({
     movies: state.movies,
@@ -50247,7 +50640,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","prop-types":"4dfy5","react-router-dom":"1PMSK","../../utils/partials/_view.scss":"552MA","./director-view.scss":"5RqqF","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../../utils/helpers":"1nff4","react-redux":"7GDa4","react-bootstrap":"4n7hB"}],"552MA":[function() {},{}],"5RqqF":[function() {},{}],"6h1DY":[function(require,module,exports) {
+},{"react":"3b2NM","prop-types":"4dfy5","react-router-dom":"1PMSK","react-redux":"7GDa4","react-bootstrap":"4n7hB","../../utils/helpers":"1nff4","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"6h1DY":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -50265,13 +50658,24 @@ try {
   var _actionsActions = require('../../actions/actions');
   require('./main-navbar.scss');
   var _s = $RefreshSig$();
-  const MainNavbar = ({setMoviesFilter}) => {
+  const MainNavbar = ({onLogout, setActorsFilter, setMoviesFilter, user}) => {
     _s();
+    const loggedIn = Object.keys(user).length > 0 ? true : false;
     const [searchTerm, setSearchTerm] = _react.useState('');
-    const isUserLoggedIn = localStorage.getItem('token') ? true : false, pathname = _reactRouterDom.useLocation().pathname;
+    const [isUserLoggedIn, setIsUserLoggedIn] = _react.useState(Object.keys(user).length > 0 ? true : false);
+    const pathname = _reactRouterDom.useLocation().pathname, history = _reactRouterDom.useHistory();
+    // Clear search term from searchbar when page changes
+    _react.useEffect(() => {
+      setSearchTerm('');
+      setActorsFilter('');
+      setMoviesFilter('');
+    }, [pathname]);
+    _react.useEffect(() => {
+      setIsUserLoggedIn(loggedIn);
+    }, [user]);
     const onChangeSearchTerm = value => {
       setSearchTerm(value);
-      setMoviesFilter(value);
+      if (pathname === '/') setMoviesFilter(value); else if (pathname === '/actors') setActorsFilter(value);
     };
     return (
       /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar, {
@@ -50293,6 +50697,7 @@ try {
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Prepend, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, {
         id: "search-bar"
       }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Search icon*/
         xmlns: " http://www.w3.org/2000/svg",
         width: "24",
         height: "24",
@@ -50318,9 +50723,12 @@ try {
         value: searchTerm,
         "aria-label": "Search …",
         "aria-describedby": "search-bar"
-      }))) : null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav, null, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: "/logout",
-        className: "link nav-link logout"
+      }))) : null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Navbar.Text, {
+        className: "link nav-link logout",
+        onClick: () => {
+          onLogout();
+          history.push('/login');
+        }
       }, "Logout")), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Nav, {
         className: "nav-links"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
@@ -50328,21 +50736,23 @@ try {
         className: `link nav-link ${pathname === '/profile' ? 'active' : ''}`
       }, "Profile"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
         to: "/",
-        className: `link nav-link ${pathname === '/' || pathname.match('movies') ? 'active' : ''}`
+        className: `link nav-link ${pathname === '/' ? 'active' : ''}`
       }, "Movies"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
         to: "/actors",
-        className: `link nav-link ${pathname.match('actors') ? 'active' : ''}`
+        className: `link nav-link ${pathname === '/actors' ? 'active' : ''}`
       }, "Actors"), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
         to: "/about",
         className: `link nav-link ${pathname === '/about' ? 'active' : ''}`
       }, "About")))) : null)
     );
   };
-  _s(MainNavbar, "28elvjxmtl+5CeMxa5d1UsuvFhM=", false, function () {
-    return [_reactRouterDom.useLocation];
+  _s(MainNavbar, "XGsulHnnJkGPEws1snt50e/bV/8=", false, function () {
+    return [_reactRouterDom.useLocation, _reactRouterDom.useHistory];
   });
   _c = MainNavbar;
   MainNavbar.propTypes = {
+    onLogout: _propTypesDefault.default.func.isRequired,
+    setActorsFilter: _propTypesDefault.default.func.isRequired,
     setMoviesFilter: _propTypesDefault.default.func.isRequired,
     user: _propTypesDefault.default.object.isRequired
   };
@@ -50352,6 +50762,7 @@ try {
     };
   };
   exports.default = _reactRedux.connect(mapStateToProps, {
+    setActorsFilter: _actionsActions.setActorsFilter,
     setMoviesFilter: _actionsActions.setMoviesFilter
   })(MainNavbar);
   var _c;
@@ -50362,7 +50773,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","react-bootstrap":"4n7hB","prop-types":"4dfy5","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./main-navbar.scss":"RFYh5","react-redux":"7GDa4","react-router-dom":"1PMSK","../../actions/actions":"5S6cN"}],"RFYh5":[function() {},{}],"6fxIo":[function(require,module,exports) {
+},{"react":"3b2NM","react-bootstrap":"4n7hB","prop-types":"4dfy5","react-router-dom":"1PMSK","react-redux":"7GDa4","../../actions/actions":"5S6cN","./main-navbar.scss":"RFYh5","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"RFYh5":[function() {},{}],"6fxIo":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -50381,16 +50792,24 @@ try {
   var _utilsHelpers = require('../../utils/helpers');
   var _RelatedAttributeCardRelatedAttributeCard = require('../RelatedAttributeCard/RelatedAttributeCard');
   var _RelatedAttributeCardRelatedAttributeCardDefault = _parcelHelpers.interopDefault(_RelatedAttributeCardRelatedAttributeCard);
-  require('../../utils/partials/_view.scss');
   require('./movie-view.scss');
   var _s = $RefreshSig$();
-  const MovieView = ({actors, addUserFavoriteMovie, addUserToWatchMovie, favoritedMovies, match, movies, setSelectedMovie, onBackClick, user}) => {
+  const MovieView = ({actors, addUserFavoriteMovie, addUserToWatchMovie, favoritedMovies, match, movies, setSelectedMovie, setFavoritedMovies, onBackClick, user}) => {
     _s();
+    // If the list of actors or movies is empty
+    // stop execution of function
+    // as is is needed for component to function properly
+    if (movies.length === 0 || actors.length === 0) return null;
+    // These variables determine whether user icons (heart/bookmark) should be
+    // filled (movie has been added to favoriteMovies/toWatchMovies list)
+    // or empty (movie has not been added to
+    // favoriteMovies/toWatchMovies list)
     const [favorited, setFavorited] = _react.useState(false);
     const [willWatch, setWillWatch] = _react.useState(false);
     _react.useEffect(() => {
       setSelectedMovie(movie);
     }, []);
+    // Get list of movies with usersFavorited property added for each movie
     const fullSelectedMovies = movies.map(movie => {
       let usersFavorited = 0;
       for (let i = 0; i < favoritedMovies.length; i++) {
@@ -50401,9 +50820,12 @@ try {
         usersFavorited
       };
     });
+    // Find movie based on id param in url
     const movie = fullSelectedMovies.find(movie => {
       return movie._id === match.params.id;
     });
+    // Get list of movie's stars with actor's id/image properties
+    // for each star
     const movieActors = movie.stars.map(star => {
       const matchingActor = actors.find(actor => {
         return star.actor === actor.name;
@@ -50414,21 +50836,39 @@ try {
         image: matchingActor.image
       };
     });
+    // Add movie to user's favorite movies list
     const addToFavoritesList = () => {
       _utilsHelpers.addToList(user.id, 'favorite-movies', movie._id, 'movie_id').then(() => {
         setFavorited(true);
         addUserFavoriteMovie(movie._id);
-        _actionsActions.setFavoritedMovies(favoritedMovies.map(favoritedMovie => {
-          if (favoritedMovie.name === movie.name) {
+        let newFavoritedMovies;
+        // If movie is already in favoritedMovies list
+        // get list of favoritedMovies with movie's usersFavorited property
+        // increased by 1
+        if (favoritedMovies.find(favoritedMovie => {
+          return favoritedMovie.name === movie.name;
+        })) {
+          newFavoritedMovies = favoritedMovies.map(favoritedMovie => {
+            let usersFavorited = favoritedMovie.usersFavorited;
+            if (favoritedMovie.name == movie.name) {
+              usersFavorited++;
+            }
             return {
-              ...movie,
-              usersFavorited: favoritedMovie.usersFavorited++
+              ...favoritedMovie,
+              usersFavorited: usersFavorited
             };
-          }
-          return movie;
-        }));
+          });
+        } else {
+          const newFavoriteMovie = {
+            ...movie
+          };
+          newFavoriteMovie.usersFavorited = 1;
+          newFavoritedMovies = [...favoritedMovies, newFavoriteMovie];
+        }
+        setFavoritedMovies(newFavoritedMovies);
       });
     };
+    // Add movie to user's to-watch movies list
     const addToWatchList = () => {
       _utilsHelpers.addToList(user.id, 'to-watch-movies', movie._id, 'movie_id').then(() => {
         setWillWatch(true);
@@ -50443,13 +50883,14 @@ try {
         className: "view",
         md: 6
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "image-cover",
+        className: "heading-box",
         style: {
           backgroundImage: `url(${movie.image})`
         }
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "close-box"
       }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*X icon*/
         onClick: () => onBackClick(),
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
@@ -50473,9 +50914,12 @@ try {
         y2: "18"
       })))), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "main-content"
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", null, /*#__PURE__*/_reactDefault.default.createElement("span", null, movie.name, movie.featured ? /*#__PURE__*/_reactDefault.default.createElement("small", null, " (Featured)") : null), /*#__PURE__*/_reactDefault.default.createElement("div", {
+      }, /*#__PURE__*/_reactDefault.default.createElement("h1", {
+        className: "main-heading"
+      }, /*#__PURE__*/_reactDefault.default.createElement("span", null, movie.name, movie.featured ? /*#__PURE__*/_reactDefault.default.createElement("small", null, " (Featured)") : null), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "user-list-icons"
       }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Heart icon*/
         onClick: () => addToFavoritesList(),
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
@@ -50490,6 +50934,7 @@ try {
       }, /*#__PURE__*/_reactDefault.default.createElement("title", null, "Add this movie to your Favorite Movies list"), /*#__PURE__*/_reactDefault.default.createElement("path", {
         d: "M20.84 4.61a5.5 5.5 0 0 0-7.78  0L12 5.67l-1.06-1.06a5.5  5.5 0 0 0-7.78 7.78l1.06  1.06L12 21.23l7.78-7.78  1.06-1.06a5.5 5.5 0 0 0  0-7.78z"
       })), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Bookmark icon*/
         onClick: () => addToWatchList(),
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
@@ -50506,7 +50951,7 @@ try {
         d: "M19 21l-7-5-7  5V5a2 2 0 0  1 2-2h10a2 2  0 0 1 2 2z"
       })))), /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "label"
-      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+      }, "Description"), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "description"
       }, _utilsHelpers.makeTextReadable(movie.description)), /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "label"
@@ -50518,7 +50963,7 @@ try {
         className: "description"
       }, movie.rating), movie.usersFavorited > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "label"
-      }, "Favorites by users"), /*#__PURE__*/_reactDefault.default.createElement("p", {
+      }, "Favorites by users"), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "description"
       }, movie.usersFavorited)) : null), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "attributes"
@@ -50539,6 +50984,7 @@ try {
       }, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Stars of ", /*#__PURE__*/_reactDefault.default.createElement("i", null, movie.name), " "), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "related-attributes-card-container"
       }, movieActors.map((actor, i) => {
+        const actorLink = `/actors/${actor.id}`;
         return (
           /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
             key: i,
@@ -50548,7 +50994,7 @@ try {
             }, /*#__PURE__*/_reactDefault.default.createElement("b", null, "Actor: "), " ", /*#__PURE__*/_reactDefault.default.createElement("br", null), /*#__PURE__*/_reactDefault.default.createElement("span", {
               className: "description"
             }, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-              to: `/actors/${actor.id}`
+              to: actorLink
             }, actor.actor))), /*#__PURE__*/_reactDefault.default.createElement("p", {
               className: "label"
             }, /*#__PURE__*/_reactDefault.default.createElement("b", null, "Character: "), " ", /*#__PURE__*/_reactDefault.default.createElement("br", null), /*#__PURE__*/_reactDefault.default.createElement("span", {
@@ -50572,29 +51018,9 @@ try {
     addUserFavoriteMovie: _propTypesDefault.default.func.isRequired,
     addUserToWatchMovie: _propTypesDefault.default.func.isRequired,
     favoritedMovies: _propTypesDefault.default.array.isRequired,
-    match: _propTypesDefault.default.string.isRequired,
-    movie: _propTypesDefault.default.shape({
-      _id: _propTypesDefault.default.string.isRequired,
-      description: _propTypesDefault.default.string.isRequired,
-      director: _propTypesDefault.default.shape({
-        name: _propTypesDefault.default.string.isRequired
-      }).isRequired,
-      featured: _propTypesDefault.default.bool,
-      genre: _propTypesDefault.default.shape({
-        name: _propTypesDefault.default.string.isRequired
-      }).isRequired,
-      image: _propTypesDefault.default.string.isRequired,
-      imdbLink: _propTypesDefault.default.string.isRequired,
-      name: _propTypesDefault.default.string.isRequired,
-      rating: _propTypesDefault.default.number,
-      releaseYear: _propTypesDefault.default.number,
-      stars: _propTypesDefault.default.array,
-      usersFavorited: _propTypesDefault.default.number
-    }).isRequired,
-    movieActors: _propTypesDefault.default.array.isRequired,
+    match: _propTypesDefault.default.object.isRequired,
     movies: _propTypesDefault.default.array.isRequired,
     onBackClick: _propTypesDefault.default.func.isRequired,
-    onItemClick: _propTypesDefault.default.func.isRequired,
     setSelectedMovie: _propTypesDefault.default.func.isRequired,
     setFavoritedMovies: _propTypesDefault.default.func.isRequired,
     user: _propTypesDefault.default.shape({
@@ -50623,7 +51049,219 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","prop-types":"4dfy5","react-router-dom":"1PMSK","react-redux":"7GDa4","../../actions/actions":"5S6cN","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","../../utils/helpers":"1nff4","../../utils/partials/_view.scss":"552MA","./movie-view.scss":"74xbX","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","react-bootstrap":"4n7hB"}],"552MA":[function() {},{}],"74xbX":[function() {},{}],"1zhWx":[function(require,module,exports) {
+},{"react":"3b2NM","prop-types":"4dfy5","react-router-dom":"1PMSK","react-redux":"7GDa4","react-bootstrap":"4n7hB","../../actions/actions":"5S6cN","../../utils/helpers":"1nff4","../RelatedAttributeCard/RelatedAttributeCard":"1tzTm","./movie-view.scss":"74xbX","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"74xbX":[function() {},{}],"44kmi":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRedux = require('react-redux');
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _ListItemCardListItemCard = require('../ListItemCard/ListItemCard');
+  var _ListItemCardListItemCardDefault = _parcelHelpers.interopDefault(_ListItemCardListItemCard);
+  var _ListTypeSelectListTypeSelect = require('../ListTypeSelect/ListTypeSelect');
+  var _ListTypeSelectListTypeSelectDefault = _parcelHelpers.interopDefault(_ListTypeSelectListTypeSelect);
+  var _MessageMessage = require('../Message/Message');
+  var _MessageMessageDefault = _parcelHelpers.interopDefault(_MessageMessage);
+  var _SortingFactorSelectSortingFactorSelect = require('../SortingFactorSelect/SortingFactorSelect');
+  var _SortingFactorSelectSortingFactorSelectDefault = _parcelHelpers.interopDefault(_SortingFactorSelectSortingFactorSelect);
+  require('../../utils/partials/_view.scss');
+  const MoviesView = ({error, errorType, favoritedMovies, featuredMovies, movies, moviesFilter, moviesListType, moviesSortingFactor}) => {
+    let content;
+    // if there is an error loading the movies
+    if (error && errorType === 'error') {
+      content = /*#__PURE__*/_reactDefault.default.createElement(_MessageMessageDefault.default, {
+        message: error,
+        type: errorType
+      });
+    } else if (error && errorType === 'info') {
+      content = /*#__PURE__*/_reactDefault.default.createElement(_MessageMessageDefault.default, {
+        message: error,
+        type: errorType
+      });
+    } else {
+      let originalSelectedMovies;
+      // will not be sorted
+      let selectedMovies;
+      // Select list type
+      // Select all movies
+      if (moviesListType === 'all') {
+        originalSelectedMovies = [...movies];
+        selectedMovies = [...movies];
+      }
+      // Select featured movies
+      if (moviesListType === 'featured') {
+        originalSelectedMovies = [...featuredMovies];
+        selectedMovies = [...featuredMovies];
+      }
+      // Select favorited movies
+      if (moviesListType === 'favorited') {
+        originalSelectedMovies = [...favoritedMovies];
+        selectedMovies = [...favoritedMovies];
+      }
+      // Sort list if needed
+      // If no sorting factor is selected, use original selected list
+      if (moviesSortingFactor === 'none') {
+        selectedMovies = [...originalSelectedMovies];
+      }
+      // Sort movies by rating
+      if (moviesSortingFactor === 'rating') selectedMovies.sort((movie1, movie2) => {
+        return movie2.rating - movie1.rating;
+      });
+      // Sort movies by releaseYear
+      if (moviesSortingFactor === 'releaseYear') selectedMovies.sort((movie1, movie2) => {
+        return movie2.releaseYear - movie1.releaseYear;
+      });
+      // Filter movies by search term
+      if (moviesFilter !== '') {
+        selectedMovies = selectedMovies.filter(movie => {
+          const regExp = new RegExp(moviesFilter, 'i');
+          return movie.name.match(regExp);
+        });
+      }
+      // Add usersFavorited property to selected movies
+      // (not needed for favoritedMovies)
+      selectedMovies = selectedMovies.map(movie => {
+        let usersFavorited = 0;
+        for (let i = 0; i < favoritedMovies.length; i++) {
+          if (favoritedMovies[i].name === movie.name) usersFavorited = favoritedMovies[i].usersFavorited;
+        }
+        return {
+          ...movie,
+          usersFavorited
+        };
+      });
+      content = /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+        className: "justify-content-center"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+        md: 5,
+        sm: 6,
+        lg: 4,
+        xl: 4
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_ListTypeSelectListTypeSelectDefault.default, null)), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_SortingFactorSelectSortingFactorSelectDefault.default, {
+        options: [{
+          text: 'None',
+          value: 'none',
+          selected: true
+        }, {
+          text: 'Rating',
+          value: 'rating',
+          selected: false
+        }, {
+          text: 'Release year',
+          value: 'releaseYear',
+          selected: false
+        }],
+        type: "movies"
+      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+        className: "view-row justify-content-center"
+      }, selectedMovies.map(movie => {
+        return (
+          /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
+            key: movie._id,
+            md: 6,
+            lg: 4
+          }, /*#__PURE__*/_reactDefault.default.createElement(_ListItemCardListItemCardDefault.default, {
+            item: movie,
+            itemType: "movies"
+          }))
+        );
+      }), ";"), ";");
+    }
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
+        className: "movies-container  justify-content-center"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, content))
+    );
+  };
+  _c = MoviesView;
+  MoviesView.propTypes = {
+    error: _propTypesDefault.default.oneOfType([_propTypesDefault.default.string, _propTypesDefault.default.bool]).isRequired,
+    errorType: _propTypesDefault.default.oneOfType([_propTypesDefault.default.string, _propTypesDefault.default.bool]).isRequired,
+    favoritedMovies: _propTypesDefault.default.array.isRequired,
+    featuredMovies: _propTypesDefault.default.array.isRequired,
+    movies: _propTypesDefault.default.array.isRequired,
+    moviesFilter: _propTypesDefault.default.string.isRequired,
+    moviesListType: _propTypesDefault.default.string.isRequired,
+    moviesSortingFactor: _propTypesDefault.default.string.isRequired
+  };
+  const mapStateToProps = state => {
+    return {
+      actors: state.actors,
+      actorsFilter: state.actorsFilter,
+      actorsSortingFactor: state.actorsSortingFactor,
+      favoritedMovies: state.favoritedMovies,
+      featuredMovies: state.featuredMovies,
+      movies: state.movies,
+      moviesFilter: state.moviesFilter,
+      moviesListType: state.moviesListType,
+      moviesSortingFactor: state.moviesSortingFactor,
+      selectedMovie: state.selectedMovie,
+      user: state.user
+    };
+  };
+  exports.default = _reactRedux.connect(mapStateToProps)(MoviesView);
+  var _c;
+  $RefreshReg$(_c, "MoviesView");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","prop-types":"4dfy5","../ListItemCard/ListItemCard":"5PP2u","../ListTypeSelect/ListTypeSelect":"2FsjQ","../Message/Message":"4YlQk","../SortingFactorSelect/SortingFactorSelect":"6zJdJ","../../utils/partials/_view.scss":"552MA","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"2FsjQ":[function(require,module,exports) {
+var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+try {
+  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+  _parcelHelpers.defineInteropFlag(exports);
+  var _react = require('react');
+  var _reactDefault = _parcelHelpers.interopDefault(_react);
+  var _reactBootstrap = require('react-bootstrap');
+  var _reactRedux = require('react-redux');
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _actionsActions = require('../../actions/actions');
+  const ListTypeSelect = ({setMoviesListType}) => {
+    return (
+      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
+        controlId: "list-type-select"
+      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Select type of movies"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Control, {
+        as: "select",
+        onChange: e => setMoviesListType(e.target.value)
+      }, /*#__PURE__*/_reactDefault.default.createElement("option", {
+        value: "all"
+      }, "All movies"), /*#__PURE__*/_reactDefault.default.createElement("option", {
+        value: "featured"
+      }, "Featured movies"), /*#__PURE__*/_reactDefault.default.createElement("option", {
+        value: "favorited"
+      }, "Favorited movies")))
+    );
+  };
+  _c = ListTypeSelect;
+  ListTypeSelect.propTypes = {
+    setMoviesListType: _propTypesDefault.default.func.isRequired
+  };
+  exports.default = _reactRedux.connect(null, {
+    setMoviesListType: _actionsActions.setMoviesListType
+  })(ListTypeSelect);
+  var _c;
+  $RefreshReg$(_c, "ListTypeSelect");
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","prop-types":"4dfy5","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"552MA":[function() {},{}],"1zhWx":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -50635,28 +51273,32 @@ try {
   var _reactDefault = _parcelHelpers.interopDefault(_react);
   var _propTypes = require('prop-types');
   var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
+  var _reactRedux = require('react-redux');
   var _axios = require('axios');
   var _axiosDefault = _parcelHelpers.interopDefault(_axios);
   var _reactRouterDom = require('react-router-dom');
   var _reactBootstrap = require('react-bootstrap');
   var _utilsHelpers = require('../../utils/helpers');
-  require('../../utils/partials/_form.scss');
   require('./login-view.scss');
   var _s = $RefreshSig$();
-  const LoginView = ({onLoggedIn}) => {
+  const LoginView = ({history, onLoggedIn}) => {
     _s();
-    const [username, setUsername] = _react.useState('');
     const [loginError, setLoginError] = _react.useState(false);
     const [password, setPassword] = _react.useState('');
+    const [username, setUsername] = _react.useState('');
     const handleSubmit = e => {
       e.preventDefault();
+      // Reset value so error will be removed,
+      // until the error occurs again
+      setLoginError(false);
       _axiosDefault.default.post('https://my-flix-2021.herokuapp.com/login', {
         username,
         password
       }).then(response => {
         onLoggedIn(response.data);
-      }, err => {
-        setLoginError(err);
+        history.push('/');
+      }).catch(() => {
+        setLoginError(true);
       });
     };
     return (
@@ -50665,6 +51307,7 @@ try {
         className: "justify-content-center view-row--form"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
         className: "form-container",
+        sm: 6,
         md: 4
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
         id: "login-form",
@@ -50686,6 +51329,7 @@ try {
         value: username,
         required: true
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*User icon*/
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
         height: "24",
@@ -50718,6 +51362,7 @@ try {
         value: password,
         required: true
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Lock icon*/
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
         height: "24",
@@ -50752,12 +51397,16 @@ try {
       }, "Register"))))))
     );
   };
-  _s(LoginView, "Q0DOD4fIQaMtcr0yrRc4JqEd3vg=");
+  _s(LoginView, "6/hPVYGubN4zBRP4SiBrvRep1CI=");
   _c = LoginView;
   LoginView.propTypes = {
+    history: _propTypesDefault.default.object,
     onLoggedIn: _propTypesDefault.default.func.isRequired
   };
-  exports.default = LoginView;
+  const mapStateToProps = state => ({
+    user: state.user
+  });
+  exports.default = _reactRedux.connect(mapStateToProps)(LoginView);
   var _c;
   $RefreshReg$(_c, "LoginView");
   helpers.postlude(module);
@@ -50766,7 +51415,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","prop-types":"4dfy5","axios":"7rA65","react-router-dom":"1PMSK","react-bootstrap":"4n7hB","../../utils/helpers":"1nff4","../../utils/partials/_form.scss":"5D0uY","./login-view.scss":"2Muu9","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"5D0uY":[function() {},{}],"2Muu9":[function() {},{}],"7iKJS":[function(require,module,exports) {
+},{"react":"3b2NM","prop-types":"4dfy5","react-redux":"7GDa4","axios":"7rA65","react-router-dom":"1PMSK","react-bootstrap":"4n7hB","../../utils/helpers":"1nff4","./login-view.scss":"2Muu9","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"2Muu9":[function() {},{}],"7iKJS":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -50785,43 +51434,54 @@ try {
   var _actionsActions = require('../../actions/actions');
   var _UserListUserList = require('../UserList/UserList');
   var _UserListUserListDefault = _parcelHelpers.interopDefault(_UserListUserList);
-  require('../../utils/partials/_form.scss');
   require('./profile-view.scss');
   var _s = $RefreshSig$();
-  const ProfileView = ({onLogout, user}) => {
+  const ProfileView = ({history, onLogout, setUserInfo, user}) => {
     _s();
+    // If user has not been set
+    // stop execution of function
+    // as is is needed for component to function properly
+    if (Object.keys(user).length === 0) return null;
+    // const history = useHistory();
     // Make date appear in readable format (2021-05-01)
-    let birthdate = '';
-    if (user.birthDate) {
-      const date = new Date(user.birthDate);
-      birthdate = `${date.getFullYear()}-${date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}-${date.getDate()}`;
-    }
-    const [birthDate, setBirthDate] = _react.useState(birthdate);
+    const convertBirthDate = () => {
+      const birthdate = user.birthDate;
+      // If date hasn't been converted to readable format yet
+      if (birthdate && birthdate.match('Z')) {
+        return birthdate.slice(0, 10);
+      } else if (birthdate && !birthdate.match('Z')) {
+        return birthdate;
+      }
+      // If user doesn't have birthday info
+      return '';
+    };
+    const [birthDate, setBirthDate] = _react.useState(convertBirthDate());
     const [email, setEmail] = _react.useState(user.email);
-    const oldPassword = user.password;
     const [username, setUsername] = _react.useState(user.username);
     const [newPassword1, setNewPassword1] = _react.useState('');
     const [newPassword2, setNewPassword2] = _react.useState('');
     const [successfulUpdate, setSuccessfulUpdate] = _react.useState(false);
-    const [successfulRemoval, setSuccessfulRemoval] = _react.useState(false);
+    const [successfulUserRemoval, setSuccessfulUserRemoval] = _react.useState(false);
     const [birthDateError, setBirthDateError] = _react.useState(false);
     const [deleteUserError, setDeleteUserError] = _react.useState(false);
     const [passwordMatchError, setPasswordMatchError] = _react.useState(false);
     const [updateProfileError, setUpdateProfileError] = _react.useState(false);
     const [usernameLengthError, setUsernameLengthError] = _react.useState(false);
     const [usernameTypeError, setUsernameTypeError] = _react.useState(false);
-    const token = localStorage.getItem('token');
+    const oldPassword = user.password, token = localStorage.getItem('token');
     const deleteUser = () => {
-      confirm('Are you sure you want to delete your account') ? _axiosDefault.default({
+      confirm('Are you sure you want to delete your account?') ? _axiosDefault.default({
         method: 'delete',
         url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
         headers: {
           Authorization: `Bearer ${token}`
         }
       }).then(() => {
-        setSuccessfulRemoval(true);
+        setSuccessfulUserRemoval(true);
         setTimeout(() => {
+          setSuccessfulUpdate(false);
           onLogout();
+          history.push('/register');
         }, 3000);
       }).catch(() => {
         setDeleteUserError(true);
@@ -50829,9 +51489,14 @@ try {
     };
     const handleSubmit = e => {
       e.preventDefault();
-      // Reset error values
+      // Reset error values so errors will be removed,
+      // until the errors occur again
       setBirthDateError(false);
+      setDeleteUserError(false);
       setPasswordMatchError(false);
+      setUpdateProfileError(false);
+      setUsernameLengthError(false);
+      setUsernameTypeError(false);
       const updatedUser = {
         email,
         password: oldPassword,
@@ -50844,8 +51509,10 @@ try {
       } else if ((newPassword1 !== '' || newPassword2 !== '') && newPassword1 === newPassword2) updatedUser['password'] = newPassword1;
       // Check if birthDate was entered and if it is valid
       // if it is add it to user object
-      if (!validateBirthDate()) return;
-      updatedUser['birthDate'] = birthDate;
+      if (birthDate !== '') {
+        if (!validateBirthDate()) return;
+        updatedUser['birthDate'] = birthDate;
+      }
       _axiosDefault.default({
         method: 'patch',
         url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
@@ -50854,14 +51521,15 @@ try {
           Authorization: `Bearer ${token}`
         }
       }).then(() => {
-        _actionsActions.setUserInfo(updatedUser);
-        if (newPassword1) {
-          _actionsActions.logoutUser();
-          window.open('/', '_self');
-        }
+        setUserInfo(updatedUser);
         setSuccessfulUpdate(true);
         setTimeout(() => {
           setSuccessfulUpdate(false);
+          // If user updates their password, log them out
+          if (newPassword1 !== '') {
+            onLogout();
+            history.push('/login');
+          }
         }, 3000);
       }, err => {
         setUpdateProfileError(err);
@@ -50874,11 +51542,13 @@ try {
     const onChangeNewPassword1 = e => {
       setNewPassword1(e.target.value);
       setPasswordMatchError(false);
+      // If both new passwords don't match
       if (newPassword2 !== '' && e.target.value !== newPassword2) setPasswordMatchError(true);
     };
     const onChangeNewPassword2 = e => {
       setNewPassword2(e.target.value);
       setPasswordMatchError(false);
+      // If both new passwords don't match
       if (newPassword1 !== '' && newPassword1 !== e.target.value) setPasswordMatchError(true);
     };
     const onChangeUsername = e => {
@@ -50886,12 +51556,13 @@ try {
       setUsername(value);
       setUsernameLengthError(false);
       setUsernameTypeError(false);
+      // Check that username is at least 6 characters
+      // and only contains alphanumeric characters
       if (value !== '') {
         if (value.length < 6) setUsernameLengthError(true);
         const nonAlphaCharacters = value.match(/\W/g);
         // If there are non alphabetical characters
         // make sure that they are only numbers
-        // Username should only contain alphanumeric characters
         if (nonAlphaCharacters) {
           for (let i = 0; i < nonAlphaCharacters.length; i++) {
             if (!nonAlphaCharacters[i].match(/\d/)) setUsernameTypeError(true);
@@ -50903,12 +51574,13 @@ try {
     const validateBirthDate = (birthdate = birthDate) => {
       const regex = /\d\d\d\d-\d\d-\d\d/;
       // valid date format
+      // If birthday is not valid
       if (!birthdate.match(regex)) {
         setBirthDateError(`${birthdate} is not a valid date. 
                 Please enter a date in this format: yyyy-mm-dd`);
         return false;
       } else if (birthdate && birthdate.match(regex)) {
-        setBirthDateError(null);
+        setBirthDateError(false);
         return true;
       }
     };
@@ -51002,21 +51674,21 @@ try {
       }, /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
         title: "Favorite Movies",
         listType: "favorite-movies",
-        listTypeJS: "favoriteMovies",
+        listTypeCamelCase: "favoriteMovies",
         userId: user.id,
         itemIdType: "movie_id",
         token: token
       }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
         title: "To Watch Movies",
         listType: "to-watch-movies",
-        listTypeJS: "toWatchMovies",
+        listTypeCamelCase: "toWatchMovies",
         userId: user.id,
         itemIdType: "movie_id",
         token: token
       }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
         title: "Favorite Actors",
         listType: "favorite-actors",
-        listTypeJS: "favoriteActors",
+        listTypeCamelCase: "favoriteActors",
         userId: user.id,
         itemIdType: "actor_id",
         token: token
@@ -51029,6 +51701,7 @@ try {
       }, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "delete-user-container"
       }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Trash icon*/
         onClick: () => deleteUser(),
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
@@ -51044,17 +51717,19 @@ try {
         points: "3 6 5 6 21 6"
       }), /*#__PURE__*/_reactDefault.default.createElement("path", {
         d: "M19 6v14a2 2 0 0  1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2  2 0 0 1 2 2v2"
-      })), /*#__PURE__*/_reactDefault.default.createElement("span", null, "Delete Account")), successfulRemoval ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+      })), /*#__PURE__*/_reactDefault.default.createElement("span", null, "Delete Account")), successfulUserRemoval ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "text-info"
       }, "Your account was successfully deleted!") : null, deleteUserError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "error"
       }, "Your account could not be deleted. Please try again") : null))))
     );
   };
-  _s(ProfileView, "CxkAh8c1rqF5w4XrzX8amoMCuSI=");
+  _s(ProfileView, "z9R5fKwifPnsLXBdUZzzKB3PPBA=");
   _c = ProfileView;
   ProfileView.propTypes = {
+    history: _propTypesDefault.default.object.isRequired,
     onLogout: _propTypesDefault.default.func.isRequired,
+    setUserInfo: _propTypesDefault.default.func.isRequired,
     user: _propTypesDefault.default.shape({
       id: _propTypesDefault.default.string.isRequired,
       birthDate: _propTypesDefault.default.string,
@@ -51080,7 +51755,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-bootstrap":"4n7hB","react-redux":"7GDa4","../../actions/actions":"5S6cN","../UserList/UserList":"7D85R","../../utils/partials/_form.scss":"5D0uY","./profile-view.scss":"aH745","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"7D85R":[function(require,module,exports) {
+},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-bootstrap":"4n7hB","react-redux":"7GDa4","../../actions/actions":"5S6cN","../UserList/UserList":"7D85R","./profile-view.scss":"aH745","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"7D85R":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -51100,13 +51775,21 @@ try {
   var _utilsHelpers = require('../../utils/helpers');
   require('./user-list.scss');
   var _s = $RefreshSig$();
-  const UserList = ({actors, favoritedMovies, title, listType, listTypeJS, movies, token, itemIdType, setFavoritedMovies, user}) => {
+  const UserList = ({actors, favoritedMovies, title, listType, listTypeCamelCase, movies, token, itemIdType, removeUserFavoriteActor, removeUserFavoriteMovie, removeUserToWatchMovie, setFavoritedMovies, user}) => {
     _s();
+    // If the list of actors/movies is empty or user hasn't been set
+    // stop execution of function
+    // as is is needed for component to function properly
+    if (Object.keys(user).length === 0 || movies.length === 0 || actors.length === 0) return null;
     const [list, setList] = _react.useState(null);
     const [error, setError] = _react.useState(false);
+    // User's lists contain only ids
+    // so it is necessary to loop through list of all movies
+    // to get details of the movies
     _react.useEffect(() => {
-      if (listTypeJS.match(/movies/i)) {
-        setList(user[listTypeJS].map(movieId => {
+      // If list type is movies
+      if (listTypeCamelCase.match(/movies/i)) {
+        setList(user[listTypeCamelCase].map(movieId => {
           const matchingMovie = movies.find(movie => {
             return movie._id === movieId;
           });
@@ -51117,8 +51800,8 @@ try {
             name: matchingMovie.name
           };
         }));
-      } else if (listTypeJS.match(/actors/i)) {
-        setList(user[listTypeJS].map(actorId => {
+      } else if (listTypeCamelCase.match(/actors/i)) {
+        setList(user[listTypeCamelCase].map(actorId => {
           const matchingActor = actors.find(actor => {
             return actor._id === actorId;
           });
@@ -51131,26 +51814,7 @@ try {
         }));
       }
     }, []);
-    const addItemsToListLink = () => {
-      const listTypeString = listType.replace(/-/g, ' ');
-      if (listTypeString.match(/movies/i)) {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-            to: "/"
-          }, "movies"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
-            className: "list-type"
-          }, listTypeString), " list!")
-        );
-      } else if (listTypeString.match(/actors/i)) {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-            to: "/actors"
-          }, "actors"), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
-            className: "list-type"
-          }, listTypeString), " list!")
-        );
-      }
-    };
+    // Remove item from user's list
     const removeListItem = (itemId, itemName) => {
       const data = {};
       data[itemIdType] = itemId;
@@ -51163,24 +51827,46 @@ try {
           Authorization: `Bearer ${token}`
         }
       }).then(() => {
+        // Filter out movie that was removed from user's list
         const newList = list.filter(listItem => {
           return listItem.id !== itemId;
         });
         setList(newList);
-        if (listTypeJS === 'favoriteMovies') {
-          _actionsActions.removeUserFavoriteMovie(itemId);
-          setFavoritedMovies(favoritedMovies.map(movie => {
-            if (movie.name === itemName) {
+        // If list is user's favorite movies list
+        // the list of favorited movies will need to be updated as well
+        if (listTypeCamelCase === 'favoriteMovies') {
+          removeUserFavoriteMovie(itemId);
+          let newFavoritedMovies = [...favoritedMovies];
+          const isMovieFavoritedOnce = favoritedMovies.find(favoritedMovie => {
+            return favoritedMovie.name === itemName;
+          }).usersFavorited === 1;
+          // If movie only has 1 favorite,
+          // remove that movie from the favorited movies list
+          // as it will no longer have any favorites
+          // after it is removed from user's favorite movies list
+          if (isMovieFavoritedOnce) {
+            for (let i = 0; i < newFavoritedMovies.length; i++) {
+              if (newFavoritedMovies[i].name === itemName) {
+                newFavoritedMovies.splice(i, 1);
+                break;
+              }
+            }
+          } else {
+            newFavoritedMovies = favoritedMovies.map(movie => {
+              let usersFavorited = movie.usersFavorited;
+              if (movie.name === itemName) {
+                usersFavorited--;
+              }
               return {
                 ...movie,
-                usersFavorited: movie.usersFavorited--
+                usersFavorited: usersFavorited
               };
-            }
-            return movie;
-          }));
+            });
+          }
+          setFavoritedMovies(newFavoritedMovies);
         }
-        if (listTypeJS === 'favoriteActors') _actionsActions.removeUserFavoriteActor(itemId);
-        if (listTypeJS === 'toWatchMovies') _actionsActions.removeUserToWatchMovie(itemId);
+        if (listTypeCamelCase === 'favoriteActors') removeUserFavoriteActor(itemId);
+        if (listTypeCamelCase === 'toWatchMovies') removeUserToWatchMovie(itemId);
       }).catch(err => {
         setError(err);
       });
@@ -51202,6 +51888,7 @@ try {
           }, item.name)), /*#__PURE__*/_reactDefault.default.createElement("p", {
             className: "description"
           }, _utilsHelpers.createExcerpt(item.description ? item.description : item.bio), " …")), /*#__PURE__*/_reactDefault.default.createElement("svg", {
+            /*Trash icon*/
             onClick: () => removeListItem(item.id, item.name),
             xmlns: "http://www.w3.org/2000/svg",
             width: "24",
@@ -51219,9 +51906,13 @@ try {
             d: "M19 6v14a2 2 0 0  1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2  2 0 0 1 2 2v2"
           })))
         );
-      }) : addItemsToListLink()), error ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+      }) : /*#__PURE__*/_reactDefault.default.createElement("p", null, "Add some ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
+        to: `${listType === 'movies' ? '/' : '/actors'}`
+      }, listType.match('movies') ? 'movies' : 'actors'), " to your ", /*#__PURE__*/_reactDefault.default.createElement("span", {
+        className: "list-type"
+      }, title), " list!")), error ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "error"
-      }, "There was an error removing that item from your", listType.replace(/-/g, ' '), " list.") : null)
+      }, "There was an error removing that item from your", title, " list.") : null)
     );
   };
   _s(UserList, "wqZ8XUITYSmvxIIOXK3f7cJazjA=");
@@ -51232,7 +51923,10 @@ try {
     movies: _propTypesDefault.default.array.isRequired,
     title: _propTypesDefault.default.string.isRequired,
     listType: _propTypesDefault.default.string.isRequired,
-    listTypeJS: _propTypesDefault.default.string,
+    listTypeCamelCase: _propTypesDefault.default.string,
+    removeUserFavoriteActor: _propTypesDefault.default.func.isRequired,
+    removeUserFavoriteMovie: _propTypesDefault.default.func.isRequired,
+    removeUserToWatchMovie: _propTypesDefault.default.func.isRequired,
     setFavoritedMovies: _propTypesDefault.default.func.isRequired,
     user: _propTypesDefault.default.shape({
       id: _propTypesDefault.default.string.isRequired
@@ -51260,7 +51954,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-router-dom":"1PMSK","react-redux":"7GDa4","../../actions/actions":"5S6cN","../../utils/helpers":"1nff4","./user-list.scss":"3enCW","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"3enCW":[function() {},{}],"5D0uY":[function() {},{}],"aH745":[function() {},{}],"4DfHF":[function(require,module,exports) {
+},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-router-dom":"1PMSK","react-redux":"7GDa4","../../actions/actions":"5S6cN","../../utils/helpers":"1nff4","./user-list.scss":"3enCW","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"3enCW":[function() {},{}],"aH745":[function() {},{}],"4DfHF":[function(require,module,exports) {
 var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -51272,50 +51966,51 @@ try {
   var _reactDefault = _parcelHelpers.interopDefault(_react);
   var _axios = require('axios');
   var _axiosDefault = _parcelHelpers.interopDefault(_axios);
+  var _propTypes = require('prop-types');
+  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
   var _reactBootstrap = require('react-bootstrap');
   var _utilsHelpers = require('../../utils/helpers');
-  require('../../utils/partials/_form.scss');
   require('./registration-view.scss');
   var _s = $RefreshSig$();
-  const RegistrationView = () => {
+  const RegistrationView = ({history}) => {
     _s();
     const [birthDate, setBirthDate] = _react.useState('');
-    const [birthDateError, setBirthDateError] = _react.useState(false);
     const [email, setEmail] = _react.useState('');
     const [password1, setPassword1] = _react.useState('');
     const [password2, setPassword2] = _react.useState('');
+    const [username, setUsername] = _react.useState('');
+    const [birthDateError, setBirthDateError] = _react.useState(false);
     const [passwordMatchError, setPasswordMatchError] = _react.useState(false);
     const [usernameLengthError, setUsernameLengthError] = _react.useState(false);
     const [usernameTypeError, setUsernameTypeError] = _react.useState(false);
     const [registrationError, setRegistrationError] = _react.useState(false);
-    const [username, setUsername] = _react.useState('');
-    _react.useEffect(() => {
-      document.body.style.backgroundColor = '#0376E3';
-      return () => {
-        document.body.style.backgroundColor = '#1B1D24';
-      };
-    });
     const handleSubmit = e => {
       e.preventDefault();
-      // Reset error values
+      // Reset error values so errors will be removed,
+      // until the errors occur again
       setBirthDateError(false);
       setPasswordMatchError(false);
+      setUsernameLengthError(false);
+      setUsernameTypeError(false);
+      setRegistrationError(false);
       // Make sure passwords match
       if (password1 !== password2) {
         setPasswordMatchError(false);
         return;
       }
-      const user = {
+      const newUser = {
         password: password1,
         email,
         username
       };
       // Check if birthDate was entered and if it is valid
-      // if it is add it to user object
-      if (!validateBirthDate()) return;
-      user['birthDate'] = birthDate;
-      _axiosDefault.default.post('https://my-flix-2021.herokuapp.com/users', user).then(() => {
-        window.open('/', '_self');
+      // if it is add it to newUser object
+      if (birthDate !== '') {
+        if (!validateBirthDate()) return;
+        newUser['birthDate'] = birthDate;
+      }
+      _axiosDefault.default.post('https://my-flix-2021.herokuapp.com/users', newUser).then(() => {
+        history.push('/login');
       }, err => {
         setRegistrationError(err);
       });
@@ -51357,15 +52052,15 @@ try {
       }
     };
     const validateBirthDate = (birthdate = birthDate) => {
-      if (birthdate === '') return true;
       const regex = /\d\d\d\d-\d\d-\d\d/;
       // valid date format
+      // If birthday is not valid
       if (!birthdate.match(regex)) {
         setBirthDateError(`${birthdate} is not a valid date. 
                 Please enter a date in this format: yyyy-mm-dd`);
         return false;
       } else if (birthdate && birthdate.match(regex)) {
-        setBirthDateError(null);
+        setBirthDateError(false);
         return true;
       }
     };
@@ -51375,6 +52070,7 @@ try {
         className: "justify-content-center view-row--form"
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
         className: "form-container",
+        sm: 6,
         md: 4
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, {
         id: "registration-form",
@@ -51396,6 +52092,7 @@ try {
         value: username,
         required: true
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*User icon*/
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
         height: "24",
@@ -51405,7 +52102,7 @@ try {
         strokeWidth: "2",
         strokeLinecap: "round",
         strokeLinejoin: "round",
-        className: "feather feather-user"
+        className: "feather feather-newUser"
       }, /*#__PURE__*/_reactDefault.default.createElement("path", {
         d: "M20 21v-2a4 4 0 0 0-4-4H8a4  4 0 0 0-4 4v2"
       }), /*#__PURE__*/_reactDefault.default.createElement("circle", {
@@ -51427,6 +52124,7 @@ try {
         onChange: e => onChangeBirthDate(e),
         value: birthDate
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Calendar icon*/
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
         height: "24",
@@ -51471,6 +52169,7 @@ try {
         value: email,
         required: true
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Mail icon*/
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
         height: "24",
@@ -51500,6 +52199,7 @@ try {
         value: password1,
         required: true
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Lock icon*/
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
         height: "24",
@@ -51525,6 +52225,7 @@ try {
         className: `input-container ${passwordMatchError ? 'error' : ''}`
       }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.FormControl, {
         type: "password",
+        "aria-label": "retype password",
         onBlur: e => _utilsHelpers.removeFocusedClass(e),
         onFocus: e => _utilsHelpers.addFocusedClass(e),
         onChange: e => onChangePassword2(e),
@@ -51532,6 +52233,7 @@ try {
         value: password2,
         required: true
       }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Append, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.InputGroup.Text, null, /*#__PURE__*/_reactDefault.default.createElement("svg", {
+        /*Lock icon*/
         xmlns: "http://www.w3.org/2000/svg",
         width: "24",
         height: "24",
@@ -51559,7 +52261,7 @@ try {
         className: "error"
       }, "Username must only contain alphanumeric characters.") : null, passwordMatchError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "error"
-      }, "Passwords must match") : null, registrationError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
+      }, "Passwords must match.") : null, registrationError ? /*#__PURE__*/_reactDefault.default.createElement("p", {
         className: "error"
       }, "There was an error. Please try again.") : null, /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "btn-container"
@@ -51568,8 +52270,11 @@ try {
       }, "Register")))))
     );
   };
-  _s(RegistrationView, "cahSAmDsOijZ8eQRo23iYptsRg4=");
+  _s(RegistrationView, "7eYoBEOgX4ML1qi9VMs0u5Ltx74=");
   _c = RegistrationView;
+  RegistrationView.propTypes = {
+    history: _propTypesDefault.default.object.isRequired
+  };
   exports.default = RegistrationView;
   var _c;
   $RefreshReg$(_c, "RegistrationView");
@@ -51579,546 +52284,7 @@ try {
   window.$RefreshSig$ = prevRefreshSig;
 }
 
-},{"react":"3b2NM","axios":"7rA65","react-bootstrap":"4n7hB","../../utils/helpers":"1nff4","../../utils/partials/_form.scss":"5D0uY","./registration-view.scss":"4BDo8","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"5D0uY":[function() {},{}],"4BDo8":[function() {},{}],"3JwwG":[function() {},{}],"44kmi":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _reactBootstrap = require('react-bootstrap');
-  var _reactRedux = require('react-redux');
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _ListItemCardListItemCard = require('../ListItemCard/ListItemCard');
-  var _ListItemCardListItemCardDefault = _parcelHelpers.interopDefault(_ListItemCardListItemCard);
-  var _ListTypeSelectListTypeSelect = require('../ListTypeSelect/ListTypeSelect');
-  var _ListTypeSelectListTypeSelectDefault = _parcelHelpers.interopDefault(_ListTypeSelectListTypeSelect);
-  var _MessageMessage = require('../Message/Message');
-  var _MessageMessageDefault = _parcelHelpers.interopDefault(_MessageMessage);
-  var _SortingFactorSelectSortingFactorSelect = require('../SortingFactorSelect/SortingFactorSelect');
-  var _SortingFactorSelectSortingFactorSelectDefault = _parcelHelpers.interopDefault(_SortingFactorSelectSortingFactorSelect);
-  require('./movies-view.scss');
-  const MoviesView = ({favoritedMovies, featuredMovies, movies, moviesFilter, moviesListType, moviesSortingFactor, error}) => {
-    let content;
-    // if there is an error loading the movies
-    if (error) {
-      content = /*#__PURE__*/_reactDefault.default.createElement(_MessageMessageDefault.default, {
-        message: "The list of movies could not be loaded.  Please try again",
-        type: "error"
-      });
-    } else if (movies.length === 0) {
-      content = /*#__PURE__*/_reactDefault.default.createElement(_MessageMessageDefault.default, {
-        message: "There are no movies to display.",
-        type: "info"
-      });
-    } else {
-      let selectedMovies;
-      if (moviesListType === 'all') selectedMovies = [...movies];
-      if (moviesListType === 'featured') selectedMovies = featuredMovies;
-      if (moviesListType === 'favorited') {
-        selectedMovies = favoritedMovies;
-        selectedMovies = movies.filter(movie => {
-          for (let i = 0; i < selectedMovies.length; i++) {
-            if (Object.values(selectedMovies[i]).indexOf(movie.name) > -1) return true;
-          }
-          return false;
-        });
-      }
-      if (moviesSortingFactor === 'rating') selectedMovies.sort((movie1, movie2) => {
-        return movie2.rating - movie1.rating;
-      });
-      if (moviesSortingFactor === 'releaseYear') selectedMovies.sort((movie1, movie2) => {
-        return movie2.releaseYear - movie1.releaseYear;
-      });
-      if (moviesFilter !== '') {
-        selectedMovies = selectedMovies.filter(movie => {
-          const regExp = new RegExp(moviesFilter, 'i');
-          return movie.name.match(regExp);
-        });
-      }
-      selectedMovies = selectedMovies.map(movie => {
-        let usersFavorited = 0;
-        for (let i = 0; i < favoritedMovies.length; i++) {
-          if (favoritedMovies[i].name === movie.name) usersFavorited = favoritedMovies[i].usersFavorited;
-        }
-        return {
-          ...movie,
-          usersFavorited
-        };
-      });
-      content = /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-center"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-        md: 5,
-        sm: 6,
-        lg: 4,
-        xl: 4
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_ListTypeSelectListTypeSelectDefault.default, null)), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_SortingFactorSelectSortingFactorSelectDefault.default, {
-        options: [{
-          text: 'None',
-          value: 'none',
-          selected: true
-        }, {
-          text: 'Rating',
-          value: 'rating',
-          selected: false
-        }, {
-          text: 'Release year',
-          value: 'releaseYear',
-          selected: false
-        }],
-        type: "movies"
-      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "view-row justify-content-center"
-      }, selectedMovies.map(movie => {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-            key: movie._id,
-            md: 6,
-            lg: 4
-          }, /*#__PURE__*/_reactDefault.default.createElement(_ListItemCardListItemCardDefault.default, {
-            item: movie,
-            itemType: "movies"
-          }))
-        );
-      }), ";"), ";");
-    }
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "movies-container  justify-content-center"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, content))
-    );
-  };
-  _c = MoviesView;
-  MoviesView.propTypes = {
-    favoritedMovies: _propTypesDefault.default.array.isRequired,
-    featuredMovies: _propTypesDefault.default.array.isRequired,
-    movies: _propTypesDefault.default.array.isRequired,
-    moviesFilter: _propTypesDefault.default.string.isRequired,
-    moviesListType: _propTypesDefault.default.string.isRequired,
-    moviesSortingFactor: _propTypesDefault.default.string.isRequired,
-    error: _propTypesDefault.default.string.isRequired
-  };
-  const mapStateToProps = state => {
-    return {
-      actors: state.actors,
-      actorsFilter: state.actorsFilter,
-      actorsSortingFactor: state.actorsSortingFactor,
-      favoritedMovies: state.favoritedMovies,
-      featuredMovies: state.featuredMovies,
-      movies: state.movies,
-      moviesFilter: state.moviesFilter,
-      moviesListType: state.moviesListType,
-      moviesSortingFactor: state.moviesSortingFactor,
-      selectedMovie: state.selectedMovie,
-      user: state.user
-    };
-  };
-  exports.default = _reactRedux.connect(mapStateToProps)(MoviesView);
-  var _c;
-  $RefreshReg$(_c, "MoviesView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","../ListItemCard/ListItemCard":"5PP2u","../ListTypeSelect/ListTypeSelect":"2FsjQ","../Message/Message":"4YlQk","../SortingFactorSelect/SortingFactorSelect":"6zJdJ","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./movies-view.scss":"73pHw","prop-types":"4dfy5"}],"5PP2u":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactBootstrap = require('react-bootstrap');
-  var _reactRouterDom = require('react-router-dom');
-  var _utilsHelpers = require('../../utils/helpers');
-  require('./list-item-card.scss');
-  const ListItemCard = ({item, itemType}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card, {
-        className: "list-item-card"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Body, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Title, {
-        className: "header"
-      }, item.usersFavorited && item.usersFavorited > 0 ? /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.OverlayTrigger, {
-        trigger: ['hover', 'focus', 'click'],
-        placement: "top",
-        overlay: /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Tooltip, null, "Favorites by users: ", item.usersFavorited)
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-star"
-      }, /*#__PURE__*/_reactDefault.default.createElement("polygon", {
-        points: "12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-      }))) : null, item.name, itemType === 'movies' && item.featured ? /*#__PURE__*/_reactDefault.default.createElement("small", null, " (Featured)") : null), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Img, {
-        src: item.image
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Card.Text, {
-        className: "description"
-      }, _utilsHelpers.createExcerpt(item.description ? item.description : item.bio), " …"), /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: "read-more-link-container"
-      }, /*#__PURE__*/_reactDefault.default.createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "24",
-        height: "24",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "feather feather-arrow-right"
-      }, /*#__PURE__*/_reactDefault.default.createElement("line", {
-        x1: "5",
-        y1: "12",
-        x2: "19",
-        y2: "12"
-      }), /*#__PURE__*/_reactDefault.default.createElement("polyline", {
-        points: "12 5 19 12 12 19"
-      })), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: `/${itemType === 'movies' ? 'movies' : 'actors'}/${item._id}`,
-        className: "read-more-link"
-      }, "Read More"))))
-    );
-  };
-  _c = ListItemCard;
-  ListItemCard.propTypes = {
-    item: _propTypesDefault.default.shape({
-      _id: _propTypesDefault.default.string.isRequired,
-      bio: _propTypesDefault.default.string,
-      description: _propTypesDefault.default.string,
-      featured: _propTypesDefault.default.bool,
-      image: _propTypesDefault.default.string.isRequired,
-      name: _propTypesDefault.default.string.isRequired,
-      usersFavorited: _propTypesDefault.default.number
-    }).isRequired,
-    itemType: _propTypesDefault.default.string.isRequired
-  };
-  exports.default = ListItemCard;
-  var _c;
-  $RefreshReg$(_c, "ListItemCard");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","prop-types":"4dfy5","react-bootstrap":"4n7hB","react-router-dom":"1PMSK","../../utils/helpers":"1nff4","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","./list-item-card.scss":"3Gt0E"}],"3Gt0E":[function() {},{}],"2FsjQ":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _reactBootstrap = require('react-bootstrap');
-  var _reactRedux = require('react-redux');
-  var _actionsActions = require('../../actions/actions');
-  const ListTypeSelect = ({setMoviesListType}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
-        controlId: "list-type-select"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Select type of movies"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Control, {
-        as: "select",
-        onChange: e => setMoviesListType(e.target.value)
-      }, /*#__PURE__*/_reactDefault.default.createElement("option", {
-        value: "all"
-      }, "All movies"), /*#__PURE__*/_reactDefault.default.createElement("option", {
-        value: "featured"
-      }, "Featured movies"), /*#__PURE__*/_reactDefault.default.createElement("option", {
-        value: "favorited"
-      }, "Favorited movies")))
-    );
-  };
-  _c = ListTypeSelect;
-  exports.default = _reactRedux.connect(null, {
-    setMoviesListType: _actionsActions.setMoviesListType
-  })(ListTypeSelect);
-  var _c;
-  $RefreshReg$(_c, "ListTypeSelect");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"4YlQk":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _reactBootstrap = require('react-bootstrap');
-  const ErrorMessage = ({message, type}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-center"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-        md: "5"
-      }, /*#__PURE__*/_reactDefault.default.createElement("div", {
-        className: `text-${type}`
-      }, message)))
-    );
-  };
-  _c = ErrorMessage;
-  ErrorMessage.propTypes = {
-    message: _propTypesDefault.default.string.isRequired,
-    type: _propTypesDefault.default.string.isRequired
-  };
-  exports.default = ErrorMessage;
-  var _c;
-  $RefreshReg$(_c, "ErrorMessage");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","prop-types":"4dfy5","react-bootstrap":"4n7hB","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"6zJdJ":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _reactBootstrap = require('react-bootstrap');
-  var _reactRedux = require('react-redux');
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _actionsActions = require('../../actions/actions');
-  const SortingFactorSelect = ({setActorsSortingFactor, setMoviesSortingFactor, options, type}) => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Group, {
-        controlId: "list-type-select"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Label, null, "Sort by:"), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Control, {
-        as: "select",
-        onChange: e => {
-          type === 'movies' ? setMoviesSortingFactor(e.target.value) : setActorsSortingFactor(e.target.value);
-        }
-      }, options.map(option => {
-        const selected = option.selected ? true : false;
-        if (selected) {
-          return (
-            /*#__PURE__*/_reactDefault.default.createElement("option", {
-              value: option.value,
-              selected: true
-            }, option.text)
-          );
-        } else {
-          return (
-            /*#__PURE__*/_reactDefault.default.createElement("option", {
-              value: option.value
-            }, option.text)
-          );
-        }
-      })))
-    );
-  };
-  _c = SortingFactorSelect;
-  SortingFactorSelect.propTypes = {
-    options: _propTypesDefault.default.array.isRequired,
-    setActorsSortingFactor: _propTypesDefault.default.func.isRequired,
-    setMoviesSortingFactor: _propTypesDefault.default.func.isRequired,
-    type: _propTypesDefault.default.string.isRequired
-  };
-  exports.default = _reactRedux.connect(null, {
-    setActorsSortingFactor: _actionsActions.setActorsSortingFactor,
-    setMoviesSortingFactor: _actionsActions.setMoviesSortingFactor
-  })(SortingFactorSelect);
-  var _c;
-  $RefreshReg$(_c, "SortingFactorSelect");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","../../actions/actions":"5S6cN","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","prop-types":"4dfy5"}],"73pHw":[function() {},{}],"6H4Vv":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _reactBootstrap = require('react-bootstrap');
-  var _reactRedux = require('react-redux');
-  var _propTypes = require('prop-types');
-  var _propTypesDefault = _parcelHelpers.interopDefault(_propTypes);
-  var _ListItemCardListItemCard = require('../ListItemCard/ListItemCard');
-  var _ListItemCardListItemCardDefault = _parcelHelpers.interopDefault(_ListItemCardListItemCard);
-  var _MessageMessage = require('../Message/Message');
-  var _MessageMessageDefault = _parcelHelpers.interopDefault(_MessageMessage);
-  var _SortingFactorSelectSortingFactorSelect = require('../SortingFactorSelect/SortingFactorSelect');
-  var _SortingFactorSelectSortingFactorSelectDefault = _parcelHelpers.interopDefault(_SortingFactorSelectSortingFactorSelect);
-  require('../../utils/partials/_view.scss');
-  const ActorsView = ({actors, actorsFilter, actorsSortingFactor, error}) => {
-    let content;
-    // if there is an error loading the actors
-    if (error) {
-      content = /*#__PURE__*/_reactDefault.default.createElement(_MessageMessageDefault.default, {
-        message: "The list of actors could not be loaded.  Please try again",
-        type: "error"
-      });
-    } else if (actors.length === 0) {
-      content = /*#__PURE__*/_reactDefault.default.createElement(_MessageMessageDefault.default, {
-        message: "There are no actors to display.",
-        type: "info"
-      });
-    } else {
-      let selectedActors = [...actors];
-      if (actorsSortingFactor === 'birthCountry') {
-        selectedActors.sort((actor1, actor2) => {
-          if (actor1.birthCountry > actor2.birthCountry) return 1;
-          if (actor1.birthCountry === actor2.birthCountry) return 0;
-          if (actor1.birthCountry < actor2.birthCountry) return -1;
-        });
-      }
-      if (actorsSortingFactor === 'birthDate') selectedActors.sort((actor1, actor2) => {
-        const actor1BirthYear = new Date(actor1.birthDate).getFullYear();
-        const actor2BirthYear = new Date(actor2.birthDate).getFullYear();
-        return actor2BirthYear - actor1BirthYear;
-      });
-      if (actorsFilter !== '') {
-        selectedActors = selectedActors.filter(actor => {
-          const regExp = new RegExp(actorsFilter, 'i');
-          return actor.name.match(regExp);
-        });
-      }
-      content = /*#__PURE__*/_reactDefault.default.createElement(_reactDefault.default.Fragment, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: " justify-content-center"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-        sm: 4,
-        md: 3,
-        lg: 2
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Form.Row, null, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, /*#__PURE__*/_reactDefault.default.createElement(_SortingFactorSelectSortingFactorSelectDefault.default, {
-        options: [{
-          text: 'None',
-          value: 'none',
-          selected: true
-        }, {
-          text: 'Birth date',
-          value: 'birthDate',
-          selected: false
-        }, {
-          text: 'Birth country',
-          value: 'birthCountry',
-          selected: false
-        }],
-        type: "actors"
-      })))))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "view-row justify-content-center"
-      }, selectedActors.map(actor => {
-        return (
-          /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-            key: actor._id,
-            md: 6,
-            lg: 4
-          }, /*#__PURE__*/_reactDefault.default.createElement(_ListItemCardListItemCardDefault.default, {
-            item: actor,
-            itemType: "actors"
-          }))
-        );
-      }), ";"), ";");
-    }
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "actors-container  movies-container justify-content-center"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, null, content))
-    );
-  };
-  _c = ActorsView;
-  ActorsView.propTypes = {
-    actors: _propTypesDefault.default.array.isRequired,
-    actorsFilter: _propTypesDefault.default.string.isRequired,
-    actorsSortingFactor: _propTypesDefault.default.string.isRequired,
-    error: _propTypesDefault.default.string.isRequired
-  };
-  const mapStateToProps = state => ({
-    actors: state.actors,
-    actorsFilter: state.actorsFilter,
-    actorsSortingFactor: state.actorsSortingFactor
-  });
-  exports.default = _reactRedux.connect(mapStateToProps)(ActorsView);
-  var _c;
-  $RefreshReg$(_c, "ActorsView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","react-bootstrap":"4n7hB","react-redux":"7GDa4","../ListItemCard/ListItemCard":"5PP2u","../Message/Message":"4YlQk","../SortingFactorSelect/SortingFactorSelect":"6zJdJ","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l","../../utils/partials/_view.scss":"552MA","prop-types":"4dfy5"}],"552MA":[function() {},{}],"2a49I":[function(require,module,exports) {
-var helpers = require("../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-helpers.prelude(module);
-try {
-  var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
-  _parcelHelpers.defineInteropFlag(exports);
-  var _react = require('react');
-  var _reactDefault = _parcelHelpers.interopDefault(_react);
-  var _reactBootstrap = require('react-bootstrap');
-  var _reactRouterDom = require('react-router-dom');
-  const AboutView = () => {
-    return (
-      /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
-        className: "justify-content-center"
-      }, /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Col, {
-        className: "view",
-        md: 5
-      }, /*#__PURE__*/_reactDefault.default.createElement("h1", {
-        className: "text-center"
-      }, "Welcome to myFlix!"), /*#__PURE__*/_reactDefault.default.createElement("p", {
-        className: "description"
-      }, "Feel free to browse and sort", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: "/"
-      }, " movies "), "and ", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: "/actors"
-      }, " actors "), "and add them to your favorites or to-watch lists. You can visit your", /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-        to: "/profile"
-      }, " profile "), "to view those lists as well as edit your profile info.")))
-    );
-  };
-  _c = AboutView;
-  exports.default = AboutView;
-  var _c;
-  $RefreshReg$(_c, "AboutView");
-  helpers.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-
-},{"react":"3b2NM","react-bootstrap":"4n7hB","react-router-dom":"1PMSK","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"7panR":[function(require,module,exports) {
+},{"react":"3b2NM","axios":"7rA65","prop-types":"4dfy5","react-bootstrap":"4n7hB","../../utils/helpers":"1nff4","./registration-view.scss":"4BDo8","@parcel/transformer-js/lib/esmodule-helpers.js":"3FaRU","../../../../../../../../../../.nvm/versions/node/v14.16.1/lib/node_modules/parcel/node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"1uZ3l"}],"4BDo8":[function() {},{}],"7panR":[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, '__esModule', {
   value: true
@@ -52837,7 +53003,12 @@ function favoritedMovies(state = [], action) {
     case _actionsActions.ADD_FAVORITED_MOVIE:
       return [...state, action.movieName];
     case _actionsActions.SET_FAVORITED_MOVIES:
-      return action.movies;
+      {
+        const newFavoritedMovies = action.movies.sort((movie1, movie2) => {
+          return movie2.usersFavorited - movie1.usersFavorited;
+        });
+        return newFavoritedMovies;
+      }
     default:
       return state;
   }
@@ -52920,8 +53091,10 @@ function user(state = {}, action) {
       }
     case _actionsActions.REMOVE_USER_FAVORITE_ACTOR:
       {
-        let favoriteActors = state.favoriteActors;
-        favoriteActors = favoriteActors.filter(actorId => actorId === action.actorId);
+        const favoriteActors = [...state.favoriteActors];
+        for (let i = 0; i < favoriteActors.length; i++) {
+          if (favoriteActors[i] === action.actorId) favoriteActors.splice(i, 1);
+        }
         return {
           ...state,
           favoriteActors
@@ -52929,8 +53102,10 @@ function user(state = {}, action) {
       }
     case _actionsActions.REMOVE_USER_FAVORITE_MOVIE:
       {
-        let favoriteMovies = state.favoriteMovies;
-        favoriteMovies = favoriteMovies.filter(movieId => movieId === action.movieId);
+        const favoriteMovies = [...state.favoriteMovies];
+        for (let i = 0; i < favoriteMovies.length; i++) {
+          if (favoriteMovies[i] === action.movieId) favoriteMovies.splice(i, 1);
+        }
         return {
           ...state,
           favoriteMovies
@@ -52938,8 +53113,10 @@ function user(state = {}, action) {
       }
     case _actionsActions.REMOVE_USER_TO_WATCH_MOVIE:
       {
-        let toWatchMovies = [...state.toWatchMovies];
-        toWatchMovies = toWatchMovies.filter(movieId => movieId !== action.movieId);
+        const toWatchMovies = [...state.toWatchMovies];
+        for (let i = 0; i < toWatchMovies.length; i++) {
+          if (toWatchMovies[i] === action.movieId) toWatchMovies.splice(i, 1);
+        }
         return {
           ...state,
           toWatchMovies
