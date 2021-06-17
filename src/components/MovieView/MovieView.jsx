@@ -82,7 +82,7 @@ const MovieView = ({
     // Add movie to user's favorite movies list
     const addToFavoritesList = () => {
         addToList(
-            user.id, 
+            user._id, 
             'favorite-movies', 
             movie._id, 
             'movie_id').then(() => {
@@ -121,7 +121,7 @@ const MovieView = ({
     // Add movie to user's to-watch movies list
     const addToWatchList = () => {
         addToList(
-            user.id, 
+            user._id, 
             'to-watch-movies', 
             movie._id, 
             'movie_id').then(() => {
@@ -288,7 +288,8 @@ const MovieView = ({
                                 {
                                     movieActors.map((actor, i) => 
                                     {
-                                        const actorLink = `/actors/${actor.id}`;
+                                        const actorLink = 
+										`/actors/${actor._id}`;
                                         return <RelatedAttributeCard 
                                             key={i}
                                             image={actor.image} 
@@ -351,9 +352,9 @@ MovieView.propTypes = {
     setSelectedMovie: PropTypes.func.isRequired,
     setFavoritedMovies: PropTypes.func.isRequired,
     user: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        favoriteMovies: PropTypes.array.isRequired,
-        toWatchMovies: PropTypes.array.isRequired
+        _id: PropTypes.string,
+        favoriteMovies: PropTypes.array,
+        toWatchMovies: PropTypes.array
     })
 };
 

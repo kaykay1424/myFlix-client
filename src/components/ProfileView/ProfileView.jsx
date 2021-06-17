@@ -19,13 +19,11 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
     // If user has not been set
     // stop execution of function
     // as is is needed for component to function properly
-    if (Object.keys(user).length === 0)
+    if (!user)
         return null;
  
-    // const history = useHistory();
     // Make date appear in readable format (2021-05-01)
-    const convertBirthDate = () => {
-        const birthdate = user.birthDate;
+    const convertBirthDate = (birthdate) => {
         // If date hasn't been converted to readable format yet         
         if (
             birthdate 
@@ -40,7 +38,8 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
         return '';
     };
 
-    const [birthDate, setBirthDate] = useState(convertBirthDate());    
+    const [birthDate, setBirthDate] = useState(
+        convertBirthDate(user.birthDate));    
     const [email, setEmail] = useState(user.email);
     const [username, setUsername] = useState(user.username);
     const [newPassword1, setNewPassword1] = useState('');
@@ -63,7 +62,7 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
             ?
             axios({
                 method: 'delete',
-                url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
+                url: `https://my-flix-2021.herokuapp.com/users/${user._id}`,
                 headers:  {Authorization: `Bearer ${token}`}
             }).then(() => {
                 setSuccessfulUserRemoval(true);
@@ -113,7 +112,7 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
             
         axios({
             method: 'patch',
-            url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
+            url: `https://my-flix-2021.herokuapp.com/users/${user._id}`,
             data: updatedUser,
             headers:  {Authorization: `Bearer ${token}`}
         })
@@ -375,7 +374,7 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
                             title="Favorite Movies" 
                             listType='favorite-movies'
                             listTypeCamelCase='favoriteMovies' 
-                            userId={user.id} 
+                            userId={user._id} 
                             itemIdType="movie_id" 
                             token={token} 
                         />
@@ -383,7 +382,7 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
                             title="To Watch Movies" 
                             listType='to-watch-movies' 
                             listTypeCamelCase='toWatchMovies'
-                            userId={user.id} 
+                            userId={user._id} 
                             itemIdType="movie_id" 
                             token={token} 
                         />
@@ -391,7 +390,7 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
                             title="Favorite Actors" 
                             listType='favorite-actors' 
                             listTypeCamelCase='favoriteActors'
-                            userId={user.id} 
+                            userId={user._id} 
                             itemIdType="actor_id" 
                             token={token} 
                         />
@@ -450,11 +449,11 @@ ProfileView.propTypes = {
     onLogout: PropTypes.func.isRequired,
     setUserInfo: PropTypes.func.isRequired,
     user: PropTypes.shape({
-        id: PropTypes.string.isRequired,
+        _id: PropTypes.string,
         birthDate: PropTypes.string,
         email: PropTypes.string,
-        password: PropTypes.string.isRequired,
-        username: PropTypes.string.isRequired
+        password: PropTypes.string,
+        username: PropTypes.string
     })
 };
 

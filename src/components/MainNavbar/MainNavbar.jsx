@@ -6,18 +6,29 @@ import PropTypes from 'prop-types';
 import {Link, useLocation, useHistory} from 'react-router-dom';
 import {connect} from 'react-redux';
 
-import {setActorsFilter, setMoviesFilter} from '../../actions/actions';
+import {
+    setActorsFilter, 
+    setActorsSortingFactor,
+    setMoviesFilter,
+    setMoviesListType,
+    setMoviesSortingFactor
+} from '../../actions/actions';
 
 import './main-navbar.scss';
 
-const MainNavbar = ({onLogout, setActorsFilter, setMoviesFilter, user}) => {
-    const loggedIn = Object.keys(user).length > 0 ? true : false;
+const MainNavbar = ({
+    onLogout, 
+    setActorsFilter,
+    setActorsSortingFactor, 
+    setMoviesFilter, 
+    setMoviesListType,
+    setMoviesSortingFactor,
+    user
+}) => {
+    const loggedIn = localStorage.getItem('token') ? true : false;
     
     const [searchTerm, setSearchTerm] = useState('');
-    const [isUserLoggedIn, setIsUserLoggedIn] = useState(
-        Object.keys(user).length > 0 
-            ? true 
-            : false);
+    const [isUserLoggedIn, setIsUserLoggedIn] = useState(loggedIn);
     
     const  pathname = useLocation().pathname,
         history = useHistory();
@@ -27,6 +38,10 @@ const MainNavbar = ({onLogout, setActorsFilter, setMoviesFilter, user}) => {
         setSearchTerm('');
         setActorsFilter('');
         setMoviesFilter('');
+        setMoviesListType('all');
+        setActorsSortingFactor('none');
+        setMoviesSortingFactor('none');
+        
     },[pathname]);
 
     useEffect(() => {
@@ -169,8 +184,11 @@ const MainNavbar = ({onLogout, setActorsFilter, setMoviesFilter, user}) => {
 MainNavbar.propTypes = {
     onLogout: PropTypes.func.isRequired,
     setActorsFilter: PropTypes.func.isRequired,
+    setActorsSortingFactor: PropTypes.func.isRequired,
     setMoviesFilter: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired
+    setMoviesListType: PropTypes.func.isRequired,
+    setMoviesSortingFactor: PropTypes.func.isRequired,
+    user: PropTypes.object
 };
 
 const mapStateToProps = state => {
@@ -181,5 +199,8 @@ const mapStateToProps = state => {
 
 export default connect(mapStateToProps, {
     setActorsFilter,
-    setMoviesFilter
+    setActorsSortingFactor,
+    setMoviesFilter,
+    setMoviesListType,
+    setMoviesSortingFactor
 })(MainNavbar);

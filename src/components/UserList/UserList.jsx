@@ -55,7 +55,7 @@ const UserList = ({
  
                 return {
                     
-                    id: matchingMovie._id,
+                    _id: matchingMovie._id,
                     description: matchingMovie.description,
                     image: matchingMovie.image,
                     name: matchingMovie.name
@@ -69,7 +69,7 @@ const UserList = ({
                 });
                            
                 return {
-                    id: matchingActor._id,
+                    _id: matchingActor._id,
                     bio: matchingActor.bio,
                     image: matchingActor.image,
                     name: matchingActor.name
@@ -85,13 +85,13 @@ const UserList = ({
         axios({
             method: 'delete',
             // eslint-disable-next-line max-len
-            url: `https://my-flix-2021.herokuapp.com/users/${user.id}/${listType}/${itemId}`,
+            url: `https://my-flix-2021.herokuapp.com/users/${user._id}/${listType}/${itemId}`,
             data,
             headers:  {Authorization: `Bearer ${token}`}
         }).then(() => {
             // Filter out movie that was removed from user's list
             const newList = list.filter(listItem => {
-                return listItem.id !== itemId;
+                return listItem._id !== itemId;
             });
             setList(newList);
             
@@ -152,13 +152,13 @@ const UserList = ({
                 {/* Show user's list of items */}
                 {list && list.length > 0 ? list.map((item) => {
                     return (
-                        <li className="user-list-item" key={item.id}>
+                        <li className="user-list-item" key={item._id}>
                             <div className="details">
                                 <p>
                                     <Link to={`${
                                         listType.match(/movies/i) 
-                                            ? `/movies/${item.id}` 
-                                            : `/actors/${item.id}`}`}
+                                            ? `/movies/${item._id}` 
+                                            : `/actors/${item._id}`}`}
                                     >
                                         {item.name}
                                     </Link>
@@ -174,7 +174,7 @@ const UserList = ({
                             </div>
                             <svg /* Trash icon */
                                 onClick={() => removeListItem(
-                                    item.id, item.name)}
+                                    item._id, item.name)}
                                 xmlns="http://www.w3.org/2000/svg" 
                                 width="24" 
                                 height="24" 
@@ -237,7 +237,7 @@ UserList.propTypes = {
     removeUserToWatchMovie: PropTypes.func.isRequired,
     setFavoritedMovies: PropTypes.func.isRequired,
     user: PropTypes.shape({
-        id: PropTypes.string.isRequired
+        _id: PropTypes.string
     }),
     token: PropTypes.string.isRequired, 
     itemIdType: PropTypes.string.isRequired

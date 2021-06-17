@@ -5,12 +5,12 @@ html {
 }
 
 .app-container {
+  font-family: "Archivo", sans-serif;
   height: 100%;
 }
 
 .container-fluid.my-flix {
   background-color: #1b1d24;
-  font-family: "Calibri";
   height: 100%;
   margin: 0;
   padding: 0;
@@ -103,19 +103,19 @@ html {
   max-width: 350px;
 }
 
-.view {
+.view[class*=col] {
   background-color: #1e2127;
   color: #fff;
   padding: 0;
   padding-bottom: 2rem;
 }
-.view .attribute {
+.view[class*=col] .attribute {
   margin-right: 4em;
 }
-.view .attribute .label + a {
+.view[class*=col] .attribute .label + a {
   color: #117dce;
 }
-.view .attributes {
+.view[class*=col] .attributes {
   border-bottom: 1px solid #30333a;
   border-top: 1px solid #30333a;
   display: flex;
@@ -123,14 +123,14 @@ html {
   margin-top: 4em;
   padding: 1em 10% 1em 10%;
 }
-.view .card-body {
+.view[class*=col] .card-body {
   padding-left: 0;
   padding-top: 0;
 }
-.view .label {
+.view[class*=col] .label {
   font-size: 15px;
 }
-.view .close-box {
+.view[class*=col] .close-box {
   background-color: #1b1d24;
   border-radius: 50%;
   cursor: pointer;
@@ -141,56 +141,56 @@ html {
   text-align: center;
   top: 20px;
 }
-.view .close-box svg {
+.view[class*=col] .close-box svg {
   color: #f5f5f5;
 }
-.view .description {
+.view[class*=col] .description {
   color: #bec2cc;
 }
-.view .label {
+.view[class*=col] .label {
   margin-bottom: 0.5rem;
 }
-.view .heading-box {
+.view[class*=col] .heading-box {
   background-color: #fff;
   background-position: top center;
   background-repeat: no-repeat;
   height: 200px;
   position: relative;
 }
-.view .heading-box.heading-box--no-image {
+.view[class*=col] .heading-box.heading-box--no-image {
   height: auto;
 }
-.view .main-content {
+.view[class*=col] .main-content {
   margin-top: 4em;
   padding-left: 10%;
   padding-right: 10%;
 }
-.view .main-heading {
+.view[class*=col] .main-heading {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
 }
-.view .main-heading svg {
+.view[class*=col] .main-heading svg {
   height: 18px;
 }
-.view .main-heading svg:hover, .view .main-heading svg.added-to-list {
+.view[class*=col] .main-heading svg:hover, .view[class*=col] .main-heading svg.added-to-list {
   cursor: pointer;
   fill: #fff;
 }
-.view .main-heading svg.added-to-list:hover {
+.view[class*=col] .main-heading svg.added-to-list:hover {
   cursor: not-allowed;
 }
-.view .related-attributes {
+.view[class*=col] .related-attributes {
   padding-left: 10%;
   padding-right: 10%;
 }
-.view .related-attributes img {
+.view[class*=col] .related-attributes img {
   max-width: 100%;
 }
-.view .related-attributes .card {
+.view[class*=col] .related-attributes .card {
   display: inline-block;
 }
-.view .source-container {
+.view[class*=col] .source-container {
   padding-left: 10%;
   padding-right: 10%;
 }
@@ -209,19 +209,19 @@ html {
   max-width: 350px;
 }
 
-.view {
+.view[class*=col] {
   background-color: #1e2127;
   color: #fff;
   padding: 0;
   padding-bottom: 2rem;
 }
-.view .attribute {
+.view[class*=col] .attribute {
   margin-right: 4em;
 }
-.view .attribute .label + a {
+.view[class*=col] .attribute .label + a {
   color: #117dce;
 }
-.view .attributes {
+.view[class*=col] .attributes {
   border-bottom: 1px solid #30333a;
   border-top: 1px solid #30333a;
   display: flex;
@@ -229,14 +229,14 @@ html {
   margin-top: 4em;
   padding: 1em 10% 1em 10%;
 }
-.view .card-body {
+.view[class*=col] .card-body {
   padding-left: 0;
   padding-top: 0;
 }
-.view .label {
+.view[class*=col] .label {
   font-size: 15px;
 }
-.view .close-box {
+.view[class*=col] .close-box {
   background-color: #1b1d24;
   border-radius: 50%;
   cursor: pointer;
@@ -247,56 +247,56 @@ html {
   text-align: center;
   top: 20px;
 }
-.view .close-box svg {
+.view[class*=col] .close-box svg {
   color: #f5f5f5;
 }
-.view .description {
+.view[class*=col] .description {
   color: #bec2cc;
 }
-.view .label {
+.view[class*=col] .label {
   margin-bottom: 0.5rem;
 }
-.view .heading-box {
+.view[class*=col] .heading-box {
   background-color: #fff;
   background-position: top center;
   background-repeat: no-repeat;
   height: 200px;
   position: relative;
 }
-.view .heading-box.heading-box--no-image {
+.view[class*=col] .heading-box.heading-box--no-image {
   height: auto;
 }
-.view .main-content {
+.view[class*=col] .main-content {
   margin-top: 4em;
   padding-left: 10%;
   padding-right: 10%;
 }
-.view .main-heading {
+.view[class*=col] .main-heading {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
 }
-.view .main-heading svg {
+.view[class*=col] .main-heading svg {
   height: 18px;
 }
-.view .main-heading svg:hover, .view .main-heading svg.added-to-list {
+.view[class*=col] .main-heading svg:hover, .view[class*=col] .main-heading svg.added-to-list {
   cursor: pointer;
   fill: #fff;
 }
-.view .main-heading svg.added-to-list:hover {
+.view[class*=col] .main-heading svg.added-to-list:hover {
   cursor: not-allowed;
 }
-.view .related-attributes {
+.view[class*=col] .related-attributes {
   padding-left: 10%;
   padding-right: 10%;
 }
-.view .related-attributes img {
+.view[class*=col] .related-attributes img {
   max-width: 100%;
 }
-.view .related-attributes .card {
+.view[class*=col] .related-attributes .card {
   display: inline-block;
 }
-.view .source-container {
+.view[class*=col] .source-container {
   padding-left: 10%;
   padding-right: 10%;
 }
@@ -580,19 +580,19 @@ form svg {
   max-width: 350px;
 }
 
-.view {
+.view[class*=col] {
   background-color: #1e2127;
   color: #fff;
   padding: 0;
   padding-bottom: 2rem;
 }
-.view .attribute {
+.view[class*=col] .attribute {
   margin-right: 4em;
 }
-.view .attribute .label + a {
+.view[class*=col] .attribute .label + a {
   color: #117dce;
 }
-.view .attributes {
+.view[class*=col] .attributes {
   border-bottom: 1px solid #30333a;
   border-top: 1px solid #30333a;
   display: flex;
@@ -600,14 +600,14 @@ form svg {
   margin-top: 4em;
   padding: 1em 10% 1em 10%;
 }
-.view .card-body {
+.view[class*=col] .card-body {
   padding-left: 0;
   padding-top: 0;
 }
-.view .label {
+.view[class*=col] .label {
   font-size: 15px;
 }
-.view .close-box {
+.view[class*=col] .close-box {
   background-color: #1b1d24;
   border-radius: 50%;
   cursor: pointer;
@@ -618,56 +618,56 @@ form svg {
   text-align: center;
   top: 20px;
 }
-.view .close-box svg {
+.view[class*=col] .close-box svg {
   color: #f5f5f5;
 }
-.view .description {
+.view[class*=col] .description {
   color: #bec2cc;
 }
-.view .label {
+.view[class*=col] .label {
   margin-bottom: 0.5rem;
 }
-.view .heading-box {
+.view[class*=col] .heading-box {
   background-color: #fff;
   background-position: top center;
   background-repeat: no-repeat;
   height: 200px;
   position: relative;
 }
-.view .heading-box.heading-box--no-image {
+.view[class*=col] .heading-box.heading-box--no-image {
   height: auto;
 }
-.view .main-content {
+.view[class*=col] .main-content {
   margin-top: 4em;
   padding-left: 10%;
   padding-right: 10%;
 }
-.view .main-heading {
+.view[class*=col] .main-heading {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
 }
-.view .main-heading svg {
+.view[class*=col] .main-heading svg {
   height: 18px;
 }
-.view .main-heading svg:hover, .view .main-heading svg.added-to-list {
+.view[class*=col] .main-heading svg:hover, .view[class*=col] .main-heading svg.added-to-list {
   cursor: pointer;
   fill: #fff;
 }
-.view .main-heading svg.added-to-list:hover {
+.view[class*=col] .main-heading svg.added-to-list:hover {
   cursor: not-allowed;
 }
-.view .related-attributes {
+.view[class*=col] .related-attributes {
   padding-left: 10%;
   padding-right: 10%;
 }
-.view .related-attributes img {
+.view[class*=col] .related-attributes img {
   max-width: 100%;
 }
-.view .related-attributes .card {
+.view[class*=col] .related-attributes .card {
   display: inline-block;
 }
-.view .source-container {
+.view[class*=col] .source-container {
   padding-left: 10%;
   padding-right: 10%;
 }

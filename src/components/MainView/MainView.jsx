@@ -53,33 +53,26 @@ const MainView = ({
     const token = localStorage.getItem('token');
     
     // Set necessary info after page refresh
-    useEffect(() => {    
+    useEffect(() => { 
+        // // Reset error values so errors will be removed, 
+        // until errors occur again  
+        setMoviesError(false);
+        setActorsError(false);
         // If user is logged in but movies haven't been set    
-        if (Object.keys(user).length > 0 && movies.length === 0) {
+        if (user && movies.length === 0) {
             getActors(token);
             getMovies(token).then((data) => getFavoritedMovies(token, data));
             
         }
         // If user is logged in but user info hasn't been set
-        if (token && !user.id) {
+        if (token && !user) {
             axios.get(
                 // eslint-disable-next-line max-len
                 `https://my-flix-2021.herokuapp.com/users/${localStorage.getItem('user')}`,
                 {
                     headers: {Authorization: `Bearer ${token}`}
                 }).then(response => {
-                const loggedInUser = response.data;
-                
-                setUserInfo({
-                    birthDate: loggedInUser.birthDate,
-                    favoriteActors: loggedInUser.favoriteActors,
-                    favoriteMovies: loggedInUser.favoriteMovies,
-                    email: loggedInUser.email,
-                    id: localStorage.getItem('user'),
-                    password: loggedInUser.password,
-                    toWatchMovies: loggedInUser.toWatchMovies,
-                    username: loggedInUser.username
-                });
+                setUserInfo(response.data);
             });
         }
     },[user, movies]);
@@ -191,10 +184,11 @@ const MainView = ({
         };
         if (user.birthDate) 
             userInfo['birthDate'] = user.birthDate;
-            
-        setUserInfo(userInfo);
+        
         localStorage.setItem('token', token);
         localStorage.setItem('user', user._id);
+        setUserInfo(user);
+
         getActors(token);
         getMovies(token).then((data) => getFavoritedMovies(token, data));
     };
@@ -205,7 +199,7 @@ const MainView = ({
         localStorage.removeItem('user');
         localStorage.removeItem('token');
     };
-        
+
     return (
         <Router>    
             <MainNavbar onLogout={onLogout} /> 
@@ -213,7 +207,7 @@ const MainView = ({
                 <Switch>            
                     <Route exact path="/" render={() => {                    
                         // If user is not logged in, show login view
-                        if (Object.keys(user).length === 0) 
+                        if (!token) 
                             return <Redirect to="/login" />;
 
                         return <MoviesView 
@@ -285,7 +279,7 @@ const MainView = ({
 
                     <Route path="/register" render={({history}) => {
                     // if user is already logged in redirect to home page
-                        if (Object.keys(user).length > 0) 
+                        if (user) 
                             return <Redirect to="/" />;
 
                         return (<RegistrationView history={history} />);
@@ -293,17 +287,13 @@ const MainView = ({
 
                     <Route path="/login" render={({history}) => {
                     // if user is already logged in redirect to home page
-                        if (Object.keys(user).length > 0) 
+                        if (user) 
                             return <Redirect to="/" />;
 
                         return <LoginView 
                             history={history} 
                             onLoggedIn={onLoggedIn} 
                         />;
-                    }} />
-
-                    <Route path="/logout" render={() => {
-                        return <Redirect to="/" />;
                     }} />
 
                     <Route path="/profile" render={({history}) => {
@@ -342,7 +332,7 @@ MainView.propTypes = {
     setFeaturedMovies: PropTypes.func.isRequired,
     setMovies: PropTypes.func.isRequired,
     setUserInfo: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired
+    user: PropTypes.object
 };
 
 const mapStateToProps = state => {

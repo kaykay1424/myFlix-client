@@ -37,7 +37,7 @@ const ActorView = ({
     // Add actor to user's favorite actors list
     const addToFavoritesList = () => {
         addToList(
-            user.id, 
+            user._id, 
             'favorite-actors', 
             actor._id, 
             'actor_id').then(() => {
@@ -170,8 +170,8 @@ ActorView.propTypes = {
     match: PropTypes.object.isRequired,
     onBackClick: PropTypes.func.isRequired,
     user: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        favoriteActors: PropTypes.array.isRequired
+        _id: PropTypes.string,
+        favoriteActors: PropTypes.array
     })
 };
 

@@ -26518,30 +26518,24 @@ try {
     const token = localStorage.getItem('token');
     // Set necessary info after page refresh
     _react.useEffect(() => {
+      // // Reset error values so errors will be removed,
+      // until errors occur again
+      setMoviesError(false);
+      setActorsError(false);
       // If user is logged in but movies haven't been set
-      if (Object.keys(user).length > 0 && movies.length === 0) {
+      if (user && movies.length === 0) {
         getActors(token);
         getMovies(token).then(data => getFavoritedMovies(token, data));
       }
       // If user is logged in but user info hasn't been set
-      if (token && !user.id) {
+      if (token && !user) {
         _axiosDefault.default.get(// eslint-disable-next-line max-len
         `https://my-flix-2021.herokuapp.com/users/${localStorage.getItem('user')}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         }).then(response => {
-          const loggedInUser = response.data;
-          setUserInfo({
-            birthDate: loggedInUser.birthDate,
-            favoriteActors: loggedInUser.favoriteActors,
-            favoriteMovies: loggedInUser.favoriteMovies,
-            email: loggedInUser.email,
-            id: localStorage.getItem('user'),
-            password: loggedInUser.password,
-            toWatchMovies: loggedInUser.toWatchMovies,
-            username: loggedInUser.username
-          });
+          setUserInfo(response.data);
         });
       }
     }, [user, movies]);
@@ -26643,9 +26637,9 @@ try {
         username: user.username
       };
       if (user.birthDate) userInfo['birthDate'] = user.birthDate;
-      setUserInfo(userInfo);
       localStorage.setItem('token', token);
       localStorage.setItem('user', user._id);
+      setUserInfo(user);
       getActors(token);
       getMovies(token).then(data => getFavoritedMovies(token, data));
     };
@@ -26666,7 +26660,7 @@ try {
         path: "/",
         render: () => {
           // If user is not logged in, show login view
-          if (Object.keys(user).length === 0) return (
+          if (!token) return (
             /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
               to: "/login"
             })
@@ -26763,7 +26757,7 @@ try {
         path: "/register",
         render: ({history}) => {
           // if user is already logged in redirect to home page
-          if (Object.keys(user).length > 0) return (
+          if (user) return (
             /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
               to: "/"
             })
@@ -26778,7 +26772,7 @@ try {
         path: "/login",
         render: ({history}) => {
           // if user is already logged in redirect to home page
-          if (Object.keys(user).length > 0) return (
+          if (user) return (
             /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
               to: "/"
             })
@@ -26787,15 +26781,6 @@ try {
             /*#__PURE__*/_reactDefault.default.createElement(_LoginViewLoginViewDefault.default, {
               history: history,
               onLoggedIn: onLoggedIn
-            })
-          );
-        }
-      }), /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Route, {
-        path: "/logout",
-        render: () => {
-          return (
-            /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Redirect, {
-              to: "/"
             })
           );
         }
@@ -26849,7 +26834,7 @@ try {
     setFeaturedMovies: _propTypesDefault.default.func.isRequired,
     setMovies: _propTypesDefault.default.func.isRequired,
     setUserInfo: _propTypesDefault.default.func.isRequired,
-    user: _propTypesDefault.default.object.isRequired
+    user: _propTypesDefault.default.object
   };
   const mapStateToProps = state => {
     return {
@@ -47603,7 +47588,7 @@ try {
     });
     // Add actor to user's favorite actors list
     const addToFavoritesList = () => {
-      _utilsHelpers.addToList(user.id, 'favorite-actors', actor._id, 'actor_id').then(() => {
+      _utilsHelpers.addToList(user._id, 'favorite-actors', actor._id, 'actor_id').then(() => {
         setFavorited(true);
         addUserFavoriteActor(actor._id);
       });
@@ -47712,8 +47697,8 @@ try {
     match: _propTypesDefault.default.object.isRequired,
     onBackClick: _propTypesDefault.default.func.isRequired,
     user: _propTypesDefault.default.shape({
-      id: _propTypesDefault.default.string.isRequired,
-      favoriteActors: _propTypesDefault.default.array.isRequired
+      _id: _propTypesDefault.default.string,
+      favoriteActors: _propTypesDefault.default.array
     })
   };
   const mapStateToProps = state => ({
@@ -50658,17 +50643,20 @@ try {
   var _actionsActions = require('../../actions/actions');
   require('./main-navbar.scss');
   var _s = $RefreshSig$();
-  const MainNavbar = ({onLogout, setActorsFilter, setMoviesFilter, user}) => {
+  const MainNavbar = ({onLogout, setActorsFilter, setActorsSortingFactor, setMoviesFilter, setMoviesListType, setMoviesSortingFactor, user}) => {
     _s();
-    const loggedIn = Object.keys(user).length > 0 ? true : false;
+    const loggedIn = localStorage.getItem('token') ? true : false;
     const [searchTerm, setSearchTerm] = _react.useState('');
-    const [isUserLoggedIn, setIsUserLoggedIn] = _react.useState(Object.keys(user).length > 0 ? true : false);
+    const [isUserLoggedIn, setIsUserLoggedIn] = _react.useState(loggedIn);
     const pathname = _reactRouterDom.useLocation().pathname, history = _reactRouterDom.useHistory();
     // Clear search term from searchbar when page changes
     _react.useEffect(() => {
       setSearchTerm('');
       setActorsFilter('');
       setMoviesFilter('');
+      setMoviesListType('all');
+      setActorsSortingFactor('none');
+      setMoviesSortingFactor('none');
     }, [pathname]);
     _react.useEffect(() => {
       setIsUserLoggedIn(loggedIn);
@@ -50746,15 +50734,18 @@ try {
       }, "About")))) : null)
     );
   };
-  _s(MainNavbar, "XGsulHnnJkGPEws1snt50e/bV/8=", false, function () {
+  _s(MainNavbar, "tosAn1NMlevRZl1QOroZEUuAOtU=", false, function () {
     return [_reactRouterDom.useLocation, _reactRouterDom.useHistory];
   });
   _c = MainNavbar;
   MainNavbar.propTypes = {
     onLogout: _propTypesDefault.default.func.isRequired,
     setActorsFilter: _propTypesDefault.default.func.isRequired,
+    setActorsSortingFactor: _propTypesDefault.default.func.isRequired,
     setMoviesFilter: _propTypesDefault.default.func.isRequired,
-    user: _propTypesDefault.default.object.isRequired
+    setMoviesListType: _propTypesDefault.default.func.isRequired,
+    setMoviesSortingFactor: _propTypesDefault.default.func.isRequired,
+    user: _propTypesDefault.default.object
   };
   const mapStateToProps = state => {
     return {
@@ -50763,7 +50754,10 @@ try {
   };
   exports.default = _reactRedux.connect(mapStateToProps, {
     setActorsFilter: _actionsActions.setActorsFilter,
-    setMoviesFilter: _actionsActions.setMoviesFilter
+    setActorsSortingFactor: _actionsActions.setActorsSortingFactor,
+    setMoviesFilter: _actionsActions.setMoviesFilter,
+    setMoviesListType: _actionsActions.setMoviesListType,
+    setMoviesSortingFactor: _actionsActions.setMoviesSortingFactor
   })(MainNavbar);
   var _c;
   $RefreshReg$(_c, "MainNavbar");
@@ -50838,7 +50832,7 @@ try {
     });
     // Add movie to user's favorite movies list
     const addToFavoritesList = () => {
-      _utilsHelpers.addToList(user.id, 'favorite-movies', movie._id, 'movie_id').then(() => {
+      _utilsHelpers.addToList(user._id, 'favorite-movies', movie._id, 'movie_id').then(() => {
         setFavorited(true);
         addUserFavoriteMovie(movie._id);
         let newFavoritedMovies;
@@ -50870,7 +50864,7 @@ try {
     };
     // Add movie to user's to-watch movies list
     const addToWatchList = () => {
-      _utilsHelpers.addToList(user.id, 'to-watch-movies', movie._id, 'movie_id').then(() => {
+      _utilsHelpers.addToList(user._id, 'to-watch-movies', movie._id, 'movie_id').then(() => {
         setWillWatch(true);
         addUserToWatchMovie(movie._id);
       });
@@ -50984,7 +50978,7 @@ try {
       }, /*#__PURE__*/_reactDefault.default.createElement("h3", null, "Stars of ", /*#__PURE__*/_reactDefault.default.createElement("i", null, movie.name), " "), /*#__PURE__*/_reactDefault.default.createElement("div", {
         className: "related-attributes-card-container"
       }, movieActors.map((actor, i) => {
-        const actorLink = `/actors/${actor.id}`;
+        const actorLink = `/actors/${actor._id}`;
         return (
           /*#__PURE__*/_reactDefault.default.createElement(_RelatedAttributeCardRelatedAttributeCardDefault.default, {
             key: i,
@@ -51024,9 +51018,9 @@ try {
     setSelectedMovie: _propTypesDefault.default.func.isRequired,
     setFavoritedMovies: _propTypesDefault.default.func.isRequired,
     user: _propTypesDefault.default.shape({
-      id: _propTypesDefault.default.string.isRequired,
-      favoriteMovies: _propTypesDefault.default.array.isRequired,
-      toWatchMovies: _propTypesDefault.default.array.isRequired
+      _id: _propTypesDefault.default.string,
+      favoriteMovies: _propTypesDefault.default.array,
+      toWatchMovies: _propTypesDefault.default.array
     })
   };
   const mapStateToProps = state => ({
@@ -51441,11 +51435,9 @@ try {
     // If user has not been set
     // stop execution of function
     // as is is needed for component to function properly
-    if (Object.keys(user).length === 0) return null;
-    // const history = useHistory();
+    if (!user) return null;
     // Make date appear in readable format (2021-05-01)
-    const convertBirthDate = () => {
-      const birthdate = user.birthDate;
+    const convertBirthDate = birthdate => {
       // If date hasn't been converted to readable format yet
       if (birthdate && birthdate.match('Z')) {
         return birthdate.slice(0, 10);
@@ -51455,7 +51447,7 @@ try {
       // If user doesn't have birthday info
       return '';
     };
-    const [birthDate, setBirthDate] = _react.useState(convertBirthDate());
+    const [birthDate, setBirthDate] = _react.useState(convertBirthDate(user.birthDate));
     const [email, setEmail] = _react.useState(user.email);
     const [username, setUsername] = _react.useState(user.username);
     const [newPassword1, setNewPassword1] = _react.useState('');
@@ -51472,7 +51464,7 @@ try {
     const deleteUser = () => {
       confirm('Are you sure you want to delete your account?') ? _axiosDefault.default({
         method: 'delete',
-        url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
+        url: `https://my-flix-2021.herokuapp.com/users/${user._id}`,
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -51515,7 +51507,7 @@ try {
       }
       _axiosDefault.default({
         method: 'patch',
-        url: `https://my-flix-2021.herokuapp.com/users/${user.id}`,
+        url: `https://my-flix-2021.herokuapp.com/users/${user._id}`,
         data: updatedUser,
         headers: {
           Authorization: `Bearer ${token}`
@@ -51675,21 +51667,21 @@ try {
         title: "Favorite Movies",
         listType: "favorite-movies",
         listTypeCamelCase: "favoriteMovies",
-        userId: user.id,
+        userId: user._id,
         itemIdType: "movie_id",
         token: token
       }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
         title: "To Watch Movies",
         listType: "to-watch-movies",
         listTypeCamelCase: "toWatchMovies",
-        userId: user.id,
+        userId: user._id,
         itemIdType: "movie_id",
         token: token
       }), /*#__PURE__*/_reactDefault.default.createElement(_UserListUserListDefault.default, {
         title: "Favorite Actors",
         listType: "favorite-actors",
         listTypeCamelCase: "favoriteActors",
-        userId: user.id,
+        userId: user._id,
         itemIdType: "actor_id",
         token: token
       }))), /*#__PURE__*/_reactDefault.default.createElement(_reactBootstrap.Row, {
@@ -51724,18 +51716,18 @@ try {
       }, "Your account could not be deleted. Please try again") : null))))
     );
   };
-  _s(ProfileView, "z9R5fKwifPnsLXBdUZzzKB3PPBA=");
+  _s(ProfileView, "sq0ujm2RLlUG7dUcP/6qo9bT9H8=");
   _c = ProfileView;
   ProfileView.propTypes = {
     history: _propTypesDefault.default.object.isRequired,
     onLogout: _propTypesDefault.default.func.isRequired,
     setUserInfo: _propTypesDefault.default.func.isRequired,
     user: _propTypesDefault.default.shape({
-      id: _propTypesDefault.default.string.isRequired,
+      _id: _propTypesDefault.default.string,
       birthDate: _propTypesDefault.default.string,
       email: _propTypesDefault.default.string,
-      password: _propTypesDefault.default.string.isRequired,
-      username: _propTypesDefault.default.string.isRequired
+      password: _propTypesDefault.default.string,
+      username: _propTypesDefault.default.string
     })
   };
   const mapStateToProps = state => {
@@ -51794,7 +51786,7 @@ try {
             return movie._id === movieId;
           });
           return {
-            id: matchingMovie._id,
+            _id: matchingMovie._id,
             description: matchingMovie.description,
             image: matchingMovie.image,
             name: matchingMovie.name
@@ -51806,7 +51798,7 @@ try {
             return actor._id === actorId;
           });
           return {
-            id: matchingActor._id,
+            _id: matchingActor._id,
             bio: matchingActor.bio,
             image: matchingActor.image,
             name: matchingActor.name
@@ -51821,7 +51813,7 @@ try {
       _axiosDefault.default({
         method: 'delete',
         // eslint-disable-next-line max-len
-        url: `https://my-flix-2021.herokuapp.com/users/${user.id}/${listType}/${itemId}`,
+        url: `https://my-flix-2021.herokuapp.com/users/${user._id}/${listType}/${itemId}`,
         data,
         headers: {
           Authorization: `Bearer ${token}`
@@ -51829,7 +51821,7 @@ try {
       }).then(() => {
         // Filter out movie that was removed from user's list
         const newList = list.filter(listItem => {
-          return listItem.id !== itemId;
+          return listItem._id !== itemId;
         });
         setList(newList);
         // If list is user's favorite movies list
@@ -51880,16 +51872,16 @@ try {
         return (
           /*#__PURE__*/_reactDefault.default.createElement("li", {
             className: "user-list-item",
-            key: item.id
+            key: item._id
           }, /*#__PURE__*/_reactDefault.default.createElement("div", {
             className: "details"
           }, /*#__PURE__*/_reactDefault.default.createElement("p", null, /*#__PURE__*/_reactDefault.default.createElement(_reactRouterDom.Link, {
-            to: `${listType.match(/movies/i) ? `/movies/${item.id}` : `/actors/${item.id}`}`
+            to: `${listType.match(/movies/i) ? `/movies/${item._id}` : `/actors/${item._id}`}`
           }, item.name)), /*#__PURE__*/_reactDefault.default.createElement("p", {
             className: "description"
           }, _utilsHelpers.createExcerpt(item.description ? item.description : item.bio), " …")), /*#__PURE__*/_reactDefault.default.createElement("svg", {
             /*Trash icon*/
-            onClick: () => removeListItem(item.id, item.name),
+            onClick: () => removeListItem(item._id, item.name),
             xmlns: "http://www.w3.org/2000/svg",
             width: "24",
             height: "24",
@@ -51929,7 +51921,7 @@ try {
     removeUserToWatchMovie: _propTypesDefault.default.func.isRequired,
     setFavoritedMovies: _propTypesDefault.default.func.isRequired,
     user: _propTypesDefault.default.shape({
-      id: _propTypesDefault.default.string.isRequired
+      _id: _propTypesDefault.default.string
     }),
     token: _propTypesDefault.default.string.isRequired,
     itemIdType: _propTypesDefault.default.string.isRequired
@@ -53062,7 +53054,7 @@ function selectedMovie(state = {}, action) {
   }
 }
 /************* -User Reducers ************/
-function user(state = {}, action) {
+function user(state = null, action) {
   switch (action.type) {
     case _actionsActions.ADD_USER_FAVORITE_ACTOR:
       return {
@@ -53080,7 +53072,7 @@ function user(state = {}, action) {
         toWatchMovies: [...state.toWatchMovies, action.movieId]
       };
     case _actionsActions.LOGOUT_USER:
-      return {};
+      return null;
     case _actionsActions.SET_USER_INFO:
       {
         const newState = {

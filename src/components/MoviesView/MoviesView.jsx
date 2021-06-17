@@ -24,7 +24,7 @@ const MoviesView = ({
     moviesListType,
     moviesSortingFactor,
 }) => {
-    
+   
     let content;
     // if there is an error loading the movies    
     if (error && errorType === 'error') {

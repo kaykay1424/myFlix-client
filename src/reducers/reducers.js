@@ -127,7 +127,7 @@ function selectedMovie(state = {}, action) {
 
 /************* -User Reducers ************/
 
-function user(state = {}, action) {
+function user(state = null, action) {
     switch(action.type) {
         case ADD_USER_FAVORITE_ACTOR:
             return {
@@ -145,7 +145,7 @@ function user(state = {}, action) {
                 toWatchMovies: [...state.toWatchMovies, action.movieId]
             };
         case LOGOUT_USER:
-            return {};    
+            return null;    
         case SET_USER_INFO: {
             
             const newState = {...state};

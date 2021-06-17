@@ -10,7 +10,7 @@
         }
     }
 }
-.view {
+.view[class*="col"] {
     background-color: $secondary-background-color;
     color: #fff;
     padding: 0;
