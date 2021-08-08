@@ -147,12 +147,13 @@ function user(state = null, action) {
         case LOGOUT_USER:
             return null;    
         case SET_USER_INFO: {
-            
-            const newState = {...state};
-            Object.keys(action.info).forEach(property =>
-                (newState[property] = action.info[property]));
-            
-            return newState;
+            const info = {...action.info};
+            // const newState = {...state};
+            // Object.keys(action.info).forEach(property =>
+            //     (newState[property] = action.info[property]));
+            if (Object.keys(info).indexOf('__v') > -1)
+				delete info["__v"];
+            return {...state, ...info};
         }
         case REMOVE_USER_FAVORITE_ACTOR: {
             const favoriteActors = [...state.favoriteActors]; 

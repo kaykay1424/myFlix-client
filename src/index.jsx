@@ -2,6 +2,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {
+    BrowserRouter as Router, 
+} from 'react-router-dom';
 
 /*********** -Redux ************/
 
@@ -22,7 +25,10 @@ class MyFlixApplication extends React.Component {
     render() {
         return (
             <Provider store={store}>
-                <MainView />    
+                <Router>
+                    <MainView />
+                </Router>
+                
             </Provider>
         );
     }

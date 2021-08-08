@@ -3,8 +3,10 @@
 $font-size: 13px;
 #main-navbar.navbar {
     align-items: flex-start;
-    background-color: $main-background-color;
     position: relative;
+    &.logged-in {
+        background-color: $main-background-color;
+    }
     &.logged-out {
         background-color: $logged-out-color;
         height: auto;

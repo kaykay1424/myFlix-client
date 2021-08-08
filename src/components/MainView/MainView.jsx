@@ -5,10 +5,10 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import {Container} from 'react-bootstrap';
 import {
-    BrowserRouter as Router, 
     Redirect, 
     Route,
-    Switch
+    Switch,
+    useHistory
 } from 'react-router-dom';
 import {connect} from 'react-redux';
 
@@ -51,7 +51,8 @@ const MainView = ({
     const [moviesError, setMoviesError] = useState(false);
 
     const token = localStorage.getItem('token');
-    
+    const history = useHistory();
+
     // Set necessary info after page refresh
     useEffect(() => { 
         // // Reset error values so errors will be removed, 
@@ -66,14 +67,24 @@ const MainView = ({
         }
         // If user is logged in but user info hasn't been set
         if (token && !user) {
+            const userId = localStorage.getItem('user');
             axios.get(
                 // eslint-disable-next-line max-len
-                `https://my-flix-2021.herokuapp.com/users/${localStorage.getItem('user')}`,
+                `https://my-flix-2021.herokuapp.com/users/${userId}`,
                 {
                     headers: {Authorization: `Bearer ${token}`}
                 }).then(response => {
-                setUserInfo(response.data);
+                setUserInfo({
+                    ...response.data,
+                    _id: userId
+                });
+            }).catch(error => {
+                // If token is invalid
+                if (error.response.status === 401) {
+                    onLogout('/login');
+                } 
             });
+            
         }
     },[user, movies]);
 
@@ -173,35 +184,25 @@ const MainView = ({
     // Set user info and get lists of movies/actors 
     // after user is logged in
     const onLoggedIn = ({token, user}) => {  
-        const userInfo = {
-            favoriteActors: user.favoriteActors,
-            favoriteMovies: user.favoriteMovies,
-            email: user.email,
-            id: user._id,
-            password: user.password,
-            toWatchMovies: user.toWatchMovies,
-            username: user.username
-        };
-        if (user.birthDate) 
-            userInfo['birthDate'] = user.birthDate;
-        
         localStorage.setItem('token', token);
         localStorage.setItem('user', user._id);
         setUserInfo(user);
 
         getActors(token);
         getMovies(token).then((data) => getFavoritedMovies(token, data));
+        history.push('/');
     };
 
     // Remove user info once user is logged out
-    const onLogout = () => {
-        logoutUser();
+    const onLogout = (redirectPath) => {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
+        logoutUser();
+        history.push(redirectPath);
     };
 
     return (
-        <Router>    
+        <>    
             <MainNavbar onLogout={onLogout} /> 
             <Container className={`my-flix`} fluid> 
                 <Switch>            
@@ -320,7 +321,7 @@ const MainView = ({
                     }} />
                 </Switch>
             </Container>
-        </Router>            
+        </>         
     );                      
 };
 

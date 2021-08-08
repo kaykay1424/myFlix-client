@@ -57,3 +57,58 @@ export const removeFocusedClass = (e) => {
     element.nextSibling.firstChild.firstChild.classList.remove('focused');
 };
 
+/********** Form Validation **********/
+// Make date appear in readable format (2021-05-01)
+export const convertBirthDate = (birthdate) => {
+    // If date hasn't been converted to readable format yet         
+    if (
+        birthdate 
+		&& birthdate.match('Z')) { 
+        return birthdate.slice(0,10);
+        // If date has been converted to readable format yet         
+    } else if (birthdate 
+		&& !birthdate.match('Z')) {
+        return birthdate;
+    }
+    // If user doesn't have birthday info
+    return '';
+};
+
+export const validateBirthDate = (birthdate) => {   
+    const regex = /\d\d\d\d-\d\d-\d\d/; // valid date format
+
+    // If birthday is not valid
+    if (!birthdate.match(regex)) return false; 
+    else return true;   
+};
+
+export const validatePasswords = (password1, password2) => {
+    // If both passwords don't match
+    return (password1 !== '' && (password1 !== password2))
+        ? false
+        : true;
+};
+
+export const validateUsername = (username) => {
+    const errors = {
+        length: false,
+        type: false
+    };
+    
+    // Check that username is at least 6 characters
+    // and only contains alphanumeric characters
+    if (username.length < 6) errors.length = true;     
+    const nonAlphaCharacters = username.match(/\W/g);
+            
+    // If there are non alphabetical characters 
+    // make sure that they are only numbers
+    if (nonAlphaCharacters) {
+        for (let i = 0; i < nonAlphaCharacters.length; i++) {
+            if (!nonAlphaCharacters[i].match(/\d/))
+                errors.type = true;
+            break;
+        }
+    } 
+
+    return errors;
+};

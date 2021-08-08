@@ -34,6 +34,13 @@ const ActorView = ({
             return actor._id === match.params.id;
         }); 
 
+    // Determine if actor has been favorited 
+    // or is already in user's favorite actors list
+    const isActorFavorited = favorited 
+    || (user.favoriteActors 
+        && user.favoriteActors.indexOf(
+            actor._id) > -1);
+
     // Add actor to user's favorite actors list
     const addToFavoritesList = () => {
         addToList(
@@ -89,7 +96,10 @@ const ActorView = ({
                         {actor.name}
                         <div className="user-list-icons">
                             <svg /* Heart icon */
-                                onClick={() => addToFavoritesList()}
+                                onClick={() => !isActorFavorited 
+                                    ? addToFavoritesList()
+                                    : null
+                                }
                                 xmlns="http://www.w3.org/2000/svg" 
                                 width="24" 
                                 height="24" 
@@ -99,11 +109,8 @@ const ActorView = ({
                                 strokeWidth="2" 
                                 strokeLinecap="round" 
                                 strokeLinejoin="round" 
-                                className={`feather feather-heart ${favorited 
-                                || (user.favoriteActors 
-                                    && user.favoriteActors.indexOf(
-                                        actor._id) > -1) 
-                                    ? 'added-to-list': ''}`
+                                className={`feather feather-heart 
+                                    ${isActorFavorited ? 'added-to-list': ''}`
                                 }                                
                             >
                                 <title>

@@ -11,7 +11,7 @@ import {addFocusedClass, removeFocusedClass} from '../../utils/helpers';
 
 import './login-view.scss';
 
-const LoginView = ({history, onLoggedIn}) => {
+const LoginView = ({onLoggedIn}) => {
     const [loginError, setLoginError] = useState(false);
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
@@ -28,8 +28,6 @@ const LoginView = ({history, onLoggedIn}) => {
         })
             .then(response => { 
                 onLoggedIn(response.data);               
-                history.push('/');
-                
             }).catch(() => {
                 setLoginError(true);
             });

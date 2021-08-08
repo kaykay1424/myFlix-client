@@ -7,6 +7,12 @@ import {Button, Col, Form, FormControl, Row} from 'react-bootstrap';
 import {connect} from 'react-redux';
 
 import {
+    convertBirthDate,
+    validateBirthDate,
+    validatePasswords,
+    validateUsername
+} from '../../utils/helpers';
+import {
     logoutUser,
     setUserInfo
 } from '../../actions/actions';
@@ -15,35 +21,13 @@ import UserList from '../UserList/UserList';
 
 import './profile-view.scss';
 
-const ProfileView = ({history, onLogout, setUserInfo, user}) => {
+const ProfileView = ({onLogout, setUserInfo, user}) => {
     // If user has not been set
     // stop execution of function
     // as is is needed for component to function properly
     if (!user)
         return null;
  
-    // Make date appear in readable format (2021-05-01)
-    const convertBirthDate = (birthdate) => {
-        // If date hasn't been converted to readable format yet         
-        if (
-            birthdate 
-            && birthdate.match('Z')) { 
-            return birthdate.slice(0,10);
-        // If date has been converted to readable format yet         
-        } else if (birthdate 
-            && !birthdate.match('Z')) {
-            return birthdate;
-        }
-        // If user doesn't have birthday info
-        return '';
-    };
-
-    const [birthDate, setBirthDate] = useState(
-        convertBirthDate(user.birthDate));    
-    const [email, setEmail] = useState(user.email);
-    const [username, setUsername] = useState(user.username);
-    const [newPassword1, setNewPassword1] = useState('');
-    const [newPassword2, setNewPassword2] = useState('');
     const [successfulUpdate, setSuccessfulUpdate] = useState(false);
     const [successfulUserRemoval, setSuccessfulUserRemoval] = useState(false);
 
@@ -54,8 +38,7 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
     const [usernameLengthError, setUsernameLengthError] = useState(false);
     const [usernameTypeError, setUsernameTypeError] = useState(false);
 
-    const oldPassword = user.password,
-        token = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
 
     const deleteUser = () => {
         confirm('Are you sure you want to delete your account?')
@@ -68,8 +51,7 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
                 setSuccessfulUserRemoval(true);
                 setTimeout(() => {
                     setSuccessfulUpdate(false);
-                    onLogout(); 
-                    history.push('/register');
+                    onLogout('/register'); 
                 }, 3000);
             }).catch(() => {
                 setDeleteUserError(true);
@@ -81,35 +63,34 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
         e.preventDefault();
         // Reset error values so errors will be removed, 
         // until the errors occur again
-        setBirthDateError(false);
         setDeleteUserError(false);
-        setPasswordMatchError(false);
         setUpdateProfileError(false);
-        setUsernameLengthError(false);
-        setUsernameTypeError(false);
 
+        // If there are errors stop submitting form
+        if (
+            passwordMatchError 
+            || usernameLengthError 
+            || usernameTypeError 
+            || birthDateError
+        ) {
+            return;
+        }
+
+        const birthDate = e.target[1].value;
+        const newPassword1 = e.target[3].value;
+        const newPassword2 = e.target[4].value;
         const updatedUser = {
-            email,
-            password: oldPassword,
-            username            
+            email: e.target[2].value,
+            password: newPassword1 !== '' 
+            || newPassword2 !== '' 
+                ? newPassword1 : user.password,
+            username: e.target[0].value            
         };
 
-        // Make sure passwords match
-        if ((newPassword1 !== '' || newPassword2 !== '') 
-            && (newPassword1 !== newPassword2)) {
-            setPasswordMatchError(false);
-            return;
-        } else if ((newPassword1 !== '' || newPassword2 !== '') 
-            && (newPassword1 === newPassword2))
-            updatedUser['password'] = newPassword1;
-
-        // Check if birthDate was entered and if it is valid
+        // Check if birthDate was entered
         // if it is add it to user object       
-        if (birthDate !== '') {
-            if (!validateBirthDate()) return;
-            updatedUser['birthDate'] = birthDate;
-        }
-            
+        if (birthDate !== '') updatedUser['birthDate'] = birthDate;
+          
         axios({
             method: 'patch',
             url: `https://my-flix-2021.herokuapp.com/users/${user._id}`,
@@ -124,8 +105,7 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
                     setSuccessfulUpdate(false);
                     // If user updates their password, log them out
                     if (newPassword1 !== '') {
-                        onLogout();     
-                        history.push('/login'); 
+                        onLogout('/login');     
                     }
                 }, 3000);            
             }, (err) => {
@@ -133,65 +113,52 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
             });
     };
 
-    const onChangeBirthDate = (e) => {
-        setBirthDate(e.target.value);
-        validateBirthDate(e.target.value);
-    };
-
-    const onChangeNewPassword1 = (e) => {
-        setNewPassword1(e.target.value);
-        setPasswordMatchError(false);
-        // If both new passwords don't match
-        if (newPassword2 !== '' && (e.target.value !== newPassword2)) 
-            setPasswordMatchError(true);
-    };
-
-    const onChangeNewPassword2 = (e) => {
-        setNewPassword2(e.target.value);
-        setPasswordMatchError(false);
-        // If both new passwords don't match
-        if (newPassword1 !== '' && (newPassword1 !== e.target.value)) 
-            setPasswordMatchError(true);
-    };
-
-    const onChangeUsername = (e) => {
-        const value = e.target.value;
-        setUsername(value);
-        setUsernameLengthError(false);
-        setUsernameTypeError(false);
-        // Check that username is at least 6 characters
-        // and only contains alphanumeric characters
-        if (value  !== '') {
-            if (value.length < 6) 
-                setUsernameLengthError(true);
-
-            const nonAlphaCharacters = value.match(/\W/g);
-            
-            // If there are non alphabetical characters 
-            // make sure that they are only numbers
-            if (nonAlphaCharacters) {
-                for (let i = 0; i < nonAlphaCharacters.length; i++) {
-                    if (!nonAlphaCharacters[i].match(/\d/))
-                        setUsernameTypeError(true);
-                    return;
-                }
+    const onChangeBirthDate = (value) => {
+        if (value !== '') {
+            const isValid = validateBirthDate(value);
+            if (isValid) {
+                if (birthDateError) 
+                    setBirthDateError(false);
+            } else {
+                if (!birthDateError) 
+                    setBirthDateError(`${value} is not a valid date. 
+                    Please enter a date in this format: yyyy-mm-dd`
+                    );
             }
         }
     };
 
-    const validateBirthDate = (birthdate=birthDate) => {        
-        const regex = /\d\d\d\d-\d\d-\d\d/; // valid date format
+    const onChangePassword = (password1, password2) => {
+        const isValid = validatePasswords(
+            password1, 
+            password2);
 
-        // If birthday is not valid
-        if (!birthdate.match(regex)) {            
-            setBirthDateError(`${birthdate} is not a valid date. 
-                Please enter a date in this format: yyyy-mm-dd`
-            );
-            return false;
-        // If birthday is valid
-        } else if (birthdate && birthdate.match(regex)) {
-            setBirthDateError(false);
-            return true;
+        if (isValid) {
+            if (passwordMatchError) 
+                setPasswordMatchError(false);
+        } else {
+            if (!passwordMatchError) 
+                setPasswordMatchError(true); 
+        }
+    };
+
+    const onChangeUsername = (value) => {
+        // Check that username is at least 6 characters
+        // and only contains alphanumeric characters
+        if (value  !== '') {
+            const errors = validateUsername(value);
+            
+            if (errors.length) {
+                if (!usernameLengthError) setUsernameLengthError(true);
+            } else {
+                if (usernameLengthError) setUsernameLengthError(false);
+            }
+
+            if (errors.type) {
+                if (!usernameTypeError) setUsernameTypeError(true);
+            } else {
+                if (usernameTypeError) setUsernameTypeError(false);
+            }
         }
     };
 
@@ -224,8 +191,9 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
                                     id="username"
                                     type="text" 
                                     placeholder="Enter your username" 
-                                    onChange={(e) => onChangeUsername(e)} 
-                                    value={username} 
+                                    onChange={(e) => 
+                                        onChangeUsername(e.target.value)} 
+                                    defaultValue={user.username} 
                                     required
                                 />      
                             </Form.Group>
@@ -242,8 +210,10 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
                                     }
                                     type="text" 
                                     placeholder="2021-05-10" 
-                                    onChange={(e) => onChangeBirthDate(e)} 
-                                    value={birthDate} 
+                                    onChange={(e) => 
+                                        onChangeBirthDate(e.target.value)} 
+                                    defaultValue={user.birthDate 
+                                        ? convertBirthDate(user.birthDate) : ''}
                                 />
                             </Form.Group>
                             <Form.Group>
@@ -251,28 +221,11 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
                                 <FormControl 
                                     id="email"
                                     type="email" 
-                                    placeholder="me@gmail.com" 
-                                    onChange={(e) => setEmail(e.target.value)} 
-                                    value={email} 
+                                    placeholder="me@gmail.com"   
+                                    defaultValue={user.email} 
                                     required
                                 />   
-                            </Form.Group>
-                            <Form.Group>
-                                <Form.Label 
-                                    className="form-label"
-                                >
-                                Old Password
-                                </Form.Label> 
-                                <FormControl 
-                                    id="oldPassword"
-                                    className="input-container" 
-                                    type="password" 
-                                    onChange={(e) => onChangeNewPassword1(e)} 
-                                    placeholder="Enter your password"
-                                    value={oldPassword}
-                                    disabled 
-                                />
-                            </Form.Group>
+                            </Form.Group>        
                             <Form.Row>
                                 <Col>
                                     <Form.Group>
@@ -291,12 +244,16 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
                                                 }`
                                             } 
                                             onChange={
-                                                (e) => onChangeNewPassword1(e)
+                                                (e) => onChangePassword(
+                                                    e.target.parentElement.
+                                                        parentElement
+                                                        .nextSibling.
+                                                        lastChild.
+                                                        lastChild.value, 
+                                                    e.target.value)
                                             } 
                                             placeholder="
-                                            Enter your password again"
-                                            value={newPassword1}
-                                         
+                                            Enter your new password"
                                         />                            
                                     </Form.Group>
                                 </Col>
@@ -317,12 +274,16 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
                                                 }`
                                             } 
                                             onChange={
-                                                (e) => onChangeNewPassword2(e)
+                                                (e) => onChangePassword(
+                                                    e.target.parentElement.
+                                                        parentElement.
+                                                        previousSibling.
+                                                        lastChild.
+                                                        lastChild.value, 
+                                                    e.target.value)
                                             } 
                                             placeholder="
                                             Enter your password again"
-                                            value={newPassword2}
-                                         
                                         />                            
                                     </Form.Group>
                                 </Col>
@@ -445,7 +406,6 @@ const ProfileView = ({history, onLogout, setUserInfo, user}) => {
 };
 
 ProfileView.propTypes = {
-    history: PropTypes.object.isRequired,
     onLogout: PropTypes.func.isRequired,
     setUserInfo: PropTypes.func.isRequired,
     user: PropTypes.shape({

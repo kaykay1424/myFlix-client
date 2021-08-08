@@ -201,7 +201,7 @@ const UserList = ({
                 })
                     : <p>
                     Add some <Link to={`${
-                            listType === 'movies' 
+                            listType.match('movies') 
                                 ? '/'
                                 : '/actors'}`}
                         >

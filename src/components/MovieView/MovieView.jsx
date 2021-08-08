@@ -78,7 +78,20 @@ const MovieView = ({
             image: matchingActor.image
         };
     });
-    
+
+    // Determine if movie has been favorited 
+    // or is already in user's favorite movies list
+    const isMovieFavorited = favorited 
+    || (user.favoriteMovies 
+        && user.favoriteMovies.indexOf(
+            movie._id) > -1),
+        // Determine if movie has been bookmarked 
+        // or is already in user's will watch list
+        isMovieBookmarked = willWatch 
+    || (user.toWatchMovies 
+        && 
+        user.toWatchMovies.indexOf(movie._id) > -1);
+
     // Add movie to user's favorite movies list
     const addToFavoritesList = () => {
         addToList(
@@ -177,7 +190,10 @@ const MovieView = ({
                     
                         <div className="user-list-icons">
                             <svg /* Heart icon */
-                                onClick={() => addToFavoritesList()}
+                                onClick={() => !isMovieFavorited 
+                                    ? addToFavoritesList()
+                                    : null
+                                }
                                 xmlns="http://www.w3.org/2000/svg" 
                                 width="24" 
                                 height="24" 
@@ -187,11 +203,8 @@ const MovieView = ({
                                 strokeWidth="2" 
                                 strokeLinecap="round" 
                                 strokeLinejoin="round" 
-                                className={`feather feather-heart ${favorited 
-                                || (user.favoriteMovies 
-                                    && user.favoriteMovies.indexOf(
-                                        movie._id) > -1) 
-                                    ? 'added-to-list': ''}`
+                                className={`feather feather-heart 
+                                    ${isMovieFavorited ? 'added-to-list': ''}`
                                 }
                             >
                                 <title>
@@ -209,7 +222,10 @@ const MovieView = ({
                                 </path>
                             </svg>
                             <svg /* Bookmark icon */
-                                onClick={() => addToWatchList()}
+                                onClick={() => !isMovieBookmarked 
+                                    ? addToWatchList() 
+                                    : null
+                                }
                                 xmlns="http://www.w3.org/2000/svg" 
                                 width="24" 
                                 height="24" 
@@ -220,10 +236,7 @@ const MovieView = ({
                                 strokeLinecap="round" 
                                 strokeLinejoin="round" 
                                 className={`feather feather-bookmark 
-                            ${willWatch 
-                                || (user.toWatchMovies 
-                                    && 
-                                    user.toWatchMovies.indexOf(movie._id) > -1) 
+                            ${isMovieBookmarked
             ? 'added-to-list': ''}`
                                 }
                             >

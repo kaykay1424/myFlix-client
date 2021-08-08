@@ -5,17 +5,17 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import {Button, Col, Form, FormControl, InputGroup, Row} from 'react-bootstrap';
 
-import {addFocusedClass, removeFocusedClass} from '../../utils/helpers';
+import {
+    addFocusedClass, 
+    removeFocusedClass,
+    validateBirthDate,
+    validatePasswords,
+    validateUsername
+} from '../../utils/helpers';
 
 import './registration-view.scss';
 
 const RegistrationView = ({history}) => {
-    const [birthDate, setBirthDate] = useState('');
-    const [email, setEmail] = useState('');
-    const [password1, setPassword1] = useState('');
-    const [password2, setPassword2] = useState('');
-    const [username, setUsername] = useState('');
-
     const [birthDateError, setBirthDateError] = useState(false);
     const [passwordMatchError, setPasswordMatchError] = useState(false);
     const [usernameLengthError, setUsernameLengthError] = useState(false);
@@ -26,30 +26,30 @@ const RegistrationView = ({history}) => {
         e.preventDefault();
         // Reset error values so errors will be removed, 
         // until the errors occur again
-        setBirthDateError(false);
-        setPasswordMatchError(false);
-        setUsernameLengthError(false);
-        setUsernameTypeError(false);
         setRegistrationError(false);
 
-        // Make sure passwords match
-        if (password1 !== password2) {
-            setPasswordMatchError(false);
+        // If there are errors stop submitting form
+        if (
+            passwordMatchError 
+            || usernameLengthError 
+            || usernameTypeError 
+            || birthDateError
+        ) {
             return;
         }
 
-        const newUser = {
-            password: password1,
-            email,
-            username            
-        };
+        const birthDate = e.target[1].value,
+            password1 = e.target[3].value,
+            newUser = {
+                email: e.target[2].value,
+                password: password1,
+                username: e.target[0].value            
+            };
 
-        // Check if birthDate was entered and if it is valid
-        // if it is add it to newUser object       
-        if (birthDate !== '') {
-            if (!validateBirthDate()) return;
-            newUser['birthDate'] = birthDate;
-        }
+        // Check if birthDate was entered
+        // if it is add it to user object       
+        if (birthDate !== '') newUser['birthDate'] = birthDate;
+        
  
         axios.post('https://my-flix-2021.herokuapp.com/users', newUser)
             .then(() => {
@@ -59,64 +59,53 @@ const RegistrationView = ({history}) => {
             });
     };
 
-    const onChangeBirthDate = (e) => {
-        setBirthDate(e.target.value);
-        validateBirthDate(e.target.value);
-    };
-
-    const onChangePassword1 = (e) => {
-        const value = e.target.value;
-        setPassword1(value);
-        setPasswordMatchError(false);
-        setUsernameLengthError(false);
-        setUsernameTypeError(false);
-        if (password2 !== '' && (value  !== password2)) 
-            setPasswordMatchError(true);
-    };
-
-    const onChangePassword2 = (e) => {
-        setPassword2(e.target.value);
-        setPasswordMatchError(false);
-        if (password1 !== '' && (password1 !== e.target.value)) 
-            setPasswordMatchError(true);
-    };
-
-    const onChangeUsername = (e) => {
-        const value = e.target.value;
-        setUsername(value);
-        setUsernameLengthError(false);
-        setUsernameTypeError(false);
-        if (value  !== '') {
-            if (value .length < 6) 
-                setUsernameLengthError(true);
-
-            const nonAlphaCharacters = value.match(/\W/g);
-            // If there are non alphabetical characters 
-            // make sure that they are only numbers
-            // Username should only contain alphanumeric characters
-            if (nonAlphaCharacters) {
-                for (let i = 0; i < nonAlphaCharacters.length; i++) {
-                    if (!nonAlphaCharacters[i].match(/\d/))
-                        setUsernameTypeError(true);
-                    return;
-                }
+    const onChangeBirthDate = (value) => {
+        if (value !== '') {
+            const isValid = validateBirthDate(value);
+            if (isValid) {
+                if (birthDateError) 
+                    setBirthDateError(false);
+            } else {
+                if (!birthDateError) 
+                    setBirthDateError(`${value} is not a valid date. 
+                    Please enter a date in this format: yyyy-mm-dd`
+                    );
             }
+        }
+        
+    };
+
+    const onChangePassword = (password1, password2) => {
+
+        const isValid = validatePasswords(
+            password1, 
+            password2);
+        if (isValid) {
+            if (passwordMatchError) 
+                setPasswordMatchError(false);
+        } else {
+            if (!passwordMatchError) 
+                setPasswordMatchError(true); 
         }
     };
 
-    const validateBirthDate = (birthdate=birthDate) => {   
-        const regex = /\d\d\d\d-\d\d-\d\d/; // valid date format
+    const onChangeUsername = (value) => {        
+        // Check that username is at least 6 characters
+        // and only contains alphanumeric characters
+        if (value  !== '') {
+            const errors = validateUsername(value);
+            
+            if (errors.length) {
+                if (!usernameLengthError) setUsernameLengthError(true);
+            } else {
+                if (usernameLengthError) setUsernameLengthError(false);
+            }
 
-        // If birthday is not valid
-        if (!birthdate.match(regex)) {            
-            setBirthDateError(`${birthdate} is not a valid date. 
-                Please enter a date in this format: yyyy-mm-dd`
-            );
-            return false;
-        // If birthday is valid
-        } else if (birthdate && birthdate.match(regex)) {
-            setBirthDateError(false);
-            return true;
+            if (errors.type) {
+                if (!usernameTypeError) setUsernameTypeError(true);
+            } else {
+                if (usernameTypeError) setUsernameTypeError(false);
+            }
         }
     };
 
@@ -145,8 +134,7 @@ const RegistrationView = ({history}) => {
                             onFocus={
                                 (e) => addFocusedClass(e)
                             }
-                            onChange={(e) => onChangeUsername(e)} 
-                            value={username} 
+                            onChange={(e) => onChangeUsername(e.target.value)}  
                             required
                         />
                         <InputGroup.Append>
@@ -191,8 +179,7 @@ const RegistrationView = ({history}) => {
                             onFocus={
                                 (e) => addFocusedClass(e)
                             } 
-                            onChange={(e) => onChangeBirthDate(e)} 
-                            value={birthDate} 
+                            onChange={(e) => onChangeBirthDate(e.target.value)} 
                         />
                         <InputGroup.Append>
                             <InputGroup.Text>
@@ -237,8 +224,6 @@ const RegistrationView = ({history}) => {
                             onFocus={
                                 (e) => addFocusedClass(e)
                             }
-                            onChange={(e) => setEmail(e.target.value)} 
-                            value={email} 
                             required
                         />
                         <InputGroup.Append>
@@ -288,9 +273,14 @@ const RegistrationView = ({history}) => {
                             onFocus={
                                 (e) => addFocusedClass(e)
                             }
-                            onChange={(e) => onChangePassword1(e)} 
+                            onChange={(e) =>  
+                                onChangePassword(
+                                    e.target.parentElement.
+                                        parentElement.nextSibling.
+                                        lastChild.firstChild.value, 
+                                    e.target.value
+                                )} 
                             placeholder="Enter your password"
-                            value={password1}
                             required 
                         />
                         <InputGroup.Append>
@@ -343,9 +333,14 @@ const RegistrationView = ({history}) => {
                             onFocus={
                                 (e) => addFocusedClass(e)
                             }
-                            onChange={(e) => onChangePassword2(e)} 
+                            onChange={(e) => {
+                                onChangePassword(
+                                    e.target.parentElement.
+                                        parentElement.previousSibling.
+                                        lastChild.firstChild.value, 
+                                    e.target.value);
+                            }} 
                             placeholder="Enter your password again"
-                            value={password2}
                             required 
                         />
                         <InputGroup.Append>

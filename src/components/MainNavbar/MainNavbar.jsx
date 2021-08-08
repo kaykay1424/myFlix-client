@@ -3,7 +3,7 @@
 import React, {useEffect, useState} from 'react';
 import {Form, FormControl,  InputGroup, Nav,Navbar} from 'react-bootstrap';
 import PropTypes from 'prop-types';
-import {Link, useLocation, useHistory} from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import {connect} from 'react-redux';
 
 import {
@@ -25,14 +25,13 @@ const MainNavbar = ({
     setMoviesSortingFactor,
     user
 }) => {
-    const loggedIn = localStorage.getItem('token') ? true : false;
+    const loggedIn = user ? true : false;
     
     const [searchTerm, setSearchTerm] = useState('');
     const [isUserLoggedIn, setIsUserLoggedIn] = useState(loggedIn);
     
-    const  pathname = useLocation().pathname,
-        history = useHistory();
-
+    const  pathname = useLocation().pathname;
+ 
     // Clear search term from searchbar when page changes
     useEffect(() => {
         setSearchTerm('');
@@ -133,8 +132,7 @@ const MainNavbar = ({
                             <Navbar.Text 
                                 className="link nav-link logout"
                                 onClick={() =>  {
-                                    onLogout();
-                                    history.push('/login');
+                                    onLogout('/login');
                                 }}
                             >
                                 Logout
