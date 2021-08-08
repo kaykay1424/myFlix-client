@@ -3,7 +3,6 @@
   "name": "myflix-client",
   "version": "1.0.0",
   "description": "myFlix is a single-page, responsive app built with React that allows users access to information about different movies, actors, directors, and genres through routing, user interactions, and user interfaces.",
-  "main": "src/index.html",
   "babel": {
     "presets": [
       "@babel/preset-react"
@@ -12,8 +11,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "parcel src/index.html",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "predeploy": "rm -rf dist && parcel build src/index.html --dist-dir ./dist --public-url ./",
+    "deploy": "gh-pages -d dist"
   },
   "repository": {
     "type": "git",

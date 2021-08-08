@@ -2,9 +2,11 @@ import React from 'react';
 import {Col, Row} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
 
+import './about-view.scss';
+
 const AboutView = () => {
     return (
-        <Row className="justify-content-center">
+        <Row id="AboutView" className="justify-content-center">
             <Col className="view" sm={8} md={5}>
                 <h1 className="text-center">Welcome to myFlix!</h1>
                 <p className="description">
