@@ -1,4 +1,5 @@
 {
+  "homepage": "https://kaykay1424.github.io/my-flix",
   "name": "myflix-client",
   "version": "1.0.0",
   "description": "myFlix is a single-page, responsive app built with React that allows users access to information about different movies, actors, directors, and genres through routing, user interactions, and user interfaces.",
@@ -10,7 +11,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "parcel src/index.html"
+    "start": "parcel src/index.html",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "repository": {
     "type": "git",
@@ -39,6 +42,7 @@
     "@babel/preset-react": "7.13.13",
     "@parcel/transformer-sass": "2.0.0-beta.2",
     "eslint": "7.26.0",
-    "eslint-plugin-react": "7.23.2"
+    "eslint-plugin-react": "7.23.2",
+    "gh-pages": "3.2.3"
   }
 }
