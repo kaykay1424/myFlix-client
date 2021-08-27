@@ -1,5 +1,5 @@
 # myFlix 
-[myFlix](https://kaykay1424.github.io/my-flix) is a single-page, responsive app built with React that allows users access to information about movies, actors, directors, and genres through routing, user interactions, and user interfaces.
+[myFlix](https://kaykay1424.github.io/my-flix-client) is a single-page, responsive app built with React that allows users access to information about movies, actors, directors, and genres through routing, user interactions, and user interfaces.
 
 ## How to Get Started
 1. Clone the repo or download the zip file
@@ -12,8 +12,7 @@
 - JavaScript
 - React
 - Redux
+- [myFlix API](https://github.com/kaykay1424/movie-api)
 
-## API
-This app uses the [myFlix API](https://github.com/kaykay1424/movie-api)
 
 
