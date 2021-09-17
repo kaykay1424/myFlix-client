@@ -212,7 +212,7 @@ const MainView = ({
                         path={`${rootPath}/movies`} render={() => {                    
                         // If user is not logged in, show login view
                             if (!token) 
-                                return <Redirect to="/login" />;
+                                return <Redirect to={`${rootPath}/login`} />;
 
                             return <MoviesView 
                                 error={moviesError.message || false} 
@@ -224,7 +224,7 @@ const MainView = ({
                         render={({history, match}) => {
                         // If user is not logged in, show login view
                             if (!token) 
-                                return <Redirect to="/login" />;
+                                return <Redirect to={`${rootPath}/login`} />;
                     
                             return <MovieView 
                                 match={match} 
@@ -237,7 +237,7 @@ const MainView = ({
                         path={`${rootPath}/actors`} render={() => {
                             // If user is not logged in, show login view
                             if (!token) 
-                                return <Redirect to="/login" />;
+                                return <Redirect to={`${rootPath}/login`} />;
                     
                             return <ActorsView 
                                 error={actorsError.message || false} 
@@ -249,7 +249,7 @@ const MainView = ({
                         render={({history, match}) => {
                             // If user is not logged in, show login view
                             if (!token) 
-                                return <Redirect to="/login" />;
+                                return <Redirect to={`${rootPath}/login`} />;
 
                             return (
                                 <ActorView  
@@ -264,7 +264,7 @@ const MainView = ({
                         render={({history, match}) => {
                             // If user is not logged in, show login view
                             if (!token) 
-                                return <Redirect to="/login" />;
+                                return <Redirect to={`${rootPath}/login`} />;
                     
                             return (                         
                                 <GenreView 
@@ -279,7 +279,7 @@ const MainView = ({
                         render={({history, match}) => {
                             // If user is not logged in, show login view
                             if (!token) 
-                                return <Redirect to="/login" />;
+                                return <Redirect to={`${rootPath}/login`} />;
                     
                             return (
                                 <DirectorView  
@@ -294,7 +294,7 @@ const MainView = ({
                             // if user is already logged 
                             // in redirect to home page
                             if (user) 
-                                return <Redirect to="/" />;
+                                return <Redirect to={`${rootPath}/movies`} />;
 
                             return (<RegistrationView history={history} />);
                         }} />
@@ -302,7 +302,7 @@ const MainView = ({
                     <Route path={`${rootPath}/login`} render={({history}) => {
                     // if user is already logged in redirect to home page
                         if (user) 
-                            return <Redirect to="/" />;
+                            return <Redirect to={`${rootPath}/movies`} />;
 
                         return <LoginView 
                             history={history} 
@@ -313,7 +313,7 @@ const MainView = ({
                     <Route path={`${rootPath}/profile`} render={({history}) => {
                     // If user is not logged in, show login view
                         if (!token) 
-                            return <Redirect to="/login" />;
+                            return <Redirect to={`${rootPath}/login`} />;
                         return (
                             <ProfileView 
                                 history={history}
@@ -324,7 +324,7 @@ const MainView = ({
 
                     <Route path={`${rootPath}/about`} render={() => {
                         if (!token) 
-                            return <Redirect to="/login" />;
+                            return <Redirect to={`${rootPath}/login`} />;
                         return <AboutView />;
                     }} />
 

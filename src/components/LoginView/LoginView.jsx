@@ -7,7 +7,7 @@ import axios from 'axios';
 import {Link} from 'react-router-dom';
 import {Button, Col, Form, FormControl, InputGroup, Row} from 'react-bootstrap';
 
-import {addFocusedClass, removeFocusedClass} from '../../utils/helpers';
+import {addFocusedClass, removeFocusedClass, rootPath} from '../../utils/helpers';
 
 import './login-view.scss';
 
@@ -166,7 +166,7 @@ const LoginView = ({onLoggedIn}) => {
                         : null
                     }   
                     <div className="btn-container">
-                        <Link to="/register">
+                        <Link to={`${rootPath}/register`}>
                             <Button 
                                 type="button" 
                             >

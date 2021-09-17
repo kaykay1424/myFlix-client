@@ -133,7 +133,7 @@ const MainNavbar = ({
                             <Navbar.Text 
                                 className="link nav-link logout"
                                 onClick={() =>  {
-                                    onLogout('/login');
+                                    onLogout(`${rootPath}/login`);
                                 }}
                             >
                                 Logout

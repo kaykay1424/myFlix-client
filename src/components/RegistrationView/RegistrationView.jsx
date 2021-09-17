@@ -10,7 +10,8 @@ import {
     removeFocusedClass,
     validateBirthDate,
     validatePasswords,
-    validateUsername
+    validateUsername,
+    rootPath
 } from '../../utils/helpers';
 
 import './registration-view.scss';
@@ -53,7 +54,7 @@ const RegistrationView = ({history}) => {
  
         axios.post('https://my-flix-2021.herokuapp.com/users', newUser)
             .then(() => {
-                history.push('/login');               
+                history.push(`${rootPath}/login`);               
             }, (err) => {
                 setRegistrationError(err);
             });

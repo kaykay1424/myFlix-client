@@ -12,9 +12,9 @@ import {
     setFavoritedMovies, 
     setSelectedMovie
 } from '../../actions/actions';
-import {makeTextReadable} from '../../utils/helpers';
+
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
-import {addToList, rootPath} from '../../utils/helpers';
+import {addToList, makeTextReadable, rootPath} from '../../utils/helpers';
 import './movie-view.scss';
 
 const MovieView = ({

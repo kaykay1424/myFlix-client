@@ -1,7 +1,7 @@
 /************* Modules ***************/
 
 import React from 'react';
-import {Col, Form, Row} from 'react-bootstrap';
+import {Col, Form, Row, Spinner} from 'react-bootstrap';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 

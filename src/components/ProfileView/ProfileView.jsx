@@ -10,7 +10,8 @@ import {
     convertBirthDate,
     validateBirthDate,
     validatePasswords,
-    validateUsername
+    validateUsername,
+    rootPath
 } from '../../utils/helpers';
 import {
     logoutUser,
@@ -51,7 +52,7 @@ const ProfileView = ({onLogout, setUserInfo, user}) => {
                 setSuccessfulUserRemoval(true);
                 setTimeout(() => {
                     setSuccessfulUpdate(false);
-                    onLogout('/register'); 
+                    onLogout(`${rootPath}/register`); 
                 }, 3000);
             }).catch(() => {
                 setDeleteUserError(true);
@@ -105,7 +106,7 @@ const ProfileView = ({onLogout, setUserInfo, user}) => {
                     setSuccessfulUpdate(false);
                     // If user updates their password, log them out
                     if (newPassword1 !== '') {
-                        onLogout('/login');     
+                        onLogout(`${rootPath}/login`);     
                     }
                 }, 3000);            
             }, (err) => {

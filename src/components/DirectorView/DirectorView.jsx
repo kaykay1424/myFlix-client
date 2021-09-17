@@ -6,7 +6,7 @@ import {Link} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {Col, Row} from 'react-bootstrap';
 
-import {makeTextReadable} from '../../utils/helpers';
+import {makeTextReadable, rootPath} from '../../utils/helpers';
 
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
 
@@ -103,7 +103,7 @@ const DirectorView = ({
                                             key={i}
                                             image={movie.image} 
                                             description={<Link 
-                                                to={`/movies/${movie._id}`}>
+                                                to={`${rootPath}/movies/${movie._id}`}>
                                                 <p>{movie.name}</p>
                                             </Link>} 
                                         />
