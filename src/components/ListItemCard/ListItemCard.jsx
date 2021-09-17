@@ -5,14 +5,14 @@ import PropTypes from 'prop-types';
 import {Card, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
 
-import {createExcerpt} from '../../utils/helpers';
+import {createExcerpt, rootPath} from '../../utils/helpers';
 
 import './list-item-card.scss';
 
 const ListItemCard = ({item, itemType}) => {
     const excerpt = createExcerpt(
             item.description ? item.description : item.bio),
-        pathname = itemType === 'movies' ? '/movies' : '/actors',
+        pathname = itemType === 'movies' ? `${rootPath}/movies` : `${rootPath}/actors`,
         readMoreLink = `${pathname}/${item._id}`;    
     return (
         <Card className="list-item-card">

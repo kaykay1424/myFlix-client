@@ -11,6 +11,7 @@ import {
     useHistory
 } from 'react-router-dom';
 import {connect} from 'react-redux';
+import {rootPath} from '../../utils/helpers';
 
 /************ Components ************/
 
@@ -206,65 +207,75 @@ const MainView = ({
             <MainNavbar onLogout={onLogout} /> 
             <Container className={`my-flix`} fluid> 
                 <Switch>            
-                    <Route exact path="/" render={() => {                    
+                    <Route 
+                        exact 
+                        path={`${rootPath}/movies`} render={() => {                    
                         // If user is not logged in, show login view
-                        if (!token) 
-                            return <Redirect to="/login" />;
+                            if (!token) 
+                                return <Redirect to="/login" />;
 
-                        return <MoviesView 
-                            error={moviesError.message || false} 
-                            errorType={moviesError.type || false} />;
-                    }} />
-
-                    <Route path="/movies/:id" render={({history, match}) => {
-                        // If user is not logged in, show login view
-                        if (!token) 
-                            return <Redirect to="/login" />;
-                    
-                        return <MovieView 
-                            match={match} 
-                            onBackClick={() => history.goBack()} 
-                        />;                                        
-                    }}/>
-
-                    <Route exact path="/actors" render={() => {
-                    // If user is not logged in, show login view
-                        if (!token) 
-                            return <Redirect to="/login" />;
-                    
-                        return <ActorsView 
-                            error={actorsError.message || false} 
-                            errorType={actorsError.type || false} />;
-                    }} />
-
-                    <Route path="/actors/:id" render={({history, match}) => {
-                    // If user is not logged in, show login view
-                        if (!token) 
-                            return <Redirect to="/login" />;
-
-                        return (
-                            <ActorView  
-                                onBackClick={() => history.goBack()} 
-                                match={match}
-                            />        
-                        );
-                    }} />
-
-                    <Route path="/genres/:name" render={({history, match}) => {
-                    // If user is not logged in, show login view
-                        if (!token) 
-                            return <Redirect to="/login" />;
-                    
-                        return (                         
-                            <GenreView 
-                                match={match}
-                                onBackClick={() => history.goBack()} 
-                            />
-                        );
-                    }} />
+                            return <MoviesView 
+                                error={moviesError.message || false} 
+                                errorType={moviesError.type || false} />;
+                        }} />
 
                     <Route 
-                        path="/directors/:name" 
+                        path={`${rootPath}/movies/:id`} 
+                        render={({history, match}) => {
+                        // If user is not logged in, show login view
+                            if (!token) 
+                                return <Redirect to="/login" />;
+                    
+                            return <MovieView 
+                                match={match} 
+                                onBackClick={() => history.goBack()} 
+                            />;                                        
+                        }}/>
+
+                    <Route 
+                        exact 
+                        path={`${rootPath}/actors`} render={() => {
+                            // If user is not logged in, show login view
+                            if (!token) 
+                                return <Redirect to="/login" />;
+                    
+                            return <ActorsView 
+                                error={actorsError.message || false} 
+                                errorType={actorsError.type || false} />;
+                        }} />
+
+                    <Route 
+                        path={`${rootPath}/actors/:id`} 
+                        render={({history, match}) => {
+                            // If user is not logged in, show login view
+                            if (!token) 
+                                return <Redirect to="/login" />;
+
+                            return (
+                                <ActorView  
+                                    onBackClick={() => history.goBack()} 
+                                    match={match}
+                                />        
+                            );
+                        }} />
+
+                    <Route 
+                        path={`${rootPath}/genres/:name`} 
+                        render={({history, match}) => {
+                            // If user is not logged in, show login view
+                            if (!token) 
+                                return <Redirect to="/login" />;
+                    
+                            return (                         
+                                <GenreView 
+                                    match={match}
+                                    onBackClick={() => history.goBack()} 
+                                />
+                            );
+                        }} />
+
+                    <Route 
+                        path={`${rootPath}/directors/:name`}
                         render={({history, match}) => {
                             // If user is not logged in, show login view
                             if (!token) 
@@ -278,15 +289,17 @@ const MainView = ({
                             );
                         }} />     
 
-                    <Route path="/register" render={({history}) => {
-                    // if user is already logged in redirect to home page
-                        if (user) 
-                            return <Redirect to="/" />;
+                    <Route 
+                        path={`${rootPath}/register`} render={({history}) => {
+                            // if user is already logged 
+                            // in redirect to home page
+                            if (user) 
+                                return <Redirect to="/" />;
 
-                        return (<RegistrationView history={history} />);
-                    }} />
+                            return (<RegistrationView history={history} />);
+                        }} />
 
-                    <Route path="/login" render={({history}) => {
+                    <Route path={`${rootPath}/login`} render={({history}) => {
                     // if user is already logged in redirect to home page
                         if (user) 
                             return <Redirect to="/" />;
@@ -297,7 +310,7 @@ const MainView = ({
                         />;
                     }} />
 
-                    <Route path="/profile" render={({history}) => {
+                    <Route path={`${rootPath}/profile`} render={({history}) => {
                     // If user is not logged in, show login view
                         if (!token) 
                             return <Redirect to="/login" />;
@@ -309,7 +322,7 @@ const MainView = ({
                         );
                     }} />
 
-                    <Route path="/about" render={() => {
+                    <Route path={`${rootPath}/about`} render={() => {
                         if (!token) 
                             return <Redirect to="/login" />;
                         return <AboutView />;
@@ -317,7 +330,7 @@ const MainView = ({
 
                     {/* Catch all Route */}
                     <Route path="*" render={() => {
-                        return <Redirect to="/" />;
+                        return <Redirect to={`${rootPath}/movies`} />;
                     }} />
                 </Switch>
             </Container>

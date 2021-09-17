@@ -8,6 +8,10 @@ html {
     font-family: 'Archivo', sans-serif;
     height: 100%;
 }
+.sr-only {
+    left: -10000px;
+    position: absolute;
+}
 .container-fluid.my-flix {
     background-color: $main-background-color;
     height: 100%;

@@ -1,7 +1,7 @@
 /************ Modules *************/
 
 import React from 'react';
-import {Col, Form, Row} from 'react-bootstrap';
+import {Col, Form, Row, Spinner} from 'react-bootstrap';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 
@@ -144,6 +144,15 @@ const MoviesView = ({
                     </Col>
                 </Row>
                 <Row className="view-row justify-content-center">
+                    {
+                        /* Display loading spinner while loading movies */
+                        movies.length === 0
+                        ? 
+                            <Spinner animation="border" role="status" variant="light">
+                                <span className="sr-only">Loading...</span>
+                            </Spinner>
+                        : null
+                    }
                     {/* Display list of movies */}
                     {selectedMovies.map((movie) => {
                         return (

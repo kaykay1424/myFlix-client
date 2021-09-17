@@ -9,7 +9,7 @@ import {Col, Row} from 'react-bootstrap';
 /************* Components **************/
 
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
-import {makeTextReadable} from '../../utils/helpers';
+import {makeTextReadable, rootPath} from '../../utils/helpers';
 
 import './genre-view.scss';
 
@@ -92,7 +92,7 @@ const GenreView = ({
                                         key={i}
                                         image={movie.image} 
                                         description={<Link 
-                                            to={`/movies/${movie._id}`}
+                                            to={`${rootPath}/movies/${movie._id}`}
                                         >
                                             <p>{movie.name}</p>
                                         </Link>} 

@@ -14,7 +14,7 @@ import {
 } from '../../actions/actions';
 import {makeTextReadable} from '../../utils/helpers';
 import RelatedAttributeCard from '../RelatedAttributeCard/RelatedAttributeCard';
-import {addToList} from '../../utils/helpers';
+import {addToList, rootPath} from '../../utils/helpers';
 import './movie-view.scss';
 
 const MovieView = ({
@@ -74,7 +74,7 @@ const MovieView = ({
                                 
         return {
             ...star,
-            id: matchingActor._id,
+            _id: matchingActor._id,
             image: matchingActor.image
         };
     });
@@ -279,13 +279,13 @@ const MovieView = ({
                     <div className="attribute">
                         <p className="label">Director</p>
                         <Link 
-                            to={`/directors/${movie.director.name}`}>
+                            to={`${rootPath}/directors/${movie.director.name}`}>
                             {movie.director.name}
                         </Link>
                     </div>
                     <div className="attribute">
                         <p className="label">Genre</p>
-                        <Link to={`/genres/${movie.genre.name}`}>
+                        <Link to={`${rootPath}/genres/${movie.genre.name}`}>
                             {movie.genre.name}
                         </Link>
                     </div>
@@ -302,7 +302,7 @@ const MovieView = ({
                                     movieActors.map((actor, i) => 
                                     {
                                         const actorLink = 
-										`/actors/${actor._id}`;
+										`${rootPath}/actors/${actor._id}`;
                                         return <RelatedAttributeCard 
                                             key={i}
                                             image={actor.image} 

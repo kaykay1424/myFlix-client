@@ -13,7 +13,7 @@ import {
     setFavoritedMovies
 } from '../../actions/actions';
 
-import {createExcerpt} from '../../utils/helpers';
+import {createExcerpt, rootPath} from '../../utils/helpers';
 
 import './user-list.scss';
 
@@ -157,8 +157,8 @@ const UserList = ({
                                 <p>
                                     <Link to={`${
                                         listType.match(/movies/i) 
-                                            ? `/movies/${item._id}` 
-                                            : `/actors/${item._id}`}`}
+                                            ? `${rootPath}/movies/${item._id}` 
+                                            : `${rootPath}/actors/${item._id}`}`}
                                     >
                                         {item.name}
                                     </Link>

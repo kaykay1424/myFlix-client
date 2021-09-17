@@ -5,6 +5,7 @@ import {Form, FormControl,  InputGroup, Nav,Navbar} from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import {Link, useLocation} from 'react-router-dom';
 import {connect} from 'react-redux';
+import {rootPath} from '../../utils/helpers';
 
 import {
     setActorsFilter, 
@@ -49,9 +50,9 @@ const MainNavbar = ({
 
     const onChangeSearchTerm = (value) => {
         setSearchTerm(value);
-        if (pathname === '/')
+        if (pathname === `${rootPath}/movies`)
             setMoviesFilter(value);
-        else if (pathname === '/actors')
+        else if (pathname === `${rootPath}/actors`)
             setActorsFilter(value);
     };
 
@@ -61,7 +62,7 @@ const MainNavbar = ({
             expand="lg" 
             className={`${!isUserLoggedIn ? 'logged-out': 'logged-in'}`}
         >
-            <Navbar.Brand to="/" 
+            <Navbar.Brand to={`${rootPath}/movies`} 
                 className={`logo link ${!isUserLoggedIn 
                     ? 'logged-out'
                     : 'logged-in'
@@ -78,7 +79,7 @@ const MainNavbar = ({
                         id="main-navbar-collapse"
                     > 
 
-                        {pathname === '/' || pathname === '/actors'
+                        {pathname === `${rootPath}/movies` || pathname === `${rootPath}/actors`
                             ?                                  
                             <Form className="mx-auto" inline>
                                 <InputGroup className="input-container">
@@ -140,31 +141,31 @@ const MainNavbar = ({
                         </Nav>
                         <Nav className="nav-links">
                             <Link 
-                                to="/profile" 
+                                to={`${rootPath}/profile`} 
                                 className={
-                                    `link nav-link ${pathname === '/profile' 
+                                    `link nav-link ${pathname === `${rootPath}/profile` 
                                         ? 'active': ''}`}
                             >
                             Profile
                             </Link>
-                            <Link to="/" className={
+                            <Link to={`${rootPath}/movies`} className={
                                 `link nav-link ${
-                                    pathname === '/' 
+                                    pathname === `${rootPath}/movies` 
                                         ? 'active': ''}`}
                             >
                             Movies
                             </Link>
-                            <Link to="/actors" className={
-                                `link nav-link ${pathname === '/actors'
+                            <Link to={`${rootPath}/actors`} className={
+                                `link nav-link ${pathname === `${rootPath}/actors`
                                     ? 'active': ''}`}
                             >
                             Actors
                             </Link>
                             <Link 
-                                to="/about" 
+                                to={`${rootPath}/about`} 
                                 className=
                                     {
-                                        `link nav-link ${pathname === '/about'
+                                        `link nav-link ${pathname === `${rootPath}/about`
                                             ? 'active': ''}`
                                     }
                             >

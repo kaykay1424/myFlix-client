@@ -1,6 +1,8 @@
 import axios from 'axios';
 import parse from 'html-react-parser';
 
+export const rootPath = '/myFlix-client';
+
 export const addToList = (userId, listType, itemId, itemIdType) => {
     const token = localStorage.getItem('token'),
         data = {};
