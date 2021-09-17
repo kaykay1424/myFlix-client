@@ -125,7 +125,7 @@ const ActorsView = ({
         movies-container
         justify-content-center"
         >
-            <Col>
+            <Col className="container-col">
                 {content}
             </Col>
             

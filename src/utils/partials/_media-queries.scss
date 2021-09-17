@@ -1,10 +1,13 @@
 @media screen and (min-width: 992px) {
-    .actor-container,
-    .movies-container {
-        .row.view-row {
-            margin: auto;
-            width: 90%;
-        }
+    .my-flix {
+        .actor-container,
+        .movies-container {
+            .row.view-row {
+                margin-left: auto;
+                margin-right: auto;
+                width: 90%;
+            }
+        } 
     }
     .form-container {
         form {

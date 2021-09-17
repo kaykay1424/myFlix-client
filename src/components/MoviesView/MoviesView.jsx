@@ -164,7 +164,7 @@ const MoviesView = ({
         <Row className="movies-container 
     justify-content-center"
         >
-            <Col>
+            <Col className="container-col">
                 {content}
             </Col>
         
